@@ -1,0 +1,3 @@
+[submodule "Seek/Vendor/spdlog"]
+	path = Seek/Vendor/spdlog
+	url = https://github.com/gabime/spdlog

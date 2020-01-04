@@ -1,0 +1,6 @@
+*.sln
+*.vcxproj*
+
+bin/
+bin-int/
+.vs/
