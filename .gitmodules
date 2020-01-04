@@ -1,3 +1,12 @@
 [submodule "Seek/Vendor/spdlog"]
 	path = Seek/Vendor/spdlog
 	url = https://github.com/gabime/spdlog
+[submodule "Seek/Vendor/GLFW"]
+	path = Seek/Vendor/GLFW
+	url = https://github.com/glfw/glfw
+[submodule "Seek/Vendor/imgui"]
+	path = Seek/Vendor/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "Seek/Vendor/glm"]
+	path = Seek/Vendor/glm
+	url = https://github.com/g-truc/glm

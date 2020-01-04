@@ -8,6 +8,20 @@ workspace "Seek"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+IncludeDir = {}
+IncludeDir["GLFW"] = "Seek/Vendor/GLFW/include"
+IncludeDir["GLAD"] = "Seek/Vendor/GLAD/include"
+IncludeDir["imgui"] = "Seek/Vendor/imgui/"
+
+-- Header Only Includes
+IncludeDir["spdlog"] = "Seek/Vendor/spdlog/"
+IncludeDir["glm"] = "Seek/Vendor/glm/"
+
+group "Dependencies"
+    include "Seek/Vendor"
+
+group ""
+
 project "Seek"
     location "Seek"
     kind "ConsoleApp"
@@ -27,10 +41,24 @@ project "Seek"
 
     includedirs {
         "%{prj.name}/Include/",
-        "Dependencies/Include/",
 
-        "%{prj.name}/Vendor/spdlog/include",
+        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.glm}",
+
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.GLAD}",
+        "%{IncludeDir.imgui}",
     }
+
+    links {
+        "GLFW",
+        "GLAD",
+        "imgui",
+        "opengl32.lib"
+    }
+
+    filter "system:windows"
+        defines { "GLFW_INCLUDE_NONE" }
 
     filter "configurations:Debug"
         defines { "SK_DEBUG" }

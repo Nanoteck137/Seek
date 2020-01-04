@@ -1,37 +1,47 @@
-#include <iostream>
+#include "SeekPCH.h"
+#include <Seek.h>
 
-#include <Seek/Log.h>
+class TestLayer : public Seek::Layer
+{
+public:
+	TestLayer()
+		: Layer("Test")
+	{}
 
-#include <Seek/Events/ApplicationEvent.h>
+	void OnUpdate() override
+	{
+
+	}
+
+	void OnEvent(Seek::Event& event) override
+	{
+		SK_APP_TRACE("'{0}' got event '{1}'", GetName(), event);
+	}
+};
+
+class SandboxApp : public Seek::Application
+{
+public:
+	SandboxApp()
+	{
+		PushLayer(new TestLayer());
+		PushOverlay(new Seek::ImGuiLayer());
+
+	}
+
+	~SandboxApp()
+	{
+
+	}
+};
 
 int main(int argc, char **argv)
 {
 	Seek::Log::Init();
 
-	Seek::Log::GetCoreLogger()->info("Hello World");
-	Seek::Log::GetCoreLogger()->warn("Hello World");
-	Seek::Log::GetCoreLogger()->error("Hello World");
-	Seek::Log::GetCoreLogger()->critical("Hello World");
-
-	SK_CORE_TRACE("Hello World");
-	SK_CORE_INFO("Hello World");
-	SK_CORE_WARNING("Hello World");
-	SK_CORE_ERROR("Hello World");
-	SK_CORE_FATAL("Hello World");
-
-	Seek::Log::GetClientLogger()->info("Hello World");
-	Seek::Log::GetClientLogger()->warn("Hello World");
-	Seek::Log::GetClientLogger()->error("Hello World");
-	Seek::Log::GetClientLogger()->critical("Hello World");
-
-	SK_APP_TRACE("Hello World");
-	SK_APP_INFO("Hello World");
-	SK_APP_WARNING("Hello World");
-	SK_APP_ERROR("Hello World");
-	SK_APP_FATAL("Hello World");
-
-	Seek::WindowResizeEvent e(1280, 720);
-	SK_APP_INFO(e);
+	SandboxApp* app = new SandboxApp();
+	app->Run();
+	delete app;
 
 	return 0;
 }
