@@ -2,6 +2,8 @@
 
 #include <Seek/Log.h>
 
+#include <Seek/Events/ApplicationEvent.h>
+
 int main(int argc, char **argv)
 {
 	Seek::Log::Init();
@@ -27,6 +29,9 @@ int main(int argc, char **argv)
 	SK_APP_WARNING("Hello World");
 	SK_APP_ERROR("Hello World");
 	SK_APP_FATAL("Hello World");
+
+	Seek::WindowResizeEvent e(1280, 720);
+	SK_APP_INFO(e);
 
 	return 0;
 }

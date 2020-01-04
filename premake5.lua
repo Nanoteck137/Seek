@@ -14,6 +14,9 @@ project "Seek"
     language "C++"
     cppdialect "C++17"
 
+    pchheader "SeekPCH.h"
+    pchsource "Seek/Source/Seek/SeekPCH.cpp"
+    
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
