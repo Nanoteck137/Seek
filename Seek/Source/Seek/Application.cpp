@@ -13,27 +13,6 @@ namespace Seek
 {
 	Application* Application::s_Instance = nullptr;
 
-	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
-	{
-		switch (type)
-		{
-		case ShaderDataType::Float:  return GL_FLOAT;
-		case ShaderDataType::Float2: return GL_FLOAT;
-		case ShaderDataType::Float3: return GL_FLOAT;
-		case ShaderDataType::Float4: return GL_FLOAT;
-		case ShaderDataType::Mat3:   return GL_FLOAT;
-		case ShaderDataType::Mat4:   return GL_FLOAT;
-		case ShaderDataType::Int:    return GL_INT;
-		case ShaderDataType::Int2:   return GL_INT;
-		case ShaderDataType::Int3:   return GL_INT;
-		case ShaderDataType::Int4:   return GL_INT;
-		case ShaderDataType::Bool:   return GL_BOOL;
-		}
-
-		SK_CORE_ASSERT(false, "Unknown shader data type");
-		return 0;
-	}
-
 	Application::Application()
 	{
 		SK_CORE_ASSERT(!s_Instance, "Application already exists");
@@ -45,8 +24,7 @@ namespace Seek
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
 
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
+		m_VertexArray.reset(VertexArray::Create());
 
 		struct Vertex {
 			glm::vec3 pos;
@@ -66,19 +44,16 @@ namespace Seek
 			{ ShaderDataType::Float4, "a_Color" },
 		};
 
-		uint32 index = 0;
-		for (const auto& element : layout)
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, element.GetElementCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)element.Offset);
-			index++;
-		}
+		m_VertexBuffer->SetLayout(layout);
+
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
 		uint32 indicies[3] = {
 			0, 1, 2
 		};
 
 		m_IndexBuffer.reset(IndexBuffer::Create(indicies, 3));
+		m_VertexArray->AddIndexBuffer(m_IndexBuffer);
 
 		String vertexShader = R"(
 			#version 330 core
@@ -170,7 +145,7 @@ namespace Seek
 
 			m_Shader->Bind();
 
-			glBindVertexArray(m_VertexArray);
+			m_VertexArray->Bind();
 			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)
