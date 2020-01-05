@@ -13,6 +13,10 @@ namespace Seek
         virtual void Bind() const override;
         virtual void Unbind() const override;
 
+        virtual void SetUniformInt(const String& name, int32 value) override;
+        virtual void SetUniformMatrix4(const String& name,
+                                       const glm::mat4& matrix) override;
+
     private:
         uint32 m_RendererID;
     };

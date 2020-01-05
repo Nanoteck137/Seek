@@ -5,7 +5,8 @@
 
 #include "Seek/Timestep.h"
 
-#include <glad/glad.h>
+#include "Seek/Renderer/Renderer.h"
+
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
@@ -13,7 +14,7 @@ namespace Seek
 {
     Application* Application::s_Instance = nullptr;
 
-    Application::Application()
+    Application::Application() : m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
     {
         SK_CORE_ASSERT(!s_Instance, "Application already exists");
         s_Instance = this;
@@ -30,26 +31,35 @@ namespace Seek
         {
             glm::vec3 pos;
             glm::vec4 color;
+            glm::vec2 texCoord;
         };
 
-        Vertex vertices[] = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+        /*Vertex vertices[] = {{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
                              {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-                             {{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}};
+                             {{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}};*/
+
+        Vertex vertices[] = {
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}}, //
+            {{0.5f, -0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},  //
+            {{0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},   //
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},  //
+        };
 
         m_VertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
 
         BufferLayout layout = {
             {ShaderDataType::Float3, "a_Position"},
             {ShaderDataType::Float4, "a_Color"},
+            {ShaderDataType::Float2, "a_TexCoord"},
         };
 
         m_VertexBuffer->SetLayout(layout);
 
         m_VertexArray->AddVertexBuffer(m_VertexBuffer);
 
-        uint32 indicies[3] = {0, 1, 2};
+        uint32 indicies[] = {0, 1, 2, 2, 3, 0};
 
-        m_IndexBuffer = IndexBuffer::Create(indicies, 3);
+        m_IndexBuffer = IndexBuffer::Create(indicies, 6);
         m_VertexArray->AddIndexBuffer(m_IndexBuffer);
 
         String vertexShader = R"(
@@ -57,13 +67,18 @@ namespace Seek
 			
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
+			layout(location = 2) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
 
 			out vec4 v_Color;
+			out vec2 v_TexCoord;
 
 			void main()
 			{
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0);
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 
@@ -73,14 +88,22 @@ namespace Seek
 			layout(location = 0) out vec4 color;
 
 			in vec4 v_Color;
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
 
 			void main()
 			{
-				color = v_Color;
+				color = texture(u_Texture, v_TexCoord);
 			}
 		)";
 
         m_Shader = Shader::Create(vertexShader, fragmentShader);
+
+        m_Texture = Texture2D::Create("Assets/Textures/test.png");
+
+        m_Shader->Bind();
+        m_Shader->SetUniformInt("u_Texture", 0);
 
         m_Running = true;
     }
@@ -140,14 +163,13 @@ namespace Seek
                 timer = 0;
             }
 
-            glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+            RenderCommand::Clear();
 
-            m_Shader->Bind();
-
-            m_VertexArray->Bind();
-            glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(),
-                           GL_UNSIGNED_INT, nullptr);
+            Renderer::BeginScene(m_Camera);
+            m_Texture->Bind();
+            Renderer::Submit(m_Shader, m_VertexArray);
+            Renderer::EndScene();
 
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);

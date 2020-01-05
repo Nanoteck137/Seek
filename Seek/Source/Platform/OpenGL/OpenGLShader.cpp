@@ -1,6 +1,7 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
 namespace Seek
@@ -99,4 +100,17 @@ namespace Seek
     void OpenGLShader::Bind() const { glUseProgram(m_RendererID); }
 
     void OpenGLShader::Unbind() const { glUseProgram(0); }
+
+    void OpenGLShader::SetUniformInt(const String& name, int32 value)
+    {
+        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
+        glUniform1i(loc, value);
+    }
+
+    void OpenGLShader::SetUniformMatrix4(const String& name,
+                                         const glm::mat4& matrix)
+    {
+        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
 }

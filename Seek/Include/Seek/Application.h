@@ -10,6 +10,9 @@
 #include "Seek/Renderer/Buffer.h"
 #include "Seek/Renderer/VertexArray.h"
 #include "Seek/Renderer/Shader.h"
+#include "Seek/Renderer/Texture.h"
+
+#include "Seek/Renderer/OrthographicCamera.h"
 
 namespace Seek
 {
@@ -36,19 +39,22 @@ namespace Seek
     private:
         bool m_Running = false;
 
-        std::unique_ptr<Window> m_Window;
+        Scope<Window> m_Window;
         ImGuiLayer* m_ImGuiLayer;
 
         LayerStack m_LayerStack;
 
         float32 m_LastFrameTime = 0.0f;
 
-        std::shared_ptr<VertexArray> m_VertexArray;
+        Ref<VertexArray> m_VertexArray;
 
-        std::shared_ptr<VertexBuffer> m_VertexBuffer;
-        std::shared_ptr<IndexBuffer> m_IndexBuffer;
+        Ref<VertexBuffer> m_VertexBuffer;
+        Ref<IndexBuffer> m_IndexBuffer;
 
-        std::shared_ptr<Shader> m_Shader;
+        Ref<Shader> m_Shader;
+        Ref<Texture> m_Texture;
+
+        OrthographicCamera m_Camera;
 
     private:
         static Application* s_Instance;

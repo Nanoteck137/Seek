@@ -151,3 +151,34 @@ project "imgui"
     filter "configurations:Dist"
         runtime "Release"
         optimize "On"
+
+project "stb"
+    location "stb"
+    kind "StaticLib"
+    language "C++"
+    
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files {
+        -- stb_image
+        "%{prj.name}/stb_image.h",
+        "%{prj.name}/stb_image.cpp",
+    }
+    
+    filter "system:windows"
+        systemversion "latest"
+        cppdialect "C++17"
+        staticruntime "On"
+
+    filter "configurations:Debug"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        runtime "Release"
+        optimize "on"
+
+    filter "configurations:Dist"
+        runtime "Release"
+        optimize "On"

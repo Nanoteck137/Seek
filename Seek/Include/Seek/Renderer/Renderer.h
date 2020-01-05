@@ -1,19 +1,35 @@
 #pragma once
 
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
+#include "Seek/Renderer/RenderCommand.h"
+#include "Seek/Renderer/Shader.h"
+
+#include "Seek/Renderer/OrthographicCamera.h"
+
 namespace Seek
 {
-    enum class RendererAPI
-    {
-        None = 0,
-        OpenGL = 1,
-    };
-
     class Renderer
     {
     public:
-        inline static RendererAPI GetAPI() { return s_RendererAPI; }
+        static void BeginScene(OrthographicCamera& camera);
+        static void EndScene();
+
+        static void Submit(const Ref<Shader>& shader,
+                           const Ref<VertexArray>& vertexArray);
+
+        inline static RendererAPI::API GetAPI()
+        {
+            return RendererAPI::GetAPI();
+        }
 
     private:
-        static RendererAPI s_RendererAPI;
+        struct SceneData
+        {
+            glm::mat4 ViewProjectionMatrix;
+        };
+
+        static SceneData* s_SceneData;
     };
 }
