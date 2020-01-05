@@ -7,43 +7,47 @@
 
 namespace Seek
 {
-	Input* Input::s_Instance = new WindowsInput();
+    Input* Input::s_Instance = new WindowsInput();
 
-	bool WindowsInput::IsKeyPressedImpl(int keycode)
-	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+    bool WindowsInput::IsKeyPressedImpl(int keycode)
+    {
+        GLFWwindow* window = static_cast<GLFWwindow*>(
+            Application::Get().GetWindow().GetNativeWindow());
 
-		int state = glfwGetKey(window, keycode);
-		return state == GLFW_PRESS || state == GLFW_REPEAT;
-	}
+        int state = glfwGetKey(window, keycode);
+        return state == GLFW_PRESS || state == GLFW_REPEAT;
+    }
 
-	bool WindowsInput::IsMouseButtonPressedImpl(int button)
-	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+    bool WindowsInput::IsMouseButtonPressedImpl(int button)
+    {
+        GLFWwindow* window = static_cast<GLFWwindow*>(
+            Application::Get().GetWindow().GetNativeWindow());
 
-		int state = glfwGetMouseButton(window, button);
-		return state == GLFW_PRESS;
-	}
+        int state = glfwGetMouseButton(window, button);
+        return state == GLFW_PRESS;
+    }
 
-	float WindowsInput::GetMouseXImpl()
-	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+    float WindowsInput::GetMouseXImpl()
+    {
+        GLFWwindow* window = static_cast<GLFWwindow*>(
+            Application::Get().GetWindow().GetNativeWindow());
 
-		double xpos;
-		double ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
+        double xpos;
+        double ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
 
-		return (float)xpos;
-	}
+        return (float)xpos;
+    }
 
-	float WindowsInput::GetMouseYImpl()
-	{
-		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+    float WindowsInput::GetMouseYImpl()
+    {
+        GLFWwindow* window = static_cast<GLFWwindow*>(
+            Application::Get().GetWindow().GetNativeWindow());
 
-		double xpos;
-		double ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
+        double xpos;
+        double ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
 
-		return (float)ypos;
-	}
+        return (float)ypos;
+    }
 }

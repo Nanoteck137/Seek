@@ -5,16 +5,15 @@
 
 namespace Seek
 {
-	class Shader
-	{
-	public:
-		Shader(const String& vertexSource, const String& fragmentSource);
-		~Shader();
+    class Shader
+    {
+    public:
+        virtual ~Shader() {}
 
-		void Bind() const;
-		void Unbind() const;
+        virtual void Bind() const = 0;
+        virtual void Unbind() const = 0;
 
-	private:
-		uint32 m_RendererID;
-	};
+        static Ref<Shader> Create(const String& vertexSource,
+                                  const String& fragmentShader);
+    };
 }

@@ -13,43 +13,44 @@
 
 namespace Seek
 {
-	class Application
-	{
-	public:
-		Application();
-		virtual ~Application();
+    class Application
+    {
+    public:
+        Application();
+        virtual ~Application();
 
-		void Run();
+        void Run();
 
-		void OnEvent(Event& e);
+        void OnEvent(Event& e);
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
+        void PushLayer(Layer* layer);
+        void PushOverlay(Layer* overlay);
 
-		static inline Application& Get() { return *s_Instance; }
+        static inline Application& Get() { return *s_Instance; }
 
-		inline Window& GetWindow() { return *m_Window; }
-	private:
-		bool OnWindowClosed(WindowCloseEvent& e);
+        inline Window& GetWindow() { return *m_Window; }
 
-	private:
-		bool m_Running = false;
+    private:
+        bool OnWindowClosed(WindowCloseEvent& e);
 
-		std::unique_ptr<Window> m_Window;
-		ImGuiLayer* m_ImGuiLayer;
+    private:
+        bool m_Running = false;
 
-		LayerStack m_LayerStack;
+        std::unique_ptr<Window> m_Window;
+        ImGuiLayer* m_ImGuiLayer;
 
-		float32 m_LastFrameTime = 0.0f;
+        LayerStack m_LayerStack;
 
-		std::shared_ptr<VertexArray> m_VertexArray;
+        float32 m_LastFrameTime = 0.0f;
 
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer;
+        std::shared_ptr<VertexArray> m_VertexArray;
 
-		std::shared_ptr<Shader> m_Shader;
+        std::shared_ptr<VertexBuffer> m_VertexBuffer;
+        std::shared_ptr<IndexBuffer> m_IndexBuffer;
 
-	private:
-		static Application* s_Instance;
-	};
+        std::shared_ptr<Shader> m_Shader;
+
+    private:
+        static Application* s_Instance;
+    };
 }
