@@ -5,7 +5,6 @@ namespace Seek
 {
 	LayerStack::LayerStack()
 	{
-		m_LayerIntert = m_Layers.begin();
 	}
 
 	LayerStack::~LayerStack()
@@ -18,7 +17,9 @@ namespace Seek
 
 	void LayerStack::PushLayer(Layer* layer)
 	{
-		m_LayerIntert = m_Layers.emplace(m_LayerIntert, layer);
+		m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, layer);
+		m_LayerInsertIndex++;
+
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
@@ -32,7 +33,7 @@ namespace Seek
 		if (it != m_Layers.end())
 		{
 			m_Layers.erase(it);
-			m_LayerIntert--;
+			m_LayerInsertIndex--;
 		}
 	}
 

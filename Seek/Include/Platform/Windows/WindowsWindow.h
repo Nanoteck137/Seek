@@ -2,6 +2,8 @@
 
 #include "Seek/Window.h"
 
+#include "Seek/Renderer/GraphicsContext.h"
+
 struct GLFWwindow;
 
 namespace Seek {
@@ -28,6 +30,7 @@ namespace Seek {
 		virtual void Shutdown();
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{

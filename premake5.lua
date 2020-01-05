@@ -14,7 +14,7 @@ IncludeDir["GLAD"] = "Seek/Vendor/GLAD/include"
 IncludeDir["imgui"] = "Seek/Vendor/imgui/"
 
 -- Header Only Includes
-IncludeDir["spdlog"] = "Seek/Vendor/spdlog/"
+IncludeDir["spdlog"] = "Seek/Vendor/spdlog/include/"
 IncludeDir["glm"] = "Seek/Vendor/glm/"
 
 group "Dependencies"

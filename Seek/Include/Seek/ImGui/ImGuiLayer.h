@@ -14,21 +14,12 @@ namespace Seek
 		ImGuiLayer();
 		~ImGuiLayer();
 
-		void OnAttach() override;
-		void OnDetach() override;
-		void OnUpdate() override;
-		void OnEvent(Event& event) override;
-	private:
-		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
-		bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
-		bool OnMouseMoved(MouseMovedEvent& e);
-		bool OnMouseScrolled(MouseScrolledEvent& e);
+		virtual void OnAttach() override;
+		virtual void OnDetach() override;
+		virtual void OnImGuiRender() override;
 
-		bool OnKeyPressed(KeyPressedEvent& e);
-		bool OnKeyReleased(KeyReleasedEvent& e);
-		bool OnKeyTyped(KeyTypedEvent& e);
-
-		bool OnWindowResize(WindowResizeEvent& e);
+		void Begin();
+		void End();
 	private:
 		float m_Time = 0.0f;
 	};

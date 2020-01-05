@@ -5,6 +5,8 @@
 #include "Seek/Application.h"
 #include "Seek/Input.h"
 
+#include "Seek/Timestep.h"
+
 #include "Seek/Events/Event.h"
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/Events/KeyEvents.h"

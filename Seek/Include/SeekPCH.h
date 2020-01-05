@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <stdint.h>
+
 #ifdef SK_PLATFORM_WINDOWS
 #include <Windows.h>
 #endif

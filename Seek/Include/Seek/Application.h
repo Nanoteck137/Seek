@@ -5,6 +5,8 @@
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/LayerStack.h"
 
+#include "Seek/ImGui/ImGuiLayer.h"
+
 namespace Seek
 {
 	class Application
@@ -25,12 +27,17 @@ namespace Seek
 		inline Window& GetWindow() { return *m_Window; }
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
+
 	private:
 		bool m_Running = false;
 
 		std::unique_ptr<Window> m_Window;
+		ImGuiLayer* m_ImGuiLayer;
 
 		LayerStack m_LayerStack;
+
+		float32 m_LastFrameTime = 0.0f;
+		uint32 m_VertexArray, m_VertexBuffer, m_IndexBuffer;
 	private:
 		static Application* s_Instance;
 	};

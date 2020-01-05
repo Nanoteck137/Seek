@@ -1,6 +1,7 @@
 #include "SeekPCH.h"
 
 #include "Platform/Windows/WindowsWindow.h"
+#include "Platform/OpenGL/OpenGLGraphicsContext.h"
 
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/Events/KeyEvents.h"
@@ -9,7 +10,6 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace Seek
@@ -39,6 +39,7 @@ namespace Seek
 
 		SK_CORE_INFO("Creating window '{0}' ({1}, {2})", props.Title, props.Width, props.Height);
 
+
 		if (!s_GLFWInitialized)
 		{
 			int success = glfwInit();
@@ -49,10 +50,9 @@ namespace Seek
 		}
 
 		m_Window = glfwCreateWindow(props.Width, props.Height, props.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
 
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		SK_CORE_ASSERT(status, "Could not initialize GLAD");
+		m_Context = new OpenGLGraphicsContext(m_Window);
+		m_Context->Init();
 
 		glfwSetWindowUserPointer(m_Window, &m_Data);
 		SetVSync(true);
@@ -154,7 +154,8 @@ namespace Seek
 
 	void WindowsWindow::OnUpdate() {
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+
+		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
