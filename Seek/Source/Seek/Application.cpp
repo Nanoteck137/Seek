@@ -6,12 +6,33 @@
 #include "Seek/Timestep.h"
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
 namespace Seek
 {
-
 	Application* Application::s_Instance = nullptr;
+
+	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
+	{
+		switch (type)
+		{
+		case ShaderDataType::Float:  return GL_FLOAT;
+		case ShaderDataType::Float2: return GL_FLOAT;
+		case ShaderDataType::Float3: return GL_FLOAT;
+		case ShaderDataType::Float4: return GL_FLOAT;
+		case ShaderDataType::Mat3:   return GL_FLOAT;
+		case ShaderDataType::Mat4:   return GL_FLOAT;
+		case ShaderDataType::Int:    return GL_INT;
+		case ShaderDataType::Int2:   return GL_INT;
+		case ShaderDataType::Int3:   return GL_INT;
+		case ShaderDataType::Int4:   return GL_INT;
+		case ShaderDataType::Bool:   return GL_BOOL;
+		}
+
+		SK_CORE_ASSERT(false, "Unknown shader data type");
+		return 0;
+	}
 
 	Application::Application()
 	{
@@ -27,28 +48,67 @@ namespace Seek
 		glGenVertexArrays(1, &m_VertexArray);
 		glBindVertexArray(m_VertexArray);
 
-		glGenBuffers(1, &m_VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-
-		float32 vertices[3 * 3] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f
+		struct Vertex {
+			glm::vec3 pos;
+			glm::vec4 color;
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		Vertex vertices[] = {
+			{ { -0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
+			{ {  0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
+			{ {  0.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }
+		};
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float32), nullptr);
+		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
-		glGenBuffers(1, &m_IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IndexBuffer);
+		BufferLayout layout = {
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color" },
+		};
+
+		uint32 index = 0;
+		for (const auto& element : layout)
+		{
+			glEnableVertexAttribArray(index);
+			glVertexAttribPointer(index, element.GetElementCount(), ShaderDataTypeToOpenGLBaseType(element.Type), element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)element.Offset);
+			index++;
+		}
 
 		uint32 indicies[3] = {
 			0, 1, 2
 		};
 
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+		m_IndexBuffer.reset(IndexBuffer::Create(indicies, 3));
+
+		String vertexShader = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec4 a_Color;
+
+			out vec4 v_Color;
+
+			void main()
+			{
+				v_Color = a_Color;
+				gl_Position = vec4(a_Position, 1.0);
+			}
+		)";
+
+		String fragmentShader = R"(
+			#version 330 core
+			
+			layout(location = 0) out vec4 color;
+
+			in vec4 v_Color;
+
+			void main()
+			{
+				color = v_Color;
+			}
+		)";
+
+		m_Shader = std::make_unique<Shader>(vertexShader, fragmentShader);
 
 		m_Running = true;
 	}
@@ -108,8 +168,10 @@ namespace Seek
 			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
+			m_Shader->Bind();
+
 			glBindVertexArray(m_VertexArray);
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate(timestep);
