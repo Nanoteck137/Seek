@@ -14,6 +14,8 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
+#include <box2d/box2d.h>
+
 namespace Seek
 {
     Application* Application::s_Instance = nullptr;
@@ -30,6 +32,9 @@ namespace Seek
         PushOverlay(m_ImGuiLayer);
 
         Renderer::Init();
+
+        b2Vec2 gravity(0.0f, -10.0f);
+        b2World world(gravity);
 
         m_Running = true;
     }

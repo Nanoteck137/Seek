@@ -10,6 +10,7 @@ public:
     {
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
     }
+
     void OnDetach() override {}
 
     void OnUpdate(Seek::Timestep ts) override
@@ -51,24 +52,20 @@ public:
 
         Seek::Renderer2D::BeginScene(m_Camera);
 
-        /*const int NUM_SPRITES = 100;
+        const int NUM_SPRITES = 100;
         for (int y = 0; y < NUM_SPRITES; y++)
         {
             for (int x = 0; x < NUM_SPRITES; x++)
             {
-                float xPos = x;
-                float yPos = y;
+                float xPos = (float)x;
+                float yPos = (float)y;
 
                 Seek::Renderer2D::DrawQuad(
                     glm::vec3(xPos * 1.05, yPos * 1.05, 0.0f), {1.0f, 1.0f},
                     glm::vec4(xPos / NUM_SPRITES, yPos / NUM_SPRITES, 0.0f,
                               1.0f));
             }
-        }*/
-
-        Seek::Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}, m_Texture);
-        Seek::Renderer2D::DrawQuad({1.0f, 0.0f, 0.0f}, {1.0f, 1.0f},
-                                   {1.0f, 0.0f, 1.0f, 1.0f});
+        }
 
         Seek::Renderer2D::EndScene();
         Seek::Renderer2D::Flush();
@@ -96,6 +93,8 @@ public:
 
 int main(int argc, char** argv)
 {
+    // TODO(patrik): Move this to a Engine Intiialize method or something like
+    // that
     Seek::Log::Init();
 
     SandboxApp* app = new SandboxApp();

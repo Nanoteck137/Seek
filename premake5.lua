@@ -11,8 +11,9 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["GLFW"] = "Seek/Vendor/GLFW/include"
 IncludeDir["GLAD"] = "Seek/Vendor/GLAD/include"
-IncludeDir["imgui"] = "Seek/Vendor/imgui/"
-IncludeDir["stb"] = "Seek/Vendor/stb/"
+IncludeDir["imgui"] = "Seek/Vendor/imgui"
+IncludeDir["stb"] = "Seek/Vendor/stb"
+IncludeDir["Box2D"] = "Seek/Vendor/Box2D/include"
 
 -- Header Only Includes
 IncludeDir["spdlog"] = "Seek/Vendor/spdlog/include/"
@@ -51,6 +52,7 @@ project "Seek"
         "%{IncludeDir.GLAD}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.stb}",
+        "%{IncludeDir.Box2D}",
     }
 
     links {
@@ -58,6 +60,7 @@ project "Seek"
         "GLAD",
         "imgui",
         "stb",
+        "Box2D",
         "opengl32.lib"
     }
 

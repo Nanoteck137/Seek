@@ -10,3 +10,6 @@
 [submodule "Seek/Vendor/glm"]
 	path = Seek/Vendor/glm
 	url = https://github.com/g-truc/glm
+[submodule "Seek/Vendor/Box2D"]
+	path = Seek/Vendor/Box2D
+	url = https://github.com/erincatto/box2d
