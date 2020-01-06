@@ -108,6 +108,13 @@ namespace Seek
         uint32 m_Stride = 0;
     };
 
+    enum class BufferUsage
+    {
+        None = 0,
+        Static,
+        Dynamic
+    };
+
     class VertexBuffer
     {
     public:
@@ -116,11 +123,19 @@ namespace Seek
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
 
+        virtual void Resize(uint32 size) = 0;
+        virtual void SetData(void* data, uint32 size) = 0;
+
+        virtual void* Map() = 0;
+        virtual void Unmap() = 0;
+
         virtual void SetLayout(const BufferLayout& layout) = 0;
         virtual const BufferLayout& GetLayout() const = 0;
 
+        virtual BufferUsage GetUsage() const = 0;
+
     public:
-        static Ref<VertexBuffer> Create(void* vertices, uint32 size);
+        static Ref<VertexBuffer> Create(BufferUsage usage);
     };
 
     class IndexBuffer

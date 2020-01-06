@@ -10,13 +10,27 @@
 
 namespace Seek
 {
+    struct Vertex2D
+    {
+        glm::vec3 Position;
+        glm::vec2 TexCoord;
+        glm::vec4 Color;
+    };
+
     struct Renderer2DStorage
     {
-        Ref<VertexArray> QuadVertexArray;
-        /*Ref<Shader> FlatColorShader;
-        Ref<Shader> TextureShader;*/
+        Ref<VertexArray> VertexArray;
+        Ref<VertexBuffer> VertexBuffer;
+        Ref<IndexBuffer> IndexBuffer;
+
+        Vertex2D* VertexBufferData = nullptr;
+        Vertex2D* VertexBufferDataWritePtr = nullptr;
+
         Ref<Shader> Shader;
-        Ref<Texture2D> WhiteTexture;
+
+        uint32 IndexCounter = 0;
+
+        RenderStats Stats;
     };
 
     static Renderer2DStorage* s_Data;
@@ -25,99 +39,122 @@ namespace Seek
     {
         s_Data = new Renderer2DStorage();
 
-        s_Data->QuadVertexArray = VertexArray::Create();
+        const uint32 MAX_QUADS = 100000;
+        const uint32 VERTEX_BUFFER_SIZE = MAX_QUADS * sizeof(Vertex2D) * 4;
+        const uint32 INDEX_BUFFER_SIZE = MAX_QUADS * 6;
 
-        struct Vertex
-        {
-            glm::vec3 pos;
-            glm::vec2 texCoord;
-        };
+        s_Data->VertexArray = VertexArray::Create();
 
-        Vertex vertices[] = {
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}}, //
-            {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}},  //
-            {{0.5f, 0.5f, 0.0f}, {1.0f, 1.0f}},   //
-            {{-0.5f, 0.5f, 0.0f}, {0.0f, 1.0f}},  //
-        };
-
-        Ref<VertexBuffer> vertexBuffer =
-            VertexBuffer::Create(vertices, sizeof(vertices));
+        s_Data->VertexBuffer = VertexBuffer::Create(BufferUsage::Dynamic);
+        s_Data->VertexBuffer->Resize(VERTEX_BUFFER_SIZE);
 
         BufferLayout layout = {
             {ShaderDataType::Float3, "a_Position"},
             {ShaderDataType::Float2, "a_TexCoord"},
+            {ShaderDataType::Float4, "a_Color"},
         };
 
-        vertexBuffer->SetLayout(layout);
+        s_Data->VertexBuffer->SetLayout(layout);
 
-        s_Data->QuadVertexArray->AddVertexBuffer(vertexBuffer);
+        s_Data->VertexArray->AddVertexBuffer(s_Data->VertexBuffer);
 
-        uint32 indicies[] = {0, 1, 2, 2, 3, 0};
+        s_Data->VertexBufferData = new Vertex2D[MAX_QUADS * 4];
+        s_Data->VertexBufferDataWritePtr = s_Data->VertexBufferData;
 
-        Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indicies, 6);
-        s_Data->QuadVertexArray->AddIndexBuffer(indexBuffer);
+        uint32* indicies = new uint32[INDEX_BUFFER_SIZE];
 
-        /*s_Data->FlatColorShader =
-            Shader::Create("Assets/Shaders/FlatColor.glsl");
-        s_Data->TextureShader = Shader::Create("Assets/Shaders/Texture.glsl");*/
+        uint32 offset = 0;
+        for (uint32 i = 0; i < INDEX_BUFFER_SIZE; i += 6)
+        {
+            indicies[i + 0] = offset + 0;
+            indicies[i + 1] = offset + 1;
+            indicies[i + 2] = offset + 2;
+
+            indicies[i + 3] = offset + 2;
+            indicies[i + 4] = offset + 3;
+            indicies[i + 5] = offset + 0;
+
+            offset += 4;
+        }
+
+        s_Data->IndexBuffer = IndexBuffer::Create(indicies, INDEX_BUFFER_SIZE);
+        s_Data->VertexArray->AddIndexBuffer(s_Data->IndexBuffer);
 
         s_Data->Shader = Shader::Create("Assets/Shaders/Renderer2D.glsl");
 
-        s_Data->WhiteTexture = Texture2D::Create(1, 1);
+        // s_Data->WhiteTexture = Texture2D::Create(1, 1);
 
-        uint8 data[4] = {0xff, 0xff, 0xff, 0xff};
-        s_Data->WhiteTexture->SetData(data, sizeof(data));
+        // uint8 data[4] = {0xff, 0xff, 0xff, 0xff};
+        // s_Data->WhiteTexture->SetData(data, sizeof(data));
+
+        ResetRenderStats();
     }
 
-    void Renderer2D::Shutdown() { delete s_Data; }
+    void Renderer2D::Shutdown()
+    {
+        delete[] s_Data->VertexBufferData;
+        delete s_Data;
+    }
 
     void Renderer2D::BeginScene(const OrthographicCamera& camera)
     {
-        /*s_Data->FlatColorShader->Bind();
-        s_Data->FlatColorShader->SetUniformMatrix4(
-            "u_ViewProjection", camera.GetViewProjectionMatrix());
-
-        s_Data->TextureShader->Bind();
-        s_Data->TextureShader->SetUniformMatrix4(
-            "u_ViewProjection", camera.GetViewProjectionMatrix());
-        s_Data->TextureShader->SetUniformInt("u_Texture", 0);*/
+        s_Data->VertexBufferDataWritePtr = s_Data->VertexBufferData;
+        s_Data->IndexCounter = 0;
 
         s_Data->Shader->Bind();
         s_Data->Shader->SetUniformMatrix4("u_ViewProjection",
                                           camera.GetViewProjectionMatrix());
-        s_Data->Shader->SetUniformInt("u_Texture", 0);
     }
 
-    void Renderer2D::EndScene() {}
+    void Renderer2D::EndScene()
+    {
+        size_t vertexBufferDataSize = (byte*)s_Data->VertexBufferDataWritePtr -
+                                      (byte*)s_Data->VertexBufferData;
+        if (vertexBufferDataSize != 0)
+        {
+            s_Data->VertexBuffer->SetData(s_Data->VertexBufferData,
+                                          vertexBufferDataSize);
+        }
+    }
+
+    void Renderer2D::Flush()
+    {
+        RenderCommand::DrawIndexed(s_Data->VertexArray, s_Data->IndexCounter);
+    }
+
+    void Renderer2D::ResetRenderStats()
+    {
+        memset(&s_Data->Stats, 0, sizeof(RenderStats));
+    }
 
     void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
                               const glm::vec4& color)
     {
+        s_Data->VertexBufferDataWritePtr->Position = position;
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr++;
 
-        s_Data->Shader->SetUniformFloat4("u_Color", color);
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, 0.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr++;
 
-        glm::mat4 transform =
-            glm::translate(glm::mat4(1.0f), position) *
-            glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
-        s_Data->Shader->SetUniformMatrix4("u_Transform", transform);
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 1.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr++;
 
-        s_Data->QuadVertexArray->Bind();
-        s_Data->WhiteTexture->Bind();
-        RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(0.0f, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 1.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->IndexCounter += 6;
     }
 
-    void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
-                              const Ref<Texture2D>& texture)
-    {
-        s_Data->Shader->SetUniformFloat4("u_Color", {1.0f, 1.0f, 1.0f, 1.0f});
-
-        glm::mat4 transform =
-            glm::translate(glm::mat4(1.0f), position) *
-            glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
-        s_Data->Shader->SetUniformMatrix4("u_Transform", transform);
-
-        s_Data->QuadVertexArray->Bind();
-        texture->Bind();
-        RenderCommand::DrawIndexed(s_Data->QuadVertexArray);
-    }
+    const RenderStats& Renderer2D::GetRenderStats() { return s_Data->Stats; }
 }

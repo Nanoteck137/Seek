@@ -27,7 +27,7 @@ namespace Seek
         }
     }
 
-    Ref<VertexBuffer> VertexBuffer::Create(void* vertices, uint32 size)
+    Ref<VertexBuffer> VertexBuffer::Create(BufferUsage usage)
     {
         switch (Renderer::GetAPI())
         {
@@ -35,7 +35,7 @@ namespace Seek
                 SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
                 return nullptr;
             case RendererAPI::API::OpenGL:
-                return CreateRef<OpenGLVertexBuffer>(vertices, size);
+                return CreateRef<OpenGLVertexBuffer>(usage);
         }
 
         SK_CORE_ASSERT(false, "No RenderingAPI selected");

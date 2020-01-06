@@ -35,4 +35,10 @@ namespace Seek
         glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(),
                        GL_UNSIGNED_INT, nullptr);
     }
+
+    void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray,
+                                        uint32 count)
+    {
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+    }
 }

@@ -9,6 +9,8 @@
 
 #include "Seek/Renderer/Renderer2D.h"
 
+#include "Seek/Input.h"
+
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
@@ -79,25 +81,85 @@ namespace Seek
             Timestep timestep(time - m_LastFrameTime);
             m_LastFrameTime = time;
 
-            timer += timestep.GetSeconds();
+            timer += timestep;
             if (timer >= 1)
             {
                 SK_CORE_TRACE("Frame Info - Time: {0}ms Fps: {1}",
-                              timestep.GetMilliseconds(),
-                              1 / timestep.GetSeconds());
+                              timestep.GetMilliseconds(), 1.0f / timestep);
                 timer = 0;
             }
+
+            const float cameraMoveSpeed = 5.0f;
+
+            glm::vec3 cameraPos = m_Camera.GetPosition();
+            float cameraRot = m_Camera.GetRotation();
+
+            if (Input::IsKeyPressed(SK_KEY_A))
+            {
+                cameraPos.x -=
+                    cos(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+                cameraPos.y -=
+                    sin(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+            }
+            else if (Input::IsKeyPressed(SK_KEY_D))
+            {
+                cameraPos.x +=
+                    cos(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+                cameraPos.y +=
+                    sin(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+            }
+
+            if (Input::IsKeyPressed(SK_KEY_W))
+            {
+                cameraPos.x +=
+                    -sin(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+                cameraPos.y +=
+                    cos(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+            }
+            else if (Input::IsKeyPressed(SK_KEY_S))
+            {
+                cameraPos.x -=
+                    -sin(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+                cameraPos.y -=
+                    cos(glm::radians(cameraRot)) * cameraMoveSpeed * timestep;
+            }
+
+            m_Camera.SetPosition(cameraPos);
+            m_Camera.SetRotation(cameraRot);
+
+            Renderer2D::ResetRenderStats();
 
             RenderCommand::SetClearColor(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
             RenderCommand::Clear();
 
             Renderer2D::BeginScene(m_Camera);
 
-            Renderer2D::DrawQuad({0.5f, 0.0f, -1.0f}, {1.0f, 1.0f},
+            /*Renderer2D::DrawQuad({0.5f, 0.0f, -1.0f}, {1.0f, 1.0f},
                                  {0.2f, 0.2f, 0.8f, 0.5f});
-            Renderer2D::DrawQuad({0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, m_Texture);
+            Renderer2D::DrawQuad({0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, m_Texture);*/
+
+            /*Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {0.5f, 0.5f},
+                                 {1.0f, 0.0f, 1.0f, 1.0f});*/
+            /*Renderer2D::DrawQuad({1.0f, 0.0f, 0.0f}, {0.5f, 0.5f},
+                                 {1.0f, 0.0f, 1.0f, 1.0f});*/
+
+            const int NUM_SPRITES = 100;
+            for (int y = 0; y < NUM_SPRITES; y++)
+            {
+                for (int x = 0; x < NUM_SPRITES; x++)
+                {
+                    float xPos = x;
+                    float yPos = y;
+
+                    Renderer2D::DrawQuad(
+                        glm::vec3(xPos * 1.05, yPos * 1.05, 0.0f), {1.0f, 1.0f},
+                        glm::vec4(xPos / NUM_SPRITES, yPos / NUM_SPRITES, 0.0f,
+                                  1.0f));
+                }
+            }
 
             Renderer2D::EndScene();
+            Renderer2D::Flush();
 
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);

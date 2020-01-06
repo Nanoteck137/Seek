@@ -26,6 +26,12 @@ namespace Seek
             s_RendererAPI->DrawIndexed(vertexArray);
         }
 
+        static inline void DrawIndexed(const Ref<VertexArray>& vertexArray,
+                                       uint32 count)
+        {
+            s_RendererAPI->DrawIndexed(vertexArray, count);
+        }
+
     private:
         static RendererAPI* s_RendererAPI;
     };

@@ -1,5 +1,11 @@
 #pragma once
 
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
+#include "Seek/KeyCodes.h"
+#include "Seek/MouseButtonCodes.h"
+
 namespace Seek
 {
     class Input
