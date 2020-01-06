@@ -46,13 +46,7 @@ namespace Seek
 
         float32 m_LastFrameTime = 0.0f;
 
-        Ref<VertexArray> m_VertexArray;
-
-        Ref<VertexBuffer> m_VertexBuffer;
-        Ref<IndexBuffer> m_IndexBuffer;
-
-        Ref<Shader> m_Shader;
-        Ref<Texture> m_Texture;
+        Ref<Texture2D> m_Texture;
 
         OrthographicCamera m_Camera;
 

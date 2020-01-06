@@ -7,6 +7,21 @@
 
 namespace Seek
 {
+    Ref<Texture2D> Texture2D::Create(uint32 width, uint32 height)
+    {
+        switch (Renderer::GetAPI())
+        {
+            case RendererAPI::API::None:
+                SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
+                return nullptr;
+            case RendererAPI::API::OpenGL:
+                return CreateRef<OpenGLTexture2D>(width, height);
+        }
+
+        SK_CORE_ASSERT(false, "No RenderingAPI selected");
+        return nullptr;
+    }
+
     Ref<Texture2D> Texture2D::Create(const String& path)
     {
         switch (Renderer::GetAPI())

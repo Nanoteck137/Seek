@@ -1,9 +1,19 @@
 #include "SeekPCH.h"
 #include "Seek/Renderer/Renderer.h"
 
+#include "Seek/Renderer/Renderer2D.h"
+
 namespace Seek
 {
     Renderer::SceneData* Renderer::s_SceneData = new Renderer::SceneData;
+
+    void Renderer::Init()
+    {
+        RenderCommand::Init();
+        Renderer2D::Init();
+    }
+
+    void Renderer::Shutdown() {}
 
     void Renderer::BeginScene(OrthographicCamera& camera)
     {

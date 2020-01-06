@@ -10,6 +10,9 @@ namespace Seek
         OpenGLRendererAPI();
         ~OpenGLRendererAPI();
 
+        virtual void Init() override;
+        virtual void Shutdown() override;
+
         virtual void SetClearColor(const glm::vec4& color) override;
         virtual void Clear() override;
 
