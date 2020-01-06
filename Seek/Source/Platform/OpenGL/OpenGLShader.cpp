@@ -175,6 +175,14 @@ namespace Seek
         glUniform1i(loc, value);
     }
 
+    void OpenGLShader::SetUnifromIntArray(const String& name, int32* values,
+                                          uint32 count)
+    {
+        // TODO(patrik): Check loc after -1
+        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
+        glUniform1iv(loc, count, values);
+    }
+
     void OpenGLShader::SetUniformFloat(const String& name, float32 value)
     {
         int32 loc = glGetUniformLocation(m_RendererID, name.c_str());

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Seek/Core.h"
+#include "Seek/Log.h"
 
 #include "Seek/Application.h"
 #include "Seek/Input.h"
@@ -17,4 +18,8 @@
 
 #include "Seek/ImGui/ImGuiLayer.h"
 
-#include "Seek/Log.h"
+#include "Seek/Renderer/Renderer.h"
+#include "Seek/Renderer/Renderer2D.h"
+#include "Seek/Renderer/Texture.h"
+#include "Seek/Renderer/Shader.h"
+#include "Seek/Renderer/OrthographicCamera.h"

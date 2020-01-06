@@ -3,6 +3,7 @@
 
 #include "Seek/Renderer/VertexArray.h"
 #include "Seek/Renderer/Shader.h"
+#include "Seek/Renderer/Texture.h"
 
 #include "Seek/Renderer/RenderCommand.h"
 
@@ -15,6 +16,7 @@ namespace Seek
         glm::vec3 Position;
         glm::vec2 TexCoord;
         glm::vec4 Color;
+        float32 TextureID;
     };
 
     struct Renderer2DStorage
@@ -22,6 +24,9 @@ namespace Seek
         Ref<VertexArray> VertexArray;
         Ref<VertexBuffer> VertexBuffer;
         Ref<IndexBuffer> IndexBuffer;
+
+        Ref<Texture2D> WhiteTexture;
+        std::vector<Ref<Texture2D>> Textures;
 
         Vertex2D* VertexBufferData = nullptr;
         Vertex2D* VertexBufferDataWritePtr = nullptr;
@@ -52,6 +57,7 @@ namespace Seek
             {ShaderDataType::Float3, "a_Position"},
             {ShaderDataType::Float2, "a_TexCoord"},
             {ShaderDataType::Float4, "a_Color"},
+            {ShaderDataType::Float, "a_TextureID"},
         };
 
         s_Data->VertexBuffer->SetLayout(layout);
@@ -81,11 +87,16 @@ namespace Seek
         s_Data->VertexArray->AddIndexBuffer(s_Data->IndexBuffer);
 
         s_Data->Shader = Shader::Create("Assets/Shaders/Renderer2D.glsl");
+        s_Data->Shader->Bind();
+        int32 values[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                            22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+        s_Data->Shader->SetUnifromIntArray("u_Textures", values, 32);
 
-        // s_Data->WhiteTexture = Texture2D::Create(1, 1);
+        s_Data->WhiteTexture = Texture2D::Create(1, 1);
 
-        // uint8 data[4] = {0xff, 0xff, 0xff, 0xff};
-        // s_Data->WhiteTexture->SetData(data, sizeof(data));
+        uint8 data[4] = {0xff, 0xff, 0xff, 0xff};
+        s_Data->WhiteTexture->SetData(data, sizeof(data));
 
         ResetRenderStats();
     }
@@ -100,6 +111,7 @@ namespace Seek
     {
         s_Data->VertexBufferDataWritePtr = s_Data->VertexBufferData;
         s_Data->IndexCounter = 0;
+        s_Data->Textures.clear();
 
         s_Data->Shader->Bind();
         s_Data->Shader->SetUniformMatrix4("u_ViewProjection",
@@ -119,6 +131,11 @@ namespace Seek
 
     void Renderer2D::Flush()
     {
+        for (int i = 0; i < s_Data->Textures.size(); i++)
+        {
+            s_Data->Textures[i]->Bind(i);
+        }
+
         RenderCommand::DrawIndexed(s_Data->VertexArray, s_Data->IndexCounter);
     }
 
@@ -127,30 +144,100 @@ namespace Seek
         memset(&s_Data->Stats, 0, sizeof(RenderStats));
     }
 
+    float Renderer2D::SubmitTexture(const Ref<Texture2D>& texture)
+    {
+        float result = 0.0f;
+        bool found = false;
+        for (uint32 i = 0; i < s_Data->Textures.size(); i++)
+        {
+            if (s_Data->Textures[i] == texture)
+            {
+                result = (float)(i + 1);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            if (s_Data->Textures.size() >= 32)
+            {
+                SK_CORE_ASSERT(false, "Too many textures");
+            }
+
+            s_Data->Textures.push_back(texture);
+            result = (float)(s_Data->Textures.size());
+        }
+
+        return result;
+    }
+
     void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
                               const glm::vec4& color)
     {
+        float textureID = SubmitTexture(s_Data->WhiteTexture);
+
         s_Data->VertexBufferDataWritePtr->Position = position;
         s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 0.0f);
         s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->VertexBufferDataWritePtr->Position =
             position + glm::vec3(size.x, 0.0f, 0.0f);
         s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 0.0f);
         s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->VertexBufferDataWritePtr->Position =
             position + glm::vec3(size.x, size.y, 0.0f);
         s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 1.0f);
         s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->VertexBufferDataWritePtr->Position =
             position + glm::vec3(0.0f, size.y, 0.0f);
         s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 1.0f);
         s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->IndexCounter += 6;
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
+                              const Ref<Texture2D>& texture)
+    {
+        float textureID = SubmitTexture(texture);
+        glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+        s_Data->VertexBufferDataWritePtr->Position = position;
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, 0.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(1.0f, 1.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(0.0f, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = glm::vec2(0.0f, 1.0f);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->IndexCounter += 6;

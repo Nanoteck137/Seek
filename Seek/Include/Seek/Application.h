@@ -46,10 +46,6 @@ namespace Seek
 
         float32 m_LastFrameTime = 0.0f;
 
-        Ref<Texture2D> m_Texture;
-
-        OrthographicCamera m_Camera;
-
     private:
         static Application* s_Instance;
     };

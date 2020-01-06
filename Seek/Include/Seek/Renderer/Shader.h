@@ -16,6 +16,8 @@ namespace Seek
         virtual void Unbind() const = 0;
 
         virtual void SetUniformInt(const String& name, int32 value) = 0;
+        virtual void SetUnifromIntArray(const String& name, int32* values,
+                                        uint32 count) = 0;
         virtual void SetUniformFloat(const String& name, float32 value) = 0;
         virtual void SetUniformFloat2(const String& name,
                                       const glm::vec2& value) = 0;

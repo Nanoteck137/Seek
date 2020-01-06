@@ -16,6 +16,8 @@ namespace Seek
         virtual void Unbind() const override;
 
         virtual void SetUniformInt(const String& name, int32 value) override;
+        virtual void SetUnifromIntArray(const String& name, int32* values,
+                                        uint32 count) override;
         virtual void SetUniformFloat(const String& name,
                                      float32 value) override;
         virtual void SetUniformFloat2(const String& name,
