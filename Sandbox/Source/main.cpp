@@ -87,13 +87,13 @@ public:
     {
         ImGui::Begin("Info");
 
-        static uint32 fps = 0.0f;
+        static uint32 fps = 0;
         static float frameTime = 0.0f;
         static float timer = 0.5f;
 
         if (timer >= 0.5f)
         {
-            fps = floor(1.0f / (float)ts);
+            fps = (uint32)floor(1.0f / (float)ts);
             frameTime = ts.GetMilliseconds();
             timer = 0;
         }
@@ -123,7 +123,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    // TODO(patrik): Move this to a Engine Intiialize method or something like
+    // TODO(patrik): Move this to a Engine Initialize method or something like
     // that
     Seek::Log::Init();
 
