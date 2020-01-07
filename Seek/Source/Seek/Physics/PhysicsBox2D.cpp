@@ -6,17 +6,10 @@
 namespace Seek
 {
     Ref<PhysicsBox2D> PhysicsBox2D::Create(const Ref<PhysicsWorld2D>& world,
+                                           PhysicsBodyType type,
                                            const glm::vec2& position,
                                            const glm::vec2& size)
     {
-        return CreateRef<Box2DPhysicsBox2D>(world, position, size);
+        return CreateRef<Box2DPhysicsBox2D>(world, type, position, size);
     }
-
-    /*Ref<PhysicsBox2D> PhysicsBox2D::Create(const Ref<PhysicsWorld2D>& world,
-                                           const glm::vec2& position,
-                                           const glm::vec2& size)
-    {
-        return Ref<PhysicsBox2D>();
-        // return
-    }*/
 }

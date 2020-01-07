@@ -27,6 +27,7 @@ namespace Seek
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
+        m_Window->SetVSync(false);
 
         m_ImGuiLayer = new ImGuiLayer();
         PushOverlay(m_ImGuiLayer);
@@ -43,8 +44,6 @@ namespace Seek
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(
             SK_BIND_EVENT_FN(Application::OnWindowClosed));
-
-        // SK_CORE_TRACE("{0}", e);
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
         {
@@ -82,20 +81,12 @@ namespace Seek
             Timestep timestep(time - m_LastFrameTime);
             m_LastFrameTime = time;
 
-            timer += timestep;
-            if (timer >= 1)
-            {
-                SK_CORE_TRACE("Frame Info - Time: {0}ms Fps: {1}",
-                              timestep.GetMilliseconds(), 1.0f / timestep);
-                timer = 0;
-            }
-
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
             m_ImGuiLayer->Begin();
             for (Layer* layer : m_LayerStack)
-                layer->OnImGuiRender();
+                layer->OnImGuiRender(timestep);
             m_ImGuiLayer->End();
 
             m_Window->OnUpdate();

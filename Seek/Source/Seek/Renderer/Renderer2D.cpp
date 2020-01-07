@@ -172,6 +172,12 @@ namespace Seek
         return result;
     }
 
+    void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
+                              const glm::vec4& color)
+    {
+        DrawQuad({position.x, position.y, 0.0f}, size, color);
+    }
+
     void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
                               const glm::vec4& color)
     {
@@ -205,6 +211,12 @@ namespace Seek
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->IndexCounter += 6;
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
+                              const Ref<Texture2D>& texture)
+    {
+        DrawQuad({position.x, position.y, 0.0f}, size, texture);
     }
 
     void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,

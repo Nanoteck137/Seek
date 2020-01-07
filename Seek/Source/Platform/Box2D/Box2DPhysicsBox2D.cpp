@@ -5,10 +5,23 @@
 
 namespace Seek
 {
+    static b2BodyType PhysicsBodyTypeToBox2D(PhysicsBodyType type)
+    {
+        switch (type)
+        {
+            case PhysicsBodyType::Static: return b2_staticBody;
+            case PhysicsBodyType::Dynamic: return b2_dynamicBody;
+        }
+
+        SK_CORE_ASSERT(false, "Unknown type");
+        return (b2BodyType)0;
+    }
+
     Box2DPhysicsBox2D::Box2DPhysicsBox2D(const Ref<PhysicsWorld2D>& world,
+                                         PhysicsBodyType type,
                                          const glm::vec2& position,
                                          const glm::vec2& size)
-        : m_Size(size), m_Position(position)
+        : m_Type(type), m_Size(size), m_Position(position)
     {
         const Ref<b2World>& box2DWorld =
             std::dynamic_pointer_cast<Box2DPhysicsWorld2D>(world)
@@ -17,7 +30,7 @@ namespace Seek
         b2BodyDef boxBodyDef;
         boxBodyDef.position.Set(position.x + (size.x / 2),
                                 position.y + (size.y / 2));
-        boxBodyDef.type = b2_dynamicBody;
+        boxBodyDef.type = PhysicsBodyTypeToBox2D(type);
 
         m_Body = box2DWorld->CreateBody(&boxBodyDef);
 
@@ -33,6 +46,11 @@ namespace Seek
     }
 
     Box2DPhysicsBox2D::~Box2DPhysicsBox2D() {}
+
+    void Box2DPhysicsBox2D::ApplyForceAtCenter(const glm::vec2& force)
+    {
+        m_Body->ApplyForceToCenter(b2Vec2(force.x, force.y), true);
+    }
 
     const glm::vec2& Box2DPhysicsBox2D::GetPosition()
     {
