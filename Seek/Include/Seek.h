@@ -23,3 +23,6 @@
 #include "Seek/Renderer/Texture.h"
 #include "Seek/Renderer/Shader.h"
 #include "Seek/Renderer/OrthographicCamera.h"
+
+#include "Seek/Physics/PhysicsWorld2D.h"
+#include "Seek/Physics/PhysicsBox2D.h"

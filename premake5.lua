@@ -103,6 +103,7 @@ project "Sandbox"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.Box2D}",
     }
 
     links {
