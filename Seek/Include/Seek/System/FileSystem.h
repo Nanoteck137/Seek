@@ -49,6 +49,23 @@ namespace Seek
             s_Instance->WriteAllLinesImpl(path, lines);
         }
 
+        static inline void AppendAllBuffer(const String& path,
+                                           const Buffer& buffer)
+        {
+            s_Instance->AppendAllBufferImpl(path, buffer);
+        }
+
+        static inline void AppendAllText(const String& path, const String& text)
+        {
+            s_Instance->AppendAllText(path, text);
+        }
+
+        static inline void AppendAllLines(const String& path,
+                                          const std::vector<String>& lines)
+        {
+            s_Instance->AppendAllLinesImpl(path, lines);
+        }
+
     private:
         virtual Buffer ReadAllBufferImpl(const String& path) = 0;
         virtual String ReadAllTextImpl(const String& path) = 0;
@@ -60,6 +77,13 @@ namespace Seek
                                       const String& text) = 0;
         virtual void WriteAllLinesImpl(const String& path,
                                        const std::vector<String>& lines) = 0;
+
+        virtual void AppendAllBufferImpl(const String& path,
+                                         const Buffer& buffer) = 0;
+        virtual void AppendAllTextImpl(const String& path,
+                                       const String& text) = 0;
+        virtual void AppendAllLinesImpl(const String& path,
+                                        const std::vector<String>& lines) = 0;
 
     private:
         static FileSystem* s_Instance;

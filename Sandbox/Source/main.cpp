@@ -19,7 +19,13 @@ public:
 
         String test = "Hello World from String WriteAllText";
 
-        Seek::FileSystem::WriteAllText("Assets/test.txt", test);
+        // Seek::FileSystem::WriteAllText("Assets/test.txt", test);
+
+        Seek::Buffer buffer = {};
+        buffer.data = test.data();
+        buffer.size = test.size();
+
+        Seek::FileSystem::AppendAllBuffer("Assets/test.txt", buffer);
 
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 

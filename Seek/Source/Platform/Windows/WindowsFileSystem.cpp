@@ -146,8 +146,8 @@ namespace Seek
         HANDLE fileHandle = OpenFileForWriting(path);
 
         DWORD written;
-        if (WriteFile(fileHandle, &text[0], text.size(), &written, nullptr) ==
-            FALSE)
+        if (WriteFile(fileHandle, text.data(), text.size(), &written,
+                      nullptr) == FALSE)
         {
             SK_CORE_ASSERT(false, "Failed to write to file");
         }
@@ -157,6 +157,71 @@ namespace Seek
 
     void WindowsFileSystem::WriteAllLinesImpl(const String& path,
                                               const std::vector<String>& lines)
+    {
+        // TODO(patrik): Implement
+    }
+
+    static HANDLE OpenFileForAppending(const String& path)
+    {
+        HANDLE fileHandle =
+            CreateFileA(path.c_str(), FILE_APPEND_DATA, 0, NULL, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, NULL);
+        if (fileHandle == INVALID_HANDLE_VALUE)
+        {
+            if (GetLastError() == ERROR_FILE_NOT_FOUND)
+            {
+                fileHandle =
+                    CreateFileA(path.c_str(), GENERIC_WRITE, 0, NULL,
+                                CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+
+                if (fileHandle == INVALID_HANDLE_VALUE)
+                {
+                    SK_CORE_ASSERT(false, "Could not open file");
+                }
+            }
+            else
+            {
+                SK_CORE_ASSERT(false, "Unknown error");
+            }
+        }
+
+        return fileHandle;
+    }
+
+    void WindowsFileSystem::AppendAllBufferImpl(const String& path,
+                                                const Buffer& buffer)
+    {
+        HANDLE fileHandle = OpenFileForAppending(path);
+
+        SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
+
+        DWORD written;
+        if (WriteFile(fileHandle, buffer.data, buffer.size, &written,
+                      nullptr) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Failed to write to file");
+        }
+
+        CloseHandle(fileHandle);
+    }
+
+    void WindowsFileSystem::AppendAllTextImpl(const String& path,
+                                              const String& text)
+    {
+        HANDLE fileHandle = OpenFileForAppending(path);
+
+        DWORD written;
+        if (WriteFile(fileHandle, text.data(), text.size(), &written,
+                      nullptr) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Failed to write to file");
+        }
+
+        CloseHandle(fileHandle);
+    }
+
+    void WindowsFileSystem::AppendAllLinesImpl(const String& path,
+                                               const std::vector<String>& lines)
     {
         // TODO(patrik): Implement
     }

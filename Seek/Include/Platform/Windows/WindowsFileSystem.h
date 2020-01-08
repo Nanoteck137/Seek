@@ -23,5 +23,13 @@ namespace Seek
         virtual void
         WriteAllLinesImpl(const String& path,
                           const std::vector<String>& lines) override;
+
+        virtual void AppendAllBufferImpl(const String& path,
+                                         const Buffer& buffer) override;
+        virtual void AppendAllTextImpl(const String& path,
+                                       const String& text) override;
+        virtual void
+        AppendAllLinesImpl(const String& path,
+                           const std::vector<String>& lines) override;
     };
 }
