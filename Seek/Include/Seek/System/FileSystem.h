@@ -8,7 +8,7 @@ namespace Seek
     struct Buffer
     {
         void* data;
-        uint32 size;
+        uint64 size;
     };
 
     class FileSystem

@@ -12,8 +12,14 @@ public:
 
     void OnAttach() override
     {
-        Seek::Buffer buffer =
+        /*Seek::Buffer buffer =
             Seek::FileSystem::ReadAllBuffer("Assets/test.txt");
+
+        String str = Seek::FileSystem::ReadAllText("Assets/test.txt");*/
+
+        String test = "Hello World from String WriteAllText";
+
+        Seek::FileSystem::WriteAllText("Assets/test.txt", test);
 
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 

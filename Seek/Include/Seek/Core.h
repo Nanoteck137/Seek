@@ -4,6 +4,18 @@
 
 #include "Types.h"
 
+// TODO(patrik): Try to fix the formatting 'IndentPPDirectives'
+#ifdef _WIN32
+/* Windows x64/x86 */
+#    ifdef _WIN64
+/* Windows x64  */
+#        define SK_PLATFORM_WINDOWS
+#    else
+/* Windows x86 */
+#        error "x86 Builds are not supported!"
+#    endif
+#endif
+
 #define SK_BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 #define BIT(x) (1 << x)

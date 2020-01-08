@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Seek/Core.h"
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -15,5 +17,5 @@
 #include <stdint.h>
 
 #ifdef SK_PLATFORM_WINDOWS
-#include <Windows.h>
+#    include <Windows.h>
 #endif

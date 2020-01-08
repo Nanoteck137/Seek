@@ -3,37 +3,161 @@
 
 namespace Seek
 {
+    // NOTE(patrik): Not used, but required for ReadFileEx
+    void CALLBACK FileIOCompletionRoutine(DWORD dwErrorCode,
+                                          DWORD dwNumberOfBytesTransfered,
+                                          LPOVERLAPPED lpOverlapped)
+    {
+    }
+
     WindowsFileSystem::WindowsFileSystem() {}
 
     WindowsFileSystem::~WindowsFileSystem() {}
 
+    static HANDLE OpenFileForReading(const String& path)
+    {
+        HANDLE fileHandle =
+            CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (fileHandle == INVALID_HANDLE_VALUE)
+        {
+            if (GetLastError() == ERROR_FILE_NOT_FOUND)
+            {
+                SK_CORE_ASSERT(false, "Could not find file");
+            }
+            else
+            {
+                SK_CORE_ASSERT(false, "Unknown error");
+            }
+        }
+
+        return fileHandle;
+    }
+
+    static uint64 GetFileSize(HANDLE file)
+    {
+        LARGE_INTEGER fileSize;
+        if (GetFileSizeEx(file, &fileSize) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Could not get file size");
+        }
+
+        return (uint64)fileSize.QuadPart;
+    }
+
     Buffer WindowsFileSystem::ReadAllBufferImpl(const String& path)
     {
-        return Buffer();
+        HANDLE fileHandle = OpenFileForReading(path);
+
+        Buffer result = {};
+        result.data = nullptr;
+        result.size = 0;
+
+        uint64 fileSize = GetFileSize(fileHandle);
+
+        // TODO(patrik): Temp
+        result.data = malloc(fileSize);
+        result.size = fileSize;
+
+        OVERLAPPED ol = {0};
+        if (ReadFileEx(fileHandle, result.data, result.size, &ol,
+                       FileIOCompletionRoutine) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Could not read file");
+        }
+
+        CloseHandle(fileHandle);
+
+        return result;
     }
 
     String WindowsFileSystem::ReadAllTextImpl(const String& path)
     {
-        return String();
+        HANDLE fileHandle = OpenFileForReading(path);
+
+        uint64 fileSize = GetFileSize(fileHandle);
+        String result(fileSize, 0);
+
+        OVERLAPPED ol = {0};
+        if (ReadFileEx(fileHandle, &result[0], fileSize, &ol,
+                       FileIOCompletionRoutine) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Could not read file");
+        }
+
+        CloseHandle(fileHandle);
+
+        return result;
     }
 
     std::vector<String> WindowsFileSystem::ReadAllLinesImpl(const String& path)
     {
+        // TODO(patrik): Implement
         return std::vector<String>();
+    }
+
+    static HANDLE OpenFileForWriting(const String& path)
+    {
+        HANDLE fileHandle =
+            CreateFileA(path.c_str(), GENERIC_WRITE, 0, NULL, TRUNCATE_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, NULL);
+        if (fileHandle == INVALID_HANDLE_VALUE)
+        {
+            if (GetLastError() == ERROR_FILE_NOT_FOUND)
+            {
+                fileHandle =
+                    CreateFileA(path.c_str(), GENERIC_WRITE, 0, NULL,
+                                CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+
+                if (fileHandle == INVALID_HANDLE_VALUE)
+                {
+                    SK_CORE_ASSERT(false, "Could not open file");
+                }
+            }
+            else
+            {
+                SK_CORE_ASSERT(false, "Unknown error");
+            }
+        }
+
+        return fileHandle;
     }
 
     void WindowsFileSystem::WriteAllBufferImpl(const String& path,
                                                const Buffer& buffer)
     {
+        HANDLE fileHandle = OpenFileForWriting(path);
+
+        SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
+
+        DWORD written;
+        if (WriteFile(fileHandle, buffer.data, buffer.size, &written,
+                      nullptr) == FALSE)
+        {
+            SK_CORE_ASSERT(false, "Failed to write to file");
+        }
+
+        CloseHandle(fileHandle);
     }
 
     void WindowsFileSystem::WriteAllTextImpl(const String& path,
                                              const String& text)
     {
+        HANDLE fileHandle = OpenFileForWriting(path);
+
+        DWORD written;
+        if (WriteFile(fileHandle, &text[0], text.size(), &written, nullptr) ==
+            FALSE)
+        {
+            SK_CORE_ASSERT(false, "Failed to write to file");
+        }
+
+        CloseHandle(fileHandle);
     }
 
     void WindowsFileSystem::WriteAllLinesImpl(const String& path,
                                               const std::vector<String>& lines)
     {
+        // TODO(patrik): Implement
     }
 }
