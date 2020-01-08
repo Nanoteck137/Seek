@@ -35,7 +35,7 @@ namespace Seek
         m_Body = box2DWorld->CreateBody(&boxBodyDef);
 
         b2PolygonShape boxShape;
-        boxShape.SetAsBox(size.x / 2, size.y / 2);
+        boxShape.SetAsBox(size.x / 2.0f, size.y / 2.0f);
 
         b2FixtureDef fixtureDef;
         fixtureDef.shape = &boxShape;

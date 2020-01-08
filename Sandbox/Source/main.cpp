@@ -12,11 +12,17 @@ public:
 
     void OnAttach() override
     {
+        Seek::Buffer buffer =
+            Seek::FileSystem::ReadAllBuffer("Assets/test.txt");
+
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 
         m_World = Seek::PhysicsWorld2D::Create();
         m_Box = Seek::PhysicsBox2D::Create(
             m_World, Seek::PhysicsBodyType::Dynamic, glm::vec2(0.0f, 10.0f),
+            glm::vec2(1.0f, 1.0f));
+        m_Box2 = Seek::PhysicsBox2D::Create(
+            m_World, Seek::PhysicsBodyType::Dynamic, glm::vec2(3.0f, 10.0f),
             glm::vec2(1.0f, 1.0f));
 
         m_GroundBox = Seek::PhysicsBox2D::Create(
@@ -59,7 +65,7 @@ public:
 
         if (Seek::Input::IsKeyPressed(SK_KEY_H))
         {
-            m_Box->ApplyForceAtCenter(glm::vec2(10.0f, 10.0f));
+            m_Box->ApplyForceAtCenter(glm::vec2(10.0f, 0.0f));
         }
 
         m_Camera.SetPosition(cameraPos);
@@ -73,6 +79,9 @@ public:
         Seek::Renderer2D::BeginScene(m_Camera);
 
         Seek::Renderer2D::DrawQuad(m_Box->GetPosition(), m_Box->GetSize(),
+                                   {1.0f, 0.0f, 1.0f, 1.0f});
+
+        Seek::Renderer2D::DrawQuad(m_Box2->GetPosition(), m_Box2->GetSize(),
                                    {1.0f, 0.0f, 1.0f, 1.0f});
 
         Seek::Renderer2D::DrawQuad(m_GroundBox->GetPosition(),
@@ -111,6 +120,7 @@ private:
 
     Seek::Ref<Seek::PhysicsWorld2D> m_World;
     Seek::Ref<Seek::PhysicsBox2D> m_Box;
+    Seek::Ref<Seek::PhysicsBox2D> m_Box2;
     Seek::Ref<Seek::PhysicsBox2D> m_GroundBox;
 };
 
