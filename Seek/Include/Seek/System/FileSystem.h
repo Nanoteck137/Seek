@@ -82,6 +82,37 @@ namespace Seek
             return s_Instance->GetDirectorySubDirectoriesImpl(path);
         }
 
+        static inline String PathCombine(const String& path,
+                                         const String& path2)
+        {
+            return s_Instance->PathCombineImpl(path, path2);
+        }
+
+        static inline String GetCurrentWorkingDirectoryPath()
+        {
+            return s_Instance->GetCurrentWorkingDirectoryPathImpl();
+        }
+
+        static inline String GetFullPath(const String& path)
+        {
+            return s_Instance->GetFullPathImpl(path);
+        }
+
+        static inline String GetPathFileExtension(const String& path)
+        {
+            return s_Instance->GetPathFileExtensionImpl(path);
+        }
+
+        static inline String GetPathFileName(const String& path)
+        {
+            return s_Instance->GetPathFileNameImpl(path);
+        }
+
+        static inline String GetPathDirectory(const String& path)
+        {
+            return s_Instance->GetPathDirectoryImpl(path);
+        }
+
     private:
         virtual Buffer ReadAllBufferImpl(const String& path) = 0;
         virtual String ReadAllTextImpl(const String& path) = 0;
@@ -107,6 +138,14 @@ namespace Seek
         GetDirectoryFilesImpl(const String& path) = 0;
         virtual std::vector<String>
         GetDirectorySubDirectoriesImpl(const String& path) = 0;
+
+        virtual String PathCombineImpl(const String& path,
+                                       const String& path2) = 0;
+        virtual String GetCurrentWorkingDirectoryPathImpl() = 0;
+        virtual String GetFullPathImpl(const String& path) = 0;
+        virtual String GetPathFileExtensionImpl(const String& path) = 0;
+        virtual String GetPathFileNameImpl(const String& path) = 0;
+        virtual String GetPathDirectoryImpl(const String& path) = 0;
 
     private:
         static FileSystem* s_Instance;

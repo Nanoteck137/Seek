@@ -17,7 +17,14 @@ public:
         std::vector<String> files =
             Seek::FileSystem::GetDirectoryFiles("Assets");
 
+        std::vector<String> dirs =
+            Seek::FileSystem::GetDirectorySubDirectories("Assets");
+
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
+
+        String path = Seek::FileSystem::GetFullPath("Test");
+
+        SK_APP_TRACE("Res: {0}", path);
 
         m_World = Seek::PhysicsWorld2D::Create();
         m_Box = Seek::PhysicsBox2D::Create(

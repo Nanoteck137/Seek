@@ -38,5 +38,13 @@ namespace Seek
         GetDirectoryFilesImpl(const String& path) override;
         virtual std::vector<String>
         GetDirectorySubDirectoriesImpl(const String& path) override;
+
+        virtual String PathCombineImpl(const String& path,
+                                       const String& path2) override;
+        virtual String GetCurrentWorkingDirectoryPathImpl() override;
+        virtual String GetFullPathImpl(const String& path) override;
+        virtual String GetPathFileExtensionImpl(const String& path) override;
+        virtual String GetPathFileNameImpl(const String& path) override;
+        virtual String GetPathDirectoryImpl(const String& path) override;
     };
 }

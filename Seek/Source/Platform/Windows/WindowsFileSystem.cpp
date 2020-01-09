@@ -235,25 +235,127 @@ namespace Seek
     std::vector<String>
     WindowsFileSystem::GetDirectoryFilesImpl(const String& path)
     {
+        String newPath = path + "\\*";
+
         WIN32_FIND_DATAA findData;
-        HANDLE findHandle = FindFirstFileA(path.c_str(), &findData);
+        HANDLE findHandle = FindFirstFileA(newPath.c_str(), &findData);
         if (findHandle == INVALID_HANDLE_VALUE)
         {
             SK_CORE_ASSERT(false, "Invalid Directory");
         }
 
+        std::vector<String> result;
         do
         {
-            SK_CORE_TRACE("{0}", String(findData.cFileName));
+            if ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) !=
+                FILE_ATTRIBUTE_DIRECTORY)
+            {
+                result.push_back(String(findData.cFileName));
+            }
         } while (FindNextFileA(findHandle, &findData));
 
         FindClose(findHandle);
 
-        return std::vector<String>();
+        return result;
     }
     std::vector<String>
     WindowsFileSystem::GetDirectorySubDirectoriesImpl(const String& path)
     {
-        return std::vector<String>();
+        String newPath = path + "\\*";
+
+        WIN32_FIND_DATAA findData;
+        HANDLE findHandle = FindFirstFileA(newPath.c_str(), &findData);
+        if (findHandle == INVALID_HANDLE_VALUE)
+        {
+            SK_CORE_ASSERT(false, "Invalid Directory");
+        }
+
+        std::vector<String> result;
+        do
+        {
+            if ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ==
+                FILE_ATTRIBUTE_DIRECTORY)
+            {
+                String str = String(findData.cFileName);
+                if (str == "." || str == "..")
+                    continue;
+                result.push_back(str);
+            }
+        } while (FindNextFileA(findHandle, &findData));
+
+        FindClose(findHandle);
+
+        return result;
+    }
+
+    const static char SEPERATOR = '\\';
+
+    static String TrimPathStringStart(const String& path)
+    {
+        String result = path;
+
+        while (result[0] == SEPERATOR)
+        {
+            result = result.substr(1, result.size());
+        }
+
+        return result;
+    }
+
+    static String TrimPathStringEnd(const String& path)
+    {
+        String result = path;
+
+        while (result[result.size() - 1] == SEPERATOR)
+        {
+            result = result.substr(0, result.size() - 1);
+        }
+
+        return result;
+    }
+
+    String WindowsFileSystem::PathCombineImpl(const String& path,
+                                              const String& path2)
+    {
+        String newPath = TrimPathStringEnd(path);
+        String newPath2 = TrimPathStringStart(path2);
+
+        String result = newPath + SEPERATOR + newPath2;
+
+        return result;
+    }
+
+    String WindowsFileSystem::GetCurrentWorkingDirectoryPathImpl()
+    {
+        char buffer[1024] = {0};
+
+        DWORD res = GetCurrentDirectoryA(1024, buffer);
+        SK_CORE_ASSERT(res, "Could not get current directory path");
+
+        return String(buffer);
+    }
+
+    String WindowsFileSystem::GetFullPathImpl(const String& path)
+    {
+        char buffer[1024] = {0};
+        DWORD res = GetFullPathNameA(path.c_str(), 1024, buffer, nullptr);
+        SK_CORE_ASSERT(res, "Could not get the full path");
+
+        return String(buffer);
+    }
+
+    String WindowsFileSystem::GetPathFileExtensionImpl(const String& path)
+    {
+        return String();
+    }
+
+    String WindowsFileSystem::GetPathFileNameImpl(const String& path)
+    {
+        return String();
+    }
+
+    String WindowsFileSystem::GetPathDirectoryImpl(const String& path)
+    {
+        return String();
     }
 }
