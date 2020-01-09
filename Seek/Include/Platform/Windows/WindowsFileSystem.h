@@ -31,5 +31,7 @@ namespace Seek
         virtual void
         AppendAllLinesImpl(const String& path,
                            const std::vector<String>& lines) override;
+
+        virtual bool FileExistsImpl(const String& path) override;
     };
 }

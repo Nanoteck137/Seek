@@ -66,6 +66,11 @@ namespace Seek
             s_Instance->AppendAllLinesImpl(path, lines);
         }
 
+        static inline bool FileExists(const String& path)
+        {
+            return s_Instance->FileExistsImpl(path);
+        }
+
     private:
         virtual Buffer ReadAllBufferImpl(const String& path) = 0;
         virtual String ReadAllTextImpl(const String& path) = 0;
@@ -84,6 +89,8 @@ namespace Seek
                                        const String& text) = 0;
         virtual void AppendAllLinesImpl(const String& path,
                                         const std::vector<String>& lines) = 0;
+
+        virtual bool FileExistsImpl(const String& path) = 0;
 
     private:
         static FileSystem* s_Instance;

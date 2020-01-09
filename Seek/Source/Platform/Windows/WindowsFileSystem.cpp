@@ -225,4 +225,11 @@ namespace Seek
     {
         // TODO(patrik): Implement
     }
+
+    bool WindowsFileSystem::FileExistsImpl(const String& path)
+    {
+        DWORD attribs = GetFileAttributesA(path.c_str());
+        return !(attribs == INVALID_FILE_ATTRIBUTES &&
+                 GetLastError() == ERROR_FILE_NOT_FOUND);
+    }
 }

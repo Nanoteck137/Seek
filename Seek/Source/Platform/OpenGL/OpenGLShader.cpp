@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include "Seek/System/FileSystem.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
 
@@ -21,7 +23,7 @@ namespace Seek
 
     OpenGLShader::OpenGLShader(const String& filePath)
     {
-        String shaderSource = ReadFile(filePath);
+        String shaderSource = FileSystem::ReadAllText(filePath);
         auto shaderSources = PreProcess(shaderSource);
         Compile(shaderSources);
 
@@ -45,27 +47,6 @@ namespace Seek
     }
 
     OpenGLShader::~OpenGLShader() { glDeleteProgram(m_RendererID); }
-
-    String OpenGLShader::ReadFile(const String& filePath)
-    {
-        std::string result;
-        std::ifstream in(filePath, std::ios::in, std::ios::binary);
-        if (in)
-        {
-            in.seekg(0, std::ios::end);
-            result.resize(in.tellg());
-            in.seekg(0, std::ios::beg);
-
-            in.read(&result[0], result.size());
-            in.close();
-        }
-        else
-        {
-            SK_CORE_ERROR("Could not open file '{0}'", filePath);
-        }
-
-        return result;
-    }
 
     std::unordered_map<uint32, String>
     OpenGLShader::PreProcess(const String& source)
@@ -169,51 +150,53 @@ namespace Seek
 
     void OpenGLShader::Unbind() const { glUseProgram(0); }
 
-    void OpenGLShader::SetUniformInt(const String& name, int32 value)
+    int32 OpenGLShader::GetUniformLocation(const String& name)
     {
         int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform1i(loc, value);
+        SK_CORE_ASSERT(loc != -1, "Unknown uniform");
+
+        return loc;
+    }
+
+    void OpenGLShader::SetUniformInt(const String& name, int32 value)
+    {
+        glUniform1i(GetUniformLocation(name), value);
     }
 
     void OpenGLShader::SetUnifromIntArray(const String& name, int32* values,
                                           uint32 count)
     {
-        // TODO(patrik): Check loc after -1
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform1iv(loc, count, values);
+        glUniform1iv(GetUniformLocation(name), count, values);
     }
 
     void OpenGLShader::SetUniformFloat(const String& name, float32 value)
     {
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform1f(loc, value);
+        glUniform1f(GetUniformLocation(name), value);
     }
 
     void OpenGLShader::SetUniformFloat2(const String& name,
                                         const glm::vec2& value)
     {
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform2f(loc, value.x, value.y);
+        glUniform2f(GetUniformLocation(name), value.x, value.y);
     }
 
     void OpenGLShader::SetUniformFloat3(const String& name,
                                         const glm::vec3& value)
     {
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform3f(loc, value.x, value.y, value.z);
+        glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
     }
 
     void OpenGLShader::SetUniformFloat4(const String& name,
                                         const glm::vec4& value)
     {
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniform4f(loc, value.x, value.y, value.z, value.w);
+        glUniform4f(GetUniformLocation(name), value.x, value.y, value.z,
+                    value.w);
     }
 
     void OpenGLShader::SetUniformMatrix4(const String& name,
                                          const glm::mat4& matrix)
     {
-        int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+        glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE,
+                           glm::value_ptr(matrix));
     }
 }

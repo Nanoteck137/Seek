@@ -38,6 +38,8 @@ namespace Seek
 
         void Compile(const std::unordered_map<uint32, String>& shaderSources);
 
+        int32 GetUniformLocation(const String& name);
+
     private:
         uint32 m_RendererID;
         String m_Name;
