@@ -71,6 +71,17 @@ namespace Seek
             return s_Instance->FileExistsImpl(path);
         }
 
+        static inline std::vector<String> GetDirectoryFiles(const String& path)
+        {
+            return s_Instance->GetDirectoryFilesImpl(path);
+        }
+
+        static inline std::vector<String>
+        GetDirectorySubDirectories(const String& path)
+        {
+            return s_Instance->GetDirectorySubDirectoriesImpl(path);
+        }
+
     private:
         virtual Buffer ReadAllBufferImpl(const String& path) = 0;
         virtual String ReadAllTextImpl(const String& path) = 0;
@@ -91,6 +102,11 @@ namespace Seek
                                         const std::vector<String>& lines) = 0;
 
         virtual bool FileExistsImpl(const String& path) = 0;
+
+        virtual std::vector<String>
+        GetDirectoryFilesImpl(const String& path) = 0;
+        virtual std::vector<String>
+        GetDirectorySubDirectoriesImpl(const String& path) = 0;
 
     private:
         static FileSystem* s_Instance;

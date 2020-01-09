@@ -33,5 +33,10 @@ namespace Seek
                            const std::vector<String>& lines) override;
 
         virtual bool FileExistsImpl(const String& path) override;
+
+        virtual std::vector<String>
+        GetDirectoryFilesImpl(const String& path) override;
+        virtual std::vector<String>
+        GetDirectorySubDirectoriesImpl(const String& path) override;
     };
 }

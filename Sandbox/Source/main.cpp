@@ -14,6 +14,9 @@ public:
     {
         bool result = Seek::FileSystem::FileExists("Assets/test.txt");
 
+        std::vector<String> files =
+            Seek::FileSystem::GetDirectoryFiles("Assets");
+
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 
         m_World = Seek::PhysicsWorld2D::Create();

@@ -232,4 +232,28 @@ namespace Seek
         return !(attribs == INVALID_FILE_ATTRIBUTES &&
                  GetLastError() == ERROR_FILE_NOT_FOUND);
     }
+    std::vector<String>
+    WindowsFileSystem::GetDirectoryFilesImpl(const String& path)
+    {
+        WIN32_FIND_DATAA findData;
+        HANDLE findHandle = FindFirstFileA(path.c_str(), &findData);
+        if (findHandle == INVALID_HANDLE_VALUE)
+        {
+            SK_CORE_ASSERT(false, "Invalid Directory");
+        }
+
+        do
+        {
+            SK_CORE_TRACE("{0}", String(findData.cFileName));
+        } while (FindNextFileA(findHandle, &findData));
+
+        FindClose(findHandle);
+
+        return std::vector<String>();
+    }
+    std::vector<String>
+    WindowsFileSystem::GetDirectorySubDirectoriesImpl(const String& path)
+    {
+        return std::vector<String>();
+    }
 }
