@@ -4,3 +4,6 @@
 bin/
 bin-int/
 .vs/
+
+Seek-Startup.json
+Seek-Runtime.json

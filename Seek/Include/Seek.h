@@ -35,3 +35,6 @@
 
 // --------------- SYSTEM ---------------
 #include "Seek/System/FileSystem.h"
+
+// --------------- SYSTEM ---------------
+#include "Seek/Debug/Instrumentor.h"

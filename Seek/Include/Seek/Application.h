@@ -1,18 +1,14 @@
 #pragma once
 
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
 #include "Seek/Window.h"
 
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/LayerStack.h"
 
 #include "Seek/ImGui/ImGuiLayer.h"
-
-#include "Seek/Renderer/Buffer.h"
-#include "Seek/Renderer/VertexArray.h"
-#include "Seek/Renderer/Shader.h"
-#include "Seek/Renderer/Texture.h"
-
-#include "Seek/Renderer/OrthographicCamera.h"
 
 namespace Seek
 {

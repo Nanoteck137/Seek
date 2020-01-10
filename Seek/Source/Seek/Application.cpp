@@ -1,20 +1,15 @@
 #include "SeekPCH.h"
 #include "Seek/Application.h"
 
-#include "Seek/Log.h"
-
 #include "Seek/Timestep.h"
 
 #include "Seek/Renderer/Renderer.h"
-
 #include "Seek/Renderer/Renderer2D.h"
 
-#include "Seek/Input.h"
+#include "Seek/Debug/Instrumentor.h"
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
-
-#include <box2d/box2d.h>
 
 namespace Seek
 {
@@ -22,6 +17,8 @@ namespace Seek
 
     Application::Application()
     {
+        SK_PROFILE_FUNCTION();
+
         SK_CORE_ASSERT(!s_Instance, "Application already exists");
         s_Instance = this;
 
@@ -41,6 +38,8 @@ namespace Seek
 
     void Application::OnEvent(Event& e)
     {
+        SK_PROFILE_FUNCTION();
+
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(
             SK_BIND_EVENT_FN(Application::OnWindowClosed));
@@ -62,18 +61,22 @@ namespace Seek
 
     void Application::PushLayer(Layer* layer)
     {
+        SK_PROFILE_FUNCTION();
         m_LayerStack.PushLayer(layer);
         layer->OnAttach();
     }
 
     void Application::PushOverlay(Layer* overlay)
     {
+        SK_PROFILE_FUNCTION();
         m_LayerStack.PushOverlay(overlay);
         overlay->OnAttach();
     }
 
     void Application::Run()
     {
+        SK_PROFILE_FUNCTION();
+
         float32 timer = 0;
         while (m_Running)
         {
