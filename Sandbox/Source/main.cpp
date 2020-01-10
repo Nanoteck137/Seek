@@ -12,19 +12,7 @@ public:
 
     void OnAttach() override
     {
-        bool result = Seek::FileSystem::FileExists("Assets/test.txt");
-
-        std::vector<String> files =
-            Seek::FileSystem::GetDirectoryFiles("Assets");
-
-        std::vector<String> dirs =
-            Seek::FileSystem::GetDirectorySubDirectories("Assets");
-
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
-
-        String newPath = Seek::FileSystem::FixPathForSystem("Assets/Textures");
-        String res = Seek::FileSystem::GetPathDirectory(newPath);
-        SK_APP_TRACE("Res: {0}", res);
 
         m_World = Seek::PhysicsWorld2D::Create();
         m_Box = Seek::PhysicsBox2D::Create(

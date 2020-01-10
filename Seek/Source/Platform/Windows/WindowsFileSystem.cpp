@@ -290,6 +290,13 @@ namespace Seek
 
     const static char SEPERATOR = '\\';
 
+    String WindowsFileSystem::FixPathForSystemImpl(const String& path)
+    {
+        String result = path;
+        std::replace(result.begin(), result.end(), '/', SEPERATOR);
+        return result;
+    }
+
     static String TrimPathStringStart(const String& path)
     {
         String result = path;
@@ -311,13 +318,6 @@ namespace Seek
             result = result.substr(0, result.size() - 1);
         }
 
-        return result;
-    }
-
-    String WindowsFileSystem::FixPathForSystemImpl(const String& path)
-    {
-        String result = path;
-        std::replace(result.begin(), result.end(), '/', SEPERATOR);
         return result;
     }
 

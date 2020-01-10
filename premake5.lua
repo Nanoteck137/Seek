@@ -108,7 +108,6 @@ project "Sandbox"
 
     links {
         "Seek",
-        "Shlwapi"
     }
 
     filter "configurations:Debug"
