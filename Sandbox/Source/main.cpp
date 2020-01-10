@@ -22,9 +22,9 @@ public:
 
         m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 
-        String path = Seek::FileSystem::GetFullPath("Test");
-
-        SK_APP_TRACE("Res: {0}", path);
+        String newPath = Seek::FileSystem::FixPathForSystem("Assets/Textures");
+        String res = Seek::FileSystem::GetPathDirectory(newPath);
+        SK_APP_TRACE("Res: {0}", res);
 
         m_World = Seek::PhysicsWorld2D::Create();
         m_Box = Seek::PhysicsBox2D::Create(

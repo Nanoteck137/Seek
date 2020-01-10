@@ -314,6 +314,13 @@ namespace Seek
         return result;
     }
 
+    String WindowsFileSystem::FixPathForSystemImpl(const String& path)
+    {
+        String result = path;
+        std::replace(result.begin(), result.end(), '/', SEPERATOR);
+        return result;
+    }
+
     String WindowsFileSystem::PathCombineImpl(const String& path,
                                               const String& path2)
     {
@@ -346,16 +353,28 @@ namespace Seek
 
     String WindowsFileSystem::GetPathFileExtensionImpl(const String& path)
     {
-        return String();
+        auto pos = path.find_last_of('.');
+        if (pos == String::npos)
+            return String();
+
+        String result = path.substr(pos + 1, path.size());
+
+        return result;
     }
 
     String WindowsFileSystem::GetPathFileNameImpl(const String& path)
     {
-        return String();
+        auto pos = path.find_last_of("/\\");
+        String result = path.substr(pos + 1, path.size());
+
+        return result;
     }
 
     String WindowsFileSystem::GetPathDirectoryImpl(const String& path)
     {
-        return String();
+        auto pos = path.find_last_of("/\\");
+        String result = path.substr(0, pos);
+
+        return result;
     }
 }

@@ -82,6 +82,11 @@ namespace Seek
             return s_Instance->GetDirectorySubDirectoriesImpl(path);
         }
 
+        static inline String FixPathForSystem(const String& path)
+        {
+            return s_Instance->FixPathForSystemImpl(path);
+        }
+
         static inline String PathCombine(const String& path,
                                          const String& path2)
         {
@@ -139,6 +144,7 @@ namespace Seek
         virtual std::vector<String>
         GetDirectorySubDirectoriesImpl(const String& path) = 0;
 
+        virtual String FixPathForSystemImpl(const String& path) = 0;
         virtual String PathCombineImpl(const String& path,
                                        const String& path2) = 0;
         virtual String GetCurrentWorkingDirectoryPathImpl() = 0;
