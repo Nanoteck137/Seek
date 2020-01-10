@@ -1,14 +1,13 @@
 #include "SeekPCH.h"
-
 #include "Platform/Windows/WindowsWindow.h"
+
 #include "Platform/OpenGL/OpenGLGraphicsContext.h"
 
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/Events/KeyEvents.h"
 #include "Seek/Events/MouseEvent.h"
 
-#include "Seek/Core.h"
-#include "Seek/Log.h"
+#include "Seek/Debug/Instrumentor.h"
 
 #include <GLFW/glfw3.h>
 
@@ -27,6 +26,8 @@ namespace Seek
 
     void WindowsWindow::Init(const WindowProps& props)
     {
+        SK_PROFILE_FUNCTION();
+
         m_Data.Title = props.Title;
         m_Data.Width = props.Width;
         m_Data.Height = props.Height;
@@ -141,10 +142,17 @@ namespace Seek
         });
     }
 
-    void WindowsWindow::Shutdown() { glfwDestroyWindow(m_Window); }
+    void WindowsWindow::Shutdown()
+    {
+        SK_PROFILE_FUNCTION();
+
+        glfwDestroyWindow(m_Window);
+    }
 
     void WindowsWindow::OnUpdate()
     {
+        SK_PROFILE_FUNCTION();
+
         glfwPollEvents();
 
         m_Context->SwapBuffers();
@@ -152,6 +160,8 @@ namespace Seek
 
     void WindowsWindow::SetVSync(bool enabled)
     {
+        SK_PROFILE_FUNCTION();
+
         if (enabled)
             glfwSwapInterval(1);
         else

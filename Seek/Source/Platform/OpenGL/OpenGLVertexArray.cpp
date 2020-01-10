@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
+#include "Seek/Debug/Instrumentor.h"
+
 #include <glad/glad.h>
 
 namespace Seek
@@ -28,21 +30,37 @@ namespace Seek
 
     OpenGLVertexArray::OpenGLVertexArray()
     {
+        SK_PROFILE_FUNCTION();
+
         glGenVertexArrays(1, &m_RendererID);
     }
 
     OpenGLVertexArray::~OpenGLVertexArray()
     {
+        SK_PROFILE_FUNCTION();
+
         glDeleteVertexArrays(1, &m_RendererID);
     }
 
-    void OpenGLVertexArray::Bind() { glBindVertexArray(m_RendererID); }
+    void OpenGLVertexArray::Bind()
+    {
+        SK_PROFILE_FUNCTION();
 
-    void OpenGLVertexArray::Unbind() { glBindVertexArray(0); }
+        glBindVertexArray(m_RendererID);
+    }
+
+    void OpenGLVertexArray::Unbind()
+    {
+        SK_PROFILE_FUNCTION();
+
+        glBindVertexArray(0);
+    }
 
     void OpenGLVertexArray::AddVertexBuffer(
         const std::shared_ptr<VertexBuffer>& vertexBuffer)
     {
+        SK_PROFILE_FUNCTION();
+
         glBindVertexArray(m_RendererID);
         vertexBuffer->Bind();
 
@@ -66,6 +84,8 @@ namespace Seek
     void OpenGLVertexArray::AddIndexBuffer(
         const std::shared_ptr<IndexBuffer>& indexBuffer)
     {
+        SK_PROFILE_FUNCTION();
+
         glBindVertexArray(m_RendererID);
         indexBuffer->Bind();
 

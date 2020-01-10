@@ -62,6 +62,7 @@ namespace Seek
     void Application::PushLayer(Layer* layer)
     {
         SK_PROFILE_FUNCTION();
+
         m_LayerStack.PushLayer(layer);
         layer->OnAttach();
     }
@@ -69,6 +70,7 @@ namespace Seek
     void Application::PushOverlay(Layer* overlay)
     {
         SK_PROFILE_FUNCTION();
+
         m_LayerStack.PushOverlay(overlay);
         overlay->OnAttach();
     }

@@ -98,6 +98,7 @@ project "Sandbox"
     }
 
     includedirs {
+        "%{prj.name}/Include/",
         "Seek/Include/",
 
         "%{IncludeDir.spdlog}",

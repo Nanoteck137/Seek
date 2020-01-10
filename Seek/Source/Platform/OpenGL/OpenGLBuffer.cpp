@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLBuffer.h"
 
+#include "Seek/Debug/Instrumentor.h"
+
 #include <glad/glad.h>
 
 namespace Seek
@@ -20,6 +22,8 @@ namespace Seek
     OpenGLVertexBuffer::OpenGLVertexBuffer(BufferUsage usage)
         : m_Size(0), m_Usage(usage)
     {
+        SK_PROFILE_FUNCTION();
+
         glGenBuffers(1, &m_RendererID);
         /*glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
         glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);*/
@@ -27,21 +31,29 @@ namespace Seek
 
     OpenGLVertexBuffer::~OpenGLVertexBuffer()
     {
+        SK_PROFILE_FUNCTION();
+
         glDeleteBuffers(1, &m_RendererID);
     }
 
     void OpenGLVertexBuffer::Bind() const
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
     }
 
     void OpenGLVertexBuffer::Unbind() const
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void OpenGLVertexBuffer::Resize(uint32 size)
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
         glBufferData(GL_ARRAY_BUFFER, size, nullptr,
                      BufferUsageToOpenGL(m_Usage));
@@ -49,6 +61,8 @@ namespace Seek
 
     void OpenGLVertexBuffer::SetData(void* data, uint32 size)
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
         glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
         // glBufferData(GL_ARRAY_BUFFER, );
@@ -56,12 +70,16 @@ namespace Seek
 
     void* OpenGLVertexBuffer::Map()
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
         return glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     }
 
     void OpenGLVertexBuffer::Unmap()
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
         glUnmapBuffer(GL_ARRAY_BUFFER);
     }
@@ -69,6 +87,8 @@ namespace Seek
     OpenGLIndexBuffer::OpenGLIndexBuffer(uint32* indices, uint32 count)
         : m_Count(count)
     {
+        SK_PROFILE_FUNCTION();
+
         glGenBuffers(1, &m_RendererID);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32), indices,
@@ -77,13 +97,22 @@ namespace Seek
 
     OpenGLIndexBuffer::~OpenGLIndexBuffer()
     {
+        SK_PROFILE_FUNCTION();
+
         glDeleteBuffers(1, &m_RendererID);
     }
 
     void OpenGLIndexBuffer::Bind() const
     {
+        SK_PROFILE_FUNCTION();
+
         glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
     }
 
-    void OpenGLIndexBuffer::Unbind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); }
+    void OpenGLIndexBuffer::Unbind() const
+    {
+        SK_PROFILE_FUNCTION();
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }

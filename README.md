@@ -3,14 +3,12 @@
 ## TODO
 
 ### Engine
-* Instrumentation Tools
 * Audio (XAudio2, OpenAL?)
 * FileSystem
   - Virtual FileSystem (VFS)
   - File Infomation
   - Directory Infomation
     - File Change Callback???
-
 
 ### Renderering Engine
 * 2D

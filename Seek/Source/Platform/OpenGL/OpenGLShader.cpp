@@ -2,6 +2,7 @@
 #include "Platform/OpenGL/OpenGLShader.h"
 
 #include "Seek/System/FileSystem.h"
+#include "Seek/Debug/Instrumentor.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glad/glad.h>
@@ -23,6 +24,8 @@ namespace Seek
 
     OpenGLShader::OpenGLShader(const String& filePath)
     {
+        SK_PROFILE_FUNCTION();
+
         String shaderSource = FileSystem::ReadAllText(filePath);
         auto shaderSources = PreProcess(shaderSource);
         Compile(shaderSources);
@@ -40,6 +43,8 @@ namespace Seek
                                const String& fragmentSource)
         : m_Name(name)
     {
+        SK_PROFILE_FUNCTION();
+
         std::unordered_map<uint32, String> sources;
         sources[GL_VERTEX_SHADER] = vertexSource;
         sources[GL_FRAGMENT_SHADER] = fragmentSource;
@@ -51,6 +56,8 @@ namespace Seek
     std::unordered_map<uint32, String>
     OpenGLShader::PreProcess(const String& source)
     {
+        SK_PROFILE_FUNCTION();
+
         std::unordered_map<uint32, String> shaderSources;
 
         const char* typeToken = "#type";
@@ -79,6 +86,8 @@ namespace Seek
     void OpenGLShader::Compile(
         const std::unordered_map<uint32, String>& shaderSources)
     {
+        SK_PROFILE_FUNCTION();
+
         uint32 program = glCreateProgram();
 
         std::vector<GLuint> glShaderIDs;
@@ -152,6 +161,8 @@ namespace Seek
 
     int32 OpenGLShader::GetUniformLocation(const String& name)
     {
+        SK_PROFILE_FUNCTION();
+
         int32 loc = glGetUniformLocation(m_RendererID, name.c_str());
         SK_CORE_ASSERT(loc != -1, "Unknown uniform");
 
@@ -160,35 +171,47 @@ namespace Seek
 
     void OpenGLShader::SetUniformInt(const String& name, int32 value)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform1i(GetUniformLocation(name), value);
     }
 
     void OpenGLShader::SetUnifromIntArray(const String& name, int32* values,
                                           uint32 count)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform1iv(GetUniformLocation(name), count, values);
     }
 
     void OpenGLShader::SetUniformFloat(const String& name, float32 value)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform1f(GetUniformLocation(name), value);
     }
 
     void OpenGLShader::SetUniformFloat2(const String& name,
                                         const glm::vec2& value)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform2f(GetUniformLocation(name), value.x, value.y);
     }
 
     void OpenGLShader::SetUniformFloat3(const String& name,
                                         const glm::vec3& value)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
     }
 
     void OpenGLShader::SetUniformFloat4(const String& name,
                                         const glm::vec4& value)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniform4f(GetUniformLocation(name), value.x, value.y, value.z,
                     value.w);
     }
@@ -196,6 +219,8 @@ namespace Seek
     void OpenGLShader::SetUniformMatrix4(const String& name,
                                          const glm::mat4& matrix)
     {
+        SK_PROFILE_FUNCTION();
+
         glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE,
                            glm::value_ptr(matrix));
     }

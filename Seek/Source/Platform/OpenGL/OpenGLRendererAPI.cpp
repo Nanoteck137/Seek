@@ -1,16 +1,20 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 
+#include "Seek/Debug/Instrumentor.h"
+
 #include <glad/glad.h>
 
 namespace Seek
 {
-    OpenGLRendererAPI::OpenGLRendererAPI() {}
+    OpenGLRendererAPI::OpenGLRendererAPI() { SK_PROFILE_FUNCTION(); }
 
-    OpenGLRendererAPI::~OpenGLRendererAPI() {}
+    OpenGLRendererAPI::~OpenGLRendererAPI() { SK_PROFILE_FUNCTION(); }
 
     void OpenGLRendererAPI::Init()
     {
+        SK_PROFILE_FUNCTION();
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -18,7 +22,7 @@ namespace Seek
         // glDepthFunc(GL_ALWAYS);
     }
 
-    void OpenGLRendererAPI::Shutdown() {}
+    void OpenGLRendererAPI::Shutdown() { SK_PROFILE_FUNCTION(); }
 
     void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
     {

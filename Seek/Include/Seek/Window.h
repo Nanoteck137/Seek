@@ -1,6 +1,7 @@
 #pragma once
 
-#include "SeekPCH.h"
+#include "Seek/Core.h"
+#include "Seek/Log.h"
 
 #include "Seek/Events/Event.h"
 
@@ -8,7 +9,7 @@ namespace Seek
 {
     struct WindowProps
     {
-        std::string Title;
+        String Title;
         unsigned int Width;
         unsigned int Height;
 

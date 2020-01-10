@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "Seek/Events/Event.h"
 
 namespace Seek

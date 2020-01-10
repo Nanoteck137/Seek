@@ -1,8 +1,7 @@
 #include "SeekPCH.h"
 #include "Platform/OpenGL/OpenGLGraphicsContext.h"
 
-#include "Seek/Core.h"
-#include "Seek/Log.h"
+#include "Seek/Debug/Instrumentor.h"
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -12,10 +11,13 @@ namespace Seek
     OpenGLGraphicsContext::OpenGLGraphicsContext(GLFWwindow* windowHandle)
         : m_WindowHandle(windowHandle)
     {
+        SK_PROFILE_FUNCTION();
     }
 
     void OpenGLGraphicsContext::Init()
     {
+        SK_PROFILE_FUNCTION();
+
         glfwMakeContextCurrent(m_WindowHandle);
         int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         SK_CORE_ASSERT(status, "Could not initialize GLAD");
@@ -32,6 +34,8 @@ namespace Seek
 
     void OpenGLGraphicsContext::SwapBuffers()
     {
+        SK_PROFILE_FUNCTION();
+
         glfwSwapBuffers(m_WindowHandle);
     }
 }

@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Platform/Windows/WindowsFileSystem.h"
 
+#include "Seek/Debug/Instrumentor.h"
+
 namespace Seek
 {
     // NOTE(patrik): Not used, but required for ReadFileEx
@@ -36,6 +38,8 @@ namespace Seek
 
     static uint64 GetFileSize(HANDLE file)
     {
+        SK_PROFILE_FUNCTION();
+
         LARGE_INTEGER fileSize;
         if (GetFileSizeEx(file, &fileSize) == FALSE)
         {
@@ -47,6 +51,8 @@ namespace Seek
 
     Buffer WindowsFileSystem::ReadAllBufferImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForReading(path);
 
         Buffer result = {};
@@ -73,6 +79,8 @@ namespace Seek
 
     String WindowsFileSystem::ReadAllTextImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForReading(path);
 
         uint64 fileSize = GetFileSize(fileHandle);
@@ -92,6 +100,8 @@ namespace Seek
 
     std::vector<String> WindowsFileSystem::ReadAllLinesImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         // TODO(patrik): Implement
         return std::vector<String>();
     }
@@ -126,6 +136,8 @@ namespace Seek
     void WindowsFileSystem::WriteAllBufferImpl(const String& path,
                                                const Buffer& buffer)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForWriting(path);
 
         SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
@@ -143,6 +155,8 @@ namespace Seek
     void WindowsFileSystem::WriteAllTextImpl(const String& path,
                                              const String& text)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForWriting(path);
 
         DWORD written;
@@ -191,6 +205,8 @@ namespace Seek
     void WindowsFileSystem::AppendAllBufferImpl(const String& path,
                                                 const Buffer& buffer)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForAppending(path);
 
         SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
@@ -208,6 +224,8 @@ namespace Seek
     void WindowsFileSystem::AppendAllTextImpl(const String& path,
                                               const String& text)
     {
+        SK_PROFILE_FUNCTION();
+
         HANDLE fileHandle = OpenFileForAppending(path);
 
         DWORD written;
@@ -228,6 +246,8 @@ namespace Seek
 
     bool WindowsFileSystem::FileExistsImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         DWORD attribs = GetFileAttributesA(path.c_str());
         return !(attribs == INVALID_FILE_ATTRIBUTES &&
                  GetLastError() == ERROR_FILE_NOT_FOUND);
@@ -235,6 +255,8 @@ namespace Seek
     std::vector<String>
     WindowsFileSystem::GetDirectoryFilesImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         String newPath = path + "\\*";
 
         WIN32_FIND_DATAA findData;
@@ -261,6 +283,8 @@ namespace Seek
     std::vector<String>
     WindowsFileSystem::GetDirectorySubDirectoriesImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         String newPath = path + "\\*";
 
         WIN32_FIND_DATAA findData;
@@ -292,6 +316,8 @@ namespace Seek
 
     String WindowsFileSystem::FixPathForSystemImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         String result = path;
         std::replace(result.begin(), result.end(), '/', SEPERATOR);
         return result;
@@ -324,6 +350,8 @@ namespace Seek
     String WindowsFileSystem::PathCombineImpl(const String& path,
                                               const String& path2)
     {
+        SK_PROFILE_FUNCTION();
+
         String newPath = TrimPathStringEnd(path);
         String newPath2 = TrimPathStringStart(path2);
 
@@ -334,6 +362,8 @@ namespace Seek
 
     String WindowsFileSystem::GetCurrentWorkingDirectoryPathImpl()
     {
+        SK_PROFILE_FUNCTION();
+
         char buffer[1024] = {0};
 
         DWORD res = GetCurrentDirectoryA(1024, buffer);
@@ -344,6 +374,8 @@ namespace Seek
 
     String WindowsFileSystem::GetFullPathImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         char buffer[1024] = {0};
         DWORD res = GetFullPathNameA(path.c_str(), 1024, buffer, nullptr);
         SK_CORE_ASSERT(res, "Could not get the full path");
@@ -353,6 +385,8 @@ namespace Seek
 
     String WindowsFileSystem::GetPathFileExtensionImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         auto pos = path.find_last_of('.');
         if (pos == String::npos)
             return String();
@@ -364,6 +398,8 @@ namespace Seek
 
     String WindowsFileSystem::GetPathFileNameImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         auto pos = path.find_last_of("/\\");
         String result = path.substr(pos + 1, path.size());
 
@@ -372,6 +408,8 @@ namespace Seek
 
     String WindowsFileSystem::GetPathDirectoryImpl(const String& path)
     {
+        SK_PROFILE_FUNCTION();
+
         auto pos = path.find_last_of("/\\");
         String result = path.substr(0, pos);
 
