@@ -23,4 +23,6 @@ private:
     Seek::Ref<Seek::PhysicsBox2D> m_Box;
     Seek::Ref<Seek::PhysicsBox2D> m_Box2;
     Seek::Ref<Seek::PhysicsBox2D> m_GroundBox;
+
+    float m_Progress = 0.0f;
 };

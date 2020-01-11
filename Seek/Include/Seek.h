@@ -4,6 +4,9 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
+// --------------- SYSTEM ---------------
+#include "Seek/Debug/Instrumentor.h"
+
 #include "Seek/Application.h"
 #include "Seek/Input.h"
 
@@ -33,8 +36,9 @@
 #include "Seek/Physics/PhysicsWorld2D.h"
 #include "Seek/Physics/PhysicsBox2D.h"
 
-// --------------- SYSTEM ---------------
-#include "Seek/System/FileSystem.h"
+// --------------- AUDIO ---------------
+#include "Seek/Audio/AudioEngine.h"
+#include "Seek/Audio/Sound.h"
 
 // --------------- SYSTEM ---------------
-#include "Seek/Debug/Instrumentor.h"
+#include "Seek/System/FileSystem.h"

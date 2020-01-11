@@ -22,12 +22,25 @@ void TestLayer::OnAttach()
     m_GroundBox = Seek::PhysicsBox2D::Create(
         m_World, Seek::PhysicsBodyType::Static, glm::vec2(-25.0f, -4.0f),
         glm::vec2(50.0f, 1.0f));
+
+    // Sound* sound = Seek::AudioEngine::CreateSound();
+    // effect->Play();
 }
 
 void TestLayer::OnDetach() {}
 
+static float Lerp(float v0, float v1, float t) { return (1 - t) * v0 + t * v1; }
+
 void TestLayer::OnUpdate(Seek::Timestep ts)
 {
+    static float dir = 1.0f;
+    if (m_Progress >= 1.0f || m_Progress < 0)
+    {
+        dir *= -1.0f;
+    }
+
+    m_Progress += ts * dir;
+
     m_World->OnUpdate(ts);
 
     const float cameraMoveSpeed = 5.0f;
@@ -82,6 +95,10 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
                                m_GroundBox->GetSize(),
                                {1.0f, 0.0f, 1.0f, 1.0f});
 
+    float x = Lerp(0.0f, 2.0f, m_Progress);
+    Seek::Renderer2D::DrawQuad({-4 * 1.6f + 0.1f + x, -0.5f}, {2.0f, 4.0f},
+                               {1.0f, 0.0f, 1.0f, 1.0f});
+
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
 }
@@ -105,5 +122,9 @@ void TestLayer::OnImGuiRender(Seek::Timestep ts)
 
     ImGui::Text("FPS: %u", fps);
     ImGui::Text("Framtime: %.2fms", frameTime);
+    ImGui::End();
+
+    ImGui::Begin("Test");
+    ImGui::SliderFloat("Progress", &m_Progress, 0.0f, 1.0f);
     ImGui::End();
 }

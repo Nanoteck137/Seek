@@ -5,5 +5,13 @@
 
 namespace Seek
 {
-    RendererAPI* RenderCommand::s_RendererAPI = new OpenGLRendererAPI();
+    RendererAPI* RenderCommand::s_RendererAPI;
+
+    void RenderCommand::Init()
+    {
+        s_RendererAPI = new OpenGLRendererAPI();
+        s_RendererAPI->Init();
+    }
+
+    void RenderCommand::Shutdown() { s_RendererAPI->Shutdown(); }
 }
