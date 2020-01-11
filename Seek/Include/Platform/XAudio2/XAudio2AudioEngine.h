@@ -12,10 +12,12 @@ namespace Seek
         XAudio2AudioEngine();
         ~XAudio2AudioEngine();
 
-        virtual Ref<Sound> CreateSound(const String& filePath) override;
+        virtual Ref<Sound> CreateSoundImpl(const String& filePath) override;
+
+        inline IXAudio2* GetDevice() const { return m_Device; }
 
     private:
-        IXAudio2* m_XAudio2 = nullptr;
+        IXAudio2* m_Device = nullptr;
         IXAudio2MasteringVoice* m_MasterVoice = nullptr;
     };
 }

@@ -6,6 +6,8 @@
 #include "Seek/Renderer/Renderer.h"
 #include "Seek/Renderer/Renderer2D.h"
 
+#include "Seek/Audio/AudioEngine.h"
+
 #include "Seek/Debug/Instrumentor.h"
 
 #include <glm/glm.hpp>
@@ -30,11 +32,16 @@ namespace Seek
         PushOverlay(m_ImGuiLayer);
 
         Renderer::Init();
+        AudioEngine::Init();
 
         m_Running = true;
     }
 
-    Application::~Application() { Renderer2D::Shutdown(); }
+    Application::~Application()
+    {
+        AudioEngine::Shutdown();
+        Renderer::Shutdown();
+    }
 
     void Application::OnEvent(Event& e)
     {

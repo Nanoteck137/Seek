@@ -8,8 +8,6 @@ int main(int argc, char** argv)
     // that
     Seek::Log::Init();
 
-    Seek::AudioEngine::Init();
-
     SandboxApp* app = new SandboxApp();
     SK_PROFILE_END_SESSION();
 
@@ -18,8 +16,6 @@ int main(int argc, char** argv)
     SK_PROFILE_END_SESSION();
 
     delete app;
-
-    Seek::AudioEngine::Shutdown();
 
     return 0;
 }

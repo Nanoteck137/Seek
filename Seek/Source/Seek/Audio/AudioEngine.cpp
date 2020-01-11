@@ -5,9 +5,9 @@
 
 namespace Seek
 {
-    AudioEngine* AudioEngine::s_AudioEngine = nullptr;
+    AudioEngine* AudioEngine::s_Instance = nullptr;
 
-    void AudioEngine::Init() { s_AudioEngine = new XAudio2AudioEngine(); }
+    void AudioEngine::Init() { s_Instance = new XAudio2AudioEngine(); }
 
-    void AudioEngine::Shutdown() { delete s_AudioEngine; }
+    void AudioEngine::Shutdown() { delete s_Instance; }
 }

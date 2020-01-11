@@ -23,6 +23,8 @@ void TestLayer::OnAttach()
         m_World, Seek::PhysicsBodyType::Static, glm::vec2(-25.0f, -4.0f),
         glm::vec2(50.0f, 1.0f));
 
+    m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
+    m_Sound->Play();
     // Sound* sound = Seek::AudioEngine::CreateSound();
     // effect->Play();
 }

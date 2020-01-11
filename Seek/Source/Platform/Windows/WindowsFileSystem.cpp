@@ -56,17 +56,15 @@ namespace Seek
         HANDLE fileHandle = OpenFileForReading(path);
 
         Buffer result = {};
-        result.data = nullptr;
-        result.size = 0;
-
         uint64 fileSize = GetFileSize(fileHandle);
 
         // TODO(patrik): Temp
-        result.data = malloc(fileSize);
-        result.size = fileSize;
+        // result.data = malloc(fileSize);
+        // result.size = fileSize;
+        result.Allocate(fileSize);
 
         OVERLAPPED ol = {0};
-        if (ReadFileEx(fileHandle, result.data, result.size, &ol,
+        if (ReadFileEx(fileHandle, result.Data, result.Size, &ol,
                        FileIOCompletionRoutine) == FALSE)
         {
             SK_CORE_ASSERT(false, "Could not read file");
@@ -140,10 +138,10 @@ namespace Seek
 
         HANDLE fileHandle = OpenFileForWriting(path);
 
-        SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
+        SK_CORE_ASSERT(buffer.Data, "Buffer data can't be null");
 
         DWORD written;
-        if (WriteFile(fileHandle, buffer.data, buffer.size, &written,
+        if (WriteFile(fileHandle, buffer.Data, buffer.Size, &written,
                       nullptr) == FALSE)
         {
             SK_CORE_ASSERT(false, "Failed to write to file");
@@ -209,10 +207,10 @@ namespace Seek
 
         HANDLE fileHandle = OpenFileForAppending(path);
 
-        SK_CORE_ASSERT(buffer.data, "Buffer data can't be null");
+        SK_CORE_ASSERT(buffer.Data, "Buffer data can't be null");
 
         DWORD written;
-        if (WriteFile(fileHandle, buffer.data, buffer.size, &written,
+        if (WriteFile(fileHandle, buffer.Data, buffer.Size, &written,
                       nullptr) == FALSE)
         {
             SK_CORE_ASSERT(false, "Failed to write to file");
