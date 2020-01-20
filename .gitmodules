@@ -17,3 +17,6 @@
 	path = Seek/Vendor/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
 
+[submodule "Seek/Vendor/volk"]
+	path = Seek/Vendor/volk
+	url = https://github.com/zeux/volk

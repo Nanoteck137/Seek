@@ -313,7 +313,8 @@ project "Box2D"
         optimize "On"
 
 
-    location "V-EZ"
+project "volk"
+    location "volk"
     kind "StaticLib"
     language "C++"
     
@@ -321,107 +322,15 @@ project "Box2D"
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
     files {
-        "%{prj.name}/Source/Compiler/GLSLCompiler.cpp",
-        "%{prj.name}/Source/Compiler/GLSLCompiler.h",
-        "%{prj.name}/Source/Compiler/ResourceLimits.cpp",
-        "%{prj.name}/Source/Compiler/ResourceLimits.h",
-        "%{prj.name}/Source/Compiler/SPIRVReflection.cpp",
-        "%{prj.name}/Source/Compiler/SPIRVReflection.h",
-
-        "%{prj.name}/Source/Core/Buffer.cpp",
-        "%{prj.name}/Source/Core/Buffer.h",
-        "%{prj.name}/Source/Core/BufferView.cpp",
-        "%{prj.name}/Source/Core/BufferView.h",
-        "%{prj.name}/Source/Core/CommandBuffer.cpp",
-        "%{prj.name}/Source/Core/CommandBuffer.h",
-        "%{prj.name}/Source/Core/CommandPool.cpp",
-        "%{prj.name}/Source/Core/CommandPool.h",
-        "%{prj.name}/Source/Core/DescriptorPool.cpp",
-        "%{prj.name}/Source/Core/DescriptorPool.h",
-        "%{prj.name}/Source/Core/DescriptorSetLayout.cpp",
-        "%{prj.name}/Source/Core/DescriptorSetLayout.h",
-        "%{prj.name}/Source/Core/DescriptorSetLayoutCache.cpp",
-        "%{prj.name}/Source/Core/DescriptorSetLayoutCache.h",
-        "%{prj.name}/Source/Core/Device.cpp",
-        "%{prj.name}/Source/Core/Device.h",
-        "%{prj.name}/Source/Core/Fence.h",
-        "%{prj.name}/Source/Core/Framebuffer.cpp",
-        "%{prj.name}/Source/Core/Framebuffer.h",
-        "%{prj.name}/Source/Core/GraphicsState.cpp",
-        "%{prj.name}/Source/Core/GraphicsState.h",
-        "%{prj.name}/Source/Core/Image.cpp",
-        "%{prj.name}/Source/Core/Image.h",
-        "%{prj.name}/Source/Core/ImageView.cpp",
-        "%{prj.name}/Source/Core/ImageView.h",
-        "%{prj.name}/Source/Core/Instance.cpp",
-        "%{prj.name}/Source/Core/Instance.h",
-        "%{prj.name}/Source/Core/PhysicalDevice.h",
-        "%{prj.name}/Source/Core/Pipeline.cpp",
-        "%{prj.name}/Source/Core/Pipeline.h",
-        "%{prj.name}/Source/Core/PipelineBarriers.cpp",
-        "%{prj.name}/Source/Core/PipelineBarriers.h",
-        "%{prj.name}/Source/Core/PipelineCache.cpp",
-        "%{prj.name}/Source/Core/PipelineCache.h",
-        "%{prj.name}/Source/Core/Queue.cpp",
-        "%{prj.name}/Source/Core/Queue.h",
-        "%{prj.name}/Source/Core/RenderPassCache.cpp",
-        "%{prj.name}/Source/Core/RenderPassCache.h",
-        "%{prj.name}/Source/Core/ResourceBindings.cpp",
-        "%{prj.name}/Source/Core/ResourceBindings.h",
-        "%{prj.name}/Source/Core/ShaderModule.cpp",
-        "%{prj.name}/Source/Core/ShaderModule.h",
-        "%{prj.name}/Source/Core/StreamDecoder.cpp",
-        "%{prj.name}/Source/Core/StreamDecoder.h",
-        "%{prj.name}/Source/Core/StreamEncoder.cpp",
-        "%{prj.name}/Source/Core/StreamEncoder.h",
-        "%{prj.name}/Source/Core/Swapchain.cpp",
-        "%{prj.name}/Source/Core/Swapchain.h",
-        "%{prj.name}/Source/Core/SyncPrimitivesPool.cpp",
-        "%{prj.name}/Source/Core/SyncPrimitivesPool.h",
-        "%{prj.name}/Source/Core/VertexInputFormat.cpp",
-        "%{prj.name}/Source/Core/VertexInputFormat.h",
-
-        "%{prj.name}/Source/Utility/Macros.h",
-        "%{prj.name}/Source/Utility/MemoryStream.cpp",
-        "%{prj.name}/Source/Utility/MemoryStream.h",
-        "%{prj.name}/Source/Utility/ObjectLookup.cpp",
-        "%{prj.name}/Source/Utility/ObjectLookup.h",
-        "%{prj.name}/Source/Utility/SpinLock.h",
-        "%{prj.name}/Source/Utility/ThreadPool.cpp",
-        "%{prj.name}/Source/Utility/ThreadPool.h",
-        "%{prj.name}/Source/Utility/VkHelpers.h",
-
-        "%{prj.name}/Source/VEZ.def",
-        "%{prj.name}/Source/VEZ.cpp",
-        "%{prj.name}/Source/VEZ.h",
-        "%{prj.name}/Source/VEZ_ext.cpp",
-        "%{prj.name}/Source/VEZ_ext.h"
+        "%{prj.name}/volk.c",
+        "%{prj.name}/volk.h",
     }
 
-    VULAKN_SDK_PATH = os.getenv("VK_SDK_PATH")
+    VULKAN_SDK_PATH = os.getenv("VK_SDK_PATH")
 
     includedirs {
-        "%{prj.name}/Source/",
-        "glslang/",
-        "SPIRV-Cross/",
-        "VulkanMemoryAllocator/src/",
-
-        VULAKN_SDK_PATH .. "/Include",
-    }
-
-    defines {
-        "ENABLE_HLSL"
-    }
-
-    libdirs {
-        VULAKN_SDK_PATH .. "/Lib",
-    }
-
-    links {
-        "SPIRV-Cross",
-        "glslang",
-
-        "vulkan-1.lib"
+        "%{prj.name}/",
+        VULKAN_SDK_PATH .. "/Include"
     }
     
     filter "system:windows"

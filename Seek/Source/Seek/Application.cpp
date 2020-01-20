@@ -13,7 +13,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
-#include <VEZ.h>
+#include <volk.h>
 
 namespace Seek
 {
@@ -26,6 +26,31 @@ namespace Seek
         SK_CORE_ASSERT(!s_Instance, "Application already exists");
         s_Instance = this;
 
+        volkInitialize();
+
+        VkApplicationInfo appInfo = {};
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = "AppName";
+        appInfo.applicationVersion = 0;
+        appInfo.pEngineName = "Seek";
+        appInfo.engineVersion = 0;
+        appInfo.apiVersion = VK_API_VERSION_1_1;
+
+        VkInstanceCreateInfo instanceCreateInfo = {};
+        instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        instanceCreateInfo.pApplicationInfo = &appInfo;
+
+        // uint32_t enabledLayerCount;
+        // const char* const* ppEnabledLayerNames;
+        // uint32_t enabledExtensionCount;
+        // const char* const* ppEnabledExtensionNames;
+
+        VkInstance instance = 0;
+        VkResult result =
+            vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
+
+        volkLoadInstance(instance);
+
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
         m_Window->SetVSync(false);
@@ -35,18 +60,6 @@ namespace Seek
 
         Renderer::Init();
         AudioEngine::Init();
-
-        VezApplicationInfo appInfo = {};
-        appInfo.pApplicationName = "MyApplication";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "MyEngine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-
-        VezInstanceCreateInfo createInfo = {};
-        createInfo.pApplicationInfo = &appInfo;
-
-        VkInstance instance = VK_NULL_HANDLE;
-        VkResult result = vezCreateInstance(&createInfo, &instance);
 
         m_Running = true;
     }
