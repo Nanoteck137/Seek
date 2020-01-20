@@ -8,12 +8,16 @@ workspace "Seek"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+VULKAN_SDK_PATH = os.getenv("VK_SDK_PATH")
+
 IncludeDir = {}
 IncludeDir["GLFW"] = "Seek/Vendor/GLFW/include"
 IncludeDir["GLAD"] = "Seek/Vendor/GLAD/include"
 IncludeDir["imgui"] = "Seek/Vendor/imgui"
 IncludeDir["stb"] = "Seek/Vendor/stb"
 IncludeDir["Box2D"] = "Seek/Vendor/Box2D/include"
+IncludeDir["Vulkan"] = VULKAN_SDK_PATH .. "/Include"
+IncludeDir["VEZ"] = "Seek/Vendor/V-EZ/source"
 
 -- Header Only Includes
 IncludeDir["spdlog"] = "Seek/Vendor/spdlog/include/"
@@ -53,6 +57,8 @@ project "Seek"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.stb}",
         "%{IncludeDir.Box2D}",
+        "%{IncludeDir.Vulkan}",
+        "%{IncludeDir.VEZ}",
     }
 
     links {
@@ -61,7 +67,10 @@ project "Seek"
         "imgui",
         "stb",
         "Box2D",
-        "opengl32.lib"
+        "V-EZ",
+
+        "opengl32.lib",
+        "Xaudio2.lib"
     }
 
     filter "system:windows"

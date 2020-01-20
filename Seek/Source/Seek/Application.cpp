@@ -13,6 +13,8 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
+#include <VEZ.h>
+
 namespace Seek
 {
     Application* Application::s_Instance = nullptr;
@@ -33,6 +35,18 @@ namespace Seek
 
         Renderer::Init();
         AudioEngine::Init();
+
+        VezApplicationInfo appInfo = {};
+        appInfo.pApplicationName = "MyApplication";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName = "MyEngine";
+        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+
+        VezInstanceCreateInfo createInfo = {};
+        createInfo.pApplicationInfo = &appInfo;
+
+        VkInstance instance = VK_NULL_HANDLE;
+        VkResult result = vezCreateInstance(&createInfo, &instance);
 
         m_Running = true;
     }

@@ -13,3 +13,15 @@
 [submodule "Seek/Vendor/Box2D"]
 	path = Seek/Vendor/Box2D
 	url = https://github.com/erincatto/box2d
+[submodule "Seek\\Vendor\\V-EZ"]
+	path = Seek\\Vendor\\V-EZ
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/V-EZ
+[submodule "Seek\\Vendor\\SPIRV-Cross"]
+	path = Seek\\Vendor\\SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "Seek\\Vendor\\VulkanMemoryAllocator"]
+	path = Seek\\Vendor\\VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
+[submodule "Seek\\Vendor\\glslang"]
+	path = Seek\\Vendor\\glslang
+	url = https://github.com/KhronosGroup/glslang
