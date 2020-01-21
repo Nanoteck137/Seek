@@ -32,6 +32,8 @@ namespace Seek
         SK_CORE_INFO("-------------------------------------------");
     }
 
+    void OpenGLGraphicsContext::Shutdown() {}
+
     void OpenGLGraphicsContext::SwapBuffers()
     {
         SK_PROFILE_FUNCTION();

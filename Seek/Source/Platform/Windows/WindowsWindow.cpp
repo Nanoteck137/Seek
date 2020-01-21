@@ -2,6 +2,7 @@
 #include "Platform/Windows/WindowsWindow.h"
 
 #include "Platform/OpenGL/OpenGLGraphicsContext.h"
+#include "Platform/Vulkan/VulkanGraphicsContext.h"
 
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/Events/KeyEvents.h"
@@ -44,10 +45,13 @@ namespace Seek
             s_GLFWInitialized = true;
         }
 
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
         m_Window = glfwCreateWindow(props.Width, props.Height,
                                     props.Title.c_str(), nullptr, nullptr);
 
-        m_Context = new OpenGLGraphicsContext(m_Window);
+        // m_Context = new OpenGLGraphicsContext(m_Window);
+        m_Context = new VulkanGraphicsContext(m_Window);
         m_Context->Init();
 
         glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -146,6 +150,7 @@ namespace Seek
     {
         SK_PROFILE_FUNCTION();
 
+        m_Context->Shutdown();
         glfwDestroyWindow(m_Window);
     }
 

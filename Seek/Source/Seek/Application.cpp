@@ -30,11 +30,11 @@ namespace Seek
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
         m_Window->SetVSync(false);
 
-        m_ImGuiLayer = new ImGuiLayer();
-        PushOverlay(m_ImGuiLayer);
+        // m_ImGuiLayer = new ImGuiLayer();
+        // PushOverlay(m_ImGuiLayer);
 
-        Renderer::Init();
-        AudioEngine::Init();
+        // Renderer::Init();
+        // AudioEngine::Init();
 
         m_Running = true;
     }
@@ -98,10 +98,13 @@ namespace Seek
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
-            m_ImGuiLayer->Begin();
-            for (Layer* layer : m_LayerStack)
-                layer->OnImGuiRender(timestep);
-            m_ImGuiLayer->End();
+            if (m_ImGuiLayer)
+            {
+                m_ImGuiLayer->Begin();
+                for (Layer* layer : m_LayerStack)
+                    layer->OnImGuiRender(timestep);
+                m_ImGuiLayer->End();
+            }
 
             m_Window->OnUpdate();
         }

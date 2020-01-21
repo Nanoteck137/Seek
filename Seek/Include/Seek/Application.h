@@ -36,7 +36,7 @@ namespace Seek
         bool m_Running = false;
 
         Scope<Window> m_Window;
-        ImGuiLayer* m_ImGuiLayer;
+        ImGuiLayer* m_ImGuiLayer = nullptr;
 
         LayerStack m_LayerStack;
 

@@ -1,7 +1,17 @@
 #include "SeekPCH.h"
 #include "Platform/Vulkan/VulkanGraphicsContext.h"
 
-#define VK_CHECK(x) SK_CORE_ASSERT((x) == VK_SUCCESS)
+#include <set>
+
+// TODO(patrik): Remove this
+#include <GLFW/glfw3.h>
+
+#define VK_CHECK(x)                                                            \
+    {                                                                          \
+        VkResult res = (x);                                                    \
+        SK_CORE_ASSERT(res == VK_SUCCESS, "Vulkan Result: {0}",                \
+                       GetVulkanErrorString(res))                              \
+    }
 
 namespace Seek
 {
@@ -11,9 +21,43 @@ namespace Seek
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData)
     {
-        SK_CORE_ERROR("Validation Layer: {0}", pCallbackData->pMessage);
+        SK_CORE_ASSERT(false, "Validation Layer: {0}", pCallbackData->pMessage);
 
         return VK_FALSE;
+    }
+
+    static String GetVulkanErrorString(VkResult errorCode)
+    {
+        switch (errorCode)
+        {
+#define STR(r)                                                                 \
+    case VK_##r: return #r
+            STR(NOT_READY);
+            STR(TIMEOUT);
+            STR(EVENT_SET);
+            STR(EVENT_RESET);
+            STR(INCOMPLETE);
+            STR(ERROR_OUT_OF_HOST_MEMORY);
+            STR(ERROR_OUT_OF_DEVICE_MEMORY);
+            STR(ERROR_INITIALIZATION_FAILED);
+            STR(ERROR_DEVICE_LOST);
+            STR(ERROR_MEMORY_MAP_FAILED);
+            STR(ERROR_LAYER_NOT_PRESENT);
+            STR(ERROR_EXTENSION_NOT_PRESENT);
+            STR(ERROR_FEATURE_NOT_PRESENT);
+            STR(ERROR_INCOMPATIBLE_DRIVER);
+            STR(ERROR_TOO_MANY_OBJECTS);
+            STR(ERROR_FORMAT_NOT_SUPPORTED);
+            STR(ERROR_SURFACE_LOST_KHR);
+            STR(ERROR_NATIVE_WINDOW_IN_USE_KHR);
+            STR(SUBOPTIMAL_KHR);
+            STR(ERROR_OUT_OF_DATE_KHR);
+            STR(ERROR_INCOMPATIBLE_DISPLAY_KHR);
+            STR(ERROR_VALIDATION_FAILED_EXT);
+            STR(ERROR_INVALID_SHADER_NV);
+#undef STR
+            default: return "UNKNOWN_ERROR";
+        }
     }
 
     VulkanGraphicsContext::VulkanGraphicsContext(GLFWwindow* windowHandle)
@@ -27,48 +71,41 @@ namespace Seek
 
         CreateInstance();
         CreateDebugMessenger();
+        CreateSurface();
+
         PickPhysicalDevice();
+        GetQueueFamiles();
+
         CreateLogicalDevice();
+        GetQueues();
+    }
 
-        uint32 numPhysicalDevices = 0;
-        VK_CHECK(vkEnumeratePhysicalDevices(m_Instance, &numPhysicalDevices,
-                                            nullptr));
+    void VulkanGraphicsContext::Shutdown()
+    {
+        if (m_Device)
+        {
+            vkDestroyDevice(m_Device, nullptr);
+            m_Device = 0;
+        }
 
-        std::vector<VkPhysicalDevice> physicalDevices(numPhysicalDevices);
-        VK_CHECK(vkEnumeratePhysicalDevices(m_Instance, &numPhysicalDevices,
-                                            physicalDevices.data()));
+        if (m_Surface)
+        {
+            vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+            m_Surface = 0;
+        }
 
-        VkPhysicalDevice physicalDevice = physicalDevices[0];
+        if (m_DebugMessenger)
+        {
+            vkDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger,
+                                            nullptr);
+            m_DebugMessenger = 0;
+        }
 
-        uint32 queueFamilyIndex = 0;
-
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-
-        float priorities[] = {1.0f};
-
-        VkDeviceQueueCreateInfo graphicsQueueInfo = {};
-        graphicsQueueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        graphicsQueueInfo.queueFamilyIndex = queueFamilyIndex;
-        graphicsQueueInfo.queueCount = 1;
-        graphicsQueueInfo.pQueuePriorities = priorities;
-        queueCreateInfos.push_back(graphicsQueueInfo);
-
-        VkDeviceCreateInfo deviceCreateInfo = {};
-        deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
-        deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
-
-        VkDevice device = 0;
-        VK_CHECK(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr,
-                                &device));
-
-        VkQueue graphicsQueue = 0;
-        vkGetDeviceQueue(device, queueFamilyIndex, 0, &graphicsQueue);
-
-        vkDestroyDevice(device, nullptr);
-
-        vkDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
-        vkDestroyInstance(m_Instance, nullptr);
+        if (m_Instance)
+        {
+            vkDestroyInstance(m_Instance, nullptr);
+            m_Instance = 0;
+        }
     }
 
     void VulkanGraphicsContext::SwapBuffers() {}
@@ -84,6 +121,13 @@ namespace Seek
         std::vector<const char*> layers = {"VK_LAYER_KHRONOS_validation"};
         std::vector<const char*> extentions = {
             VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
+
+        uint32 glfwExtCount = 0;
+        const char** glfwExts =
+            glfwGetRequiredInstanceExtensions(&glfwExtCount);
+
+        for (int i = 0; i < glfwExtCount; i++)
+            extentions.push_back(glfwExts[i]);
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -114,8 +158,7 @@ namespace Seek
         messengerCreateInfo.messageSeverity =
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         messengerCreateInfo.messageType =
             VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
@@ -128,6 +171,95 @@ namespace Seek
             m_Instance, &messengerCreateInfo, nullptr, &m_DebugMessenger));
     }
 
-    void VulkanGraphicsContext::PickPhysicalDevice() {}
-    void VulkanGraphicsContext::CreateLogicalDevice() {}
+    void VulkanGraphicsContext::CreateSurface()
+    {
+        VK_CHECK(glfwCreateWindowSurface(m_Instance, m_WindowHandle, nullptr,
+                                         &m_Surface));
+    }
+
+    void VulkanGraphicsContext::PickPhysicalDevice()
+    {
+        // TODO(patrik): More work here
+
+        uint32 numPhysicalDevices = 0;
+        VK_CHECK(vkEnumeratePhysicalDevices(m_Instance, &numPhysicalDevices,
+                                            nullptr));
+
+        std::vector<VkPhysicalDevice> physicalDevices(numPhysicalDevices);
+        VK_CHECK(vkEnumeratePhysicalDevices(m_Instance, &numPhysicalDevices,
+                                            physicalDevices.data()));
+
+        for (VkPhysicalDevice physicalDevice : physicalDevices)
+        {
+            VkPhysicalDeviceProperties props;
+            vkGetPhysicalDeviceProperties(physicalDevice, &props);
+
+            SK_CORE_INFO("GPU Detected: {0}", props.deviceName);
+        }
+
+        m_PhysicalDevice = physicalDevices[0];
+    }
+
+    void VulkanGraphicsContext::GetQueueFamiles()
+    {
+        uint32 queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice,
+                                                 &queueFamilyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamiles(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(
+            m_PhysicalDevice, &queueFamilyCount, queueFamiles.data());
+
+        for (int i = 0; i < queueFamiles.size(); i++)
+        {
+            if (queueFamiles[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            {
+                m_GraphicsQueueFamilyIndex = i;
+            }
+
+            VkBool32 supported = VK_FALSE;
+            vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface,
+                                                 &supported);
+            if (supported == VK_TRUE)
+            {
+                m_PresentQueueFamilyIndex = i;
+            }
+        }
+    }
+
+    void VulkanGraphicsContext::CreateLogicalDevice()
+    {
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
+        float priorities[] = {1.0f};
+        std::set<uint32> uniqueQueueFamilies = {m_GraphicsQueueFamilyIndex,
+                                                m_PresentQueueFamilyIndex};
+
+        for (uint32 queueFamily : uniqueQueueFamilies)
+        {
+            VkDeviceQueueCreateInfo queueInfo = {};
+            queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueInfo.queueFamilyIndex = queueFamily;
+            queueInfo.queueCount = 1;
+            queueInfo.pQueuePriorities = priorities;
+            queueCreateInfos.push_back(queueInfo);
+        }
+
+        VkDeviceCreateInfo deviceCreateInfo = {};
+        deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
+        deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+        VK_CHECK(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr,
+                                &m_Device));
+    }
+
+    void VulkanGraphicsContext::GetQueues()
+    {
+        vkGetDeviceQueue(m_Device, m_GraphicsQueueFamilyIndex, 0,
+                         &m_GraphicsQueue);
+        vkGetDeviceQueue(m_Device, m_PresentQueueFamilyIndex, 0,
+                         &m_PresentQueue);
+    }
+
 }
