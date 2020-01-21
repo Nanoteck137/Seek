@@ -22,17 +22,25 @@
 
 #define SK_CORE_ASSERT(x, ...)                                                 \
     {                                                                          \
-        if (!(x))                                                              \
+        while (!(x))                                                           \
         {                                                                      \
-            SK_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);               \
+            SK_CORE_ERROR("------------------------------------");             \
+            SK_CORE_ERROR("  Core Assertion Failed");                          \
+            SK_CORE_ERROR("  Message:");                                       \
+            SK_CORE_ERROR("  " __VA_ARGS__);                                   \
+            SK_CORE_ERROR("------------------------------------");             \
             __debugbreak();                                                    \
         }                                                                      \
     }
 #define SK_APP_ASSERT(x, ...)                                                  \
     {                                                                          \
-        if (!(x))                                                              \
+        while (!(x))                                                           \
         {                                                                      \
-            SK_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);               \
+            SK_APP_ERROR("------------------------------------");              \
+            SK_APP_ERROR("  App Assertion Failed");                            \
+            SK_APP_ERROR("  Message:");                                        \
+            SK_APP_ERROR("  " __VA_ARGS__);                                    \
+            SK_APP_ERROR("------------------------------------");              \
             __debugbreak();                                                    \
         }                                                                      \
     }
