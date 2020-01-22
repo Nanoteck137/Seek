@@ -27,6 +27,11 @@ namespace Seek
         void SetVSync(bool enabled) override;
         bool GetVSync() const override;
 
+        inline virtual GraphicsContext* GetGraphicsContext() const override
+        {
+            return m_Context;
+        }
+
         inline void* GetNativeWindow() const override { return m_Window; }
 
     private:

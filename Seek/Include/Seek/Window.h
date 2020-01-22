@@ -3,6 +3,8 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
+#include "Seek/Renderer/GraphicsContext.h"
+
 #include "Seek/Events/Event.h"
 
 namespace Seek
@@ -35,6 +37,8 @@ namespace Seek
         virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
         virtual void SetVSync(bool enabled) = 0;
         virtual bool GetVSync() const = 0;
+
+        virtual GraphicsContext* GetGraphicsContext() const = 0;
 
         virtual void* GetNativeWindow() const = 0;
 

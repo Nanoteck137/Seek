@@ -6,13 +6,6 @@
 // TODO(patrik): Remove this
 #include <GLFW/glfw3.h>
 
-#define VK_CHECK(x)                                                            \
-    {                                                                          \
-        VkResult res = (x);                                                    \
-        SK_CORE_ASSERT(res == VK_SUCCESS, "Vulkan Result: {0}",                \
-                       GetVulkanErrorString(res))                              \
-    }
-
 namespace Seek
 {
     static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(
@@ -26,7 +19,7 @@ namespace Seek
         return VK_FALSE;
     }
 
-    static String GetVulkanErrorString(VkResult errorCode)
+    String GetVulkanErrorString(VkResult errorCode)
     {
         switch (errorCode)
         {
@@ -195,6 +188,9 @@ namespace Seek
             vkGetPhysicalDeviceProperties(physicalDevice, &props);
 
             SK_CORE_INFO("GPU Detected: {0}", props.deviceName);
+            SK_CORE_INFO("  {0}.{1}.{2}", VK_VERSION_MAJOR(props.driverVersion),
+                         VK_VERSION_MINOR(props.driverVersion),
+                         VK_VERSION_PATCH(props.driverVersion));
         }
 
         m_PhysicalDevice = physicalDevices[0];
@@ -245,10 +241,14 @@ namespace Seek
             queueCreateInfos.push_back(queueInfo);
         }
 
+        std::vector<const char*> extentions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
         VkDeviceCreateInfo deviceCreateInfo = {};
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
         deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+        deviceCreateInfo.enabledExtensionCount = extentions.size();
+        deviceCreateInfo.ppEnabledExtensionNames = extentions.data();
 
         VK_CHECK(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr,
                                 &m_Device));
