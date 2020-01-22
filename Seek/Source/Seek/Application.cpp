@@ -30,6 +30,22 @@ namespace Seek
         std::vector<VkPresentModeKHR> PresentModes;
     };
 
+    struct VulkanObjects
+    {
+        VkDevice Device;
+        VkQueue GraphicsQueue;
+        VkQueue PresentQueue;
+
+        VkSwapchainKHR Swapchain;
+
+        std::vector<VkCommandBuffer> CommandBuffers;
+
+        VkSemaphore ImageAvailableSemaphore;
+        VkSemaphore RenderFinishedSemaphore;
+    };
+
+    VulkanObjects obj;
+
     SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device,
                                                   VkSurfaceKHR surface)
     {
@@ -253,12 +269,23 @@ namespace Seek
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
 
+        VkSubpassDependency dependency = {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                   VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
         VkRenderPassCreateInfo renderPassCreateInfo = {};
         renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassCreateInfo.attachmentCount = 1;
         renderPassCreateInfo.pAttachments = &colorAttachment;
         renderPassCreateInfo.subpassCount = 1;
         renderPassCreateInfo.pSubpasses = &subpass;
+        renderPassCreateInfo.dependencyCount = 1;
+        renderPassCreateInfo.pDependencies = &dependency;
 
         VkRenderPass renderPass = 0;
         VK_CHECK(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr,
@@ -278,11 +305,11 @@ namespace Seek
         vertexShaderStage.pName = "main";
 
         VkPipelineShaderStageCreateInfo fragmentShaderStage = {};
-        vertexShaderStage.sType =
+        fragmentShaderStage.sType =
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertexShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        vertexShaderStage.module = fragmentModule;
-        vertexShaderStage.pName = "main";
+        fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragmentShaderStage.module = fragmentModule;
+        fragmentShaderStage.pName = "main";
 
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStage,
                                                           fragmentShaderStage};
@@ -364,6 +391,127 @@ namespace Seek
         VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo,
                                         nullptr, &pipelineLayout));
 
+        VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
+        pipelineCreateInfo.sType =
+            VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipelineCreateInfo.stageCount = 2;
+        pipelineCreateInfo.pStages = shaderStages;
+        pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
+        pipelineCreateInfo.pInputAssemblyState = &inputAssembly;
+        pipelineCreateInfo.pViewportState = &viewportState;
+        pipelineCreateInfo.pRasterizationState = &rasterizer;
+        pipelineCreateInfo.pMultisampleState = &multisampling;
+        pipelineCreateInfo.pDepthStencilState = nullptr; // Optional
+        pipelineCreateInfo.pColorBlendState = &colorBlending;
+        pipelineCreateInfo.pDynamicState = nullptr; // Optional
+        pipelineCreateInfo.layout = pipelineLayout;
+        pipelineCreateInfo.renderPass = renderPass;
+        pipelineCreateInfo.subpass = 0;
+        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
+        pipelineCreateInfo.basePipelineIndex = -1;              // Optional
+
+        VkPipeline pipeline = 0;
+        VK_CHECK(vkCreateGraphicsPipelines(device, 0, 1, &pipelineCreateInfo,
+                                           nullptr, &pipeline));
+
+        std::vector<VkFramebuffer> framebuffers(swapchainImageViews.size());
+
+        for (int i = 0; i < swapchainImageViews.size(); i++)
+        {
+            VkImageView attachments[] = {swapchainImageViews[i]};
+
+            VkFramebufferCreateInfo framebufferCreateInfo = {};
+            framebufferCreateInfo.sType =
+                VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferCreateInfo.renderPass = renderPass;
+            framebufferCreateInfo.attachmentCount = 1;
+            framebufferCreateInfo.pAttachments = attachments;
+            framebufferCreateInfo.width = extent.width;
+            framebufferCreateInfo.height = extent.height;
+            framebufferCreateInfo.layers = 1;
+
+            VkFramebuffer framebuffer = 0;
+            VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo,
+                                         nullptr, &framebuffer));
+
+            framebuffers[i] = framebuffer;
+        }
+
+        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+        commandPoolCreateInfo.sType =
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.queueFamilyIndex =
+            context->GetGraphicsFamilyIndex();
+
+        VkCommandPool commandPool = 0;
+        VK_CHECK(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr,
+                                     &commandPool));
+
+        std::vector<VkCommandBuffer> commandBuffers(framebuffers.size());
+
+        VkCommandBufferAllocateInfo commandBufferAllocInfo = {};
+        commandBufferAllocInfo.sType =
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocInfo.commandPool = commandPool;
+        commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        commandBufferAllocInfo.commandBufferCount = framebuffers.size();
+
+        VK_CHECK(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
+                                          commandBuffers.data()));
+
+        for (uint32 i = 0; i < commandBuffers.size(); i++)
+        {
+            VkCommandBufferBeginInfo commandBufferBeginInfo = {};
+            commandBufferBeginInfo.sType =
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            VK_CHECK(vkBeginCommandBuffer(commandBuffers[i],
+                                          &commandBufferBeginInfo));
+
+            VkRenderPassBeginInfo renderPassBeginInfo = {};
+            renderPassBeginInfo.sType =
+                VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassBeginInfo.renderPass = renderPass;
+            renderPassBeginInfo.framebuffer = framebuffers[i];
+            renderPassBeginInfo.renderArea.extent = extent;
+            renderPassBeginInfo.renderArea.offset = {0, 0};
+
+            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+            renderPassBeginInfo.clearValueCount = 1;
+            renderPassBeginInfo.pClearValues = &clearColor;
+
+            vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
+                                 VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdBindPipeline(commandBuffers[i],
+                              VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+
+            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+
+            vkCmdEndRenderPass(commandBuffers[i]);
+
+            VK_CHECK(vkEndCommandBuffer(commandBuffers[i]));
+        }
+
+        VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VkSemaphore imageAvailableSemaphore = 0;
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr,
+                                   &imageAvailableSemaphore));
+
+        VkSemaphore renderFinishedSemaphore = 0;
+        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr,
+                                   &renderFinishedSemaphore));
+
+        obj.Device = device;
+        obj.GraphicsQueue = context->GetGraphicsQueue();
+        obj.PresentQueue = context->GetPresentQueue();
+        obj.Swapchain = swapchain;
+        obj.CommandBuffers = commandBuffers;
+        obj.ImageAvailableSemaphore = imageAvailableSemaphore;
+        obj.RenderFinishedSemaphore = renderFinishedSemaphore;
+
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
 
@@ -432,6 +580,45 @@ namespace Seek
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
+            uint32 imageIndex;
+            vkAcquireNextImageKHR(obj.Device, obj.Swapchain, UINT64_MAX,
+                                  obj.ImageAvailableSemaphore, VK_NULL_HANDLE,
+                                  &imageIndex);
+
+            VkSubmitInfo submitInfo = {};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+            VkSemaphore waitSemaphores[] = {obj.ImageAvailableSemaphore};
+            VkPipelineStageFlags waitStages[] = {
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+            submitInfo.waitSemaphoreCount = 1;
+            submitInfo.pWaitSemaphores = waitSemaphores;
+            submitInfo.pWaitDstStageMask = waitStages;
+
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &obj.CommandBuffers[imageIndex];
+
+            VkSemaphore signalSemaphores[] = {obj.RenderFinishedSemaphore};
+            submitInfo.signalSemaphoreCount = 1;
+            submitInfo.pSignalSemaphores = signalSemaphores;
+
+            VK_CHECK(vkQueueSubmit(obj.GraphicsQueue, 1, &submitInfo, 0));
+
+            VkPresentInfoKHR presentInfo = {};
+            presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+            presentInfo.waitSemaphoreCount = 1;
+            presentInfo.pWaitSemaphores = signalSemaphores;
+
+            VkSwapchainKHR swapChains[] = {obj.Swapchain};
+            presentInfo.swapchainCount = 1;
+            presentInfo.pSwapchains = swapChains;
+            presentInfo.pImageIndices = &imageIndex;
+            presentInfo.pResults = nullptr; // Optional
+
+            vkQueuePresentKHR(obj.PresentQueue, &presentInfo);
+            vkQueueWaitIdle(obj.PresentQueue);
+
             if (m_ImGuiLayer)
             {
                 m_ImGuiLayer->Begin();
@@ -442,5 +629,7 @@ namespace Seek
 
             m_Window->OnUpdate();
         }
+
+        vkDeviceWaitIdle(obj.Device);
     }
 }
