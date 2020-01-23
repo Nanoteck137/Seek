@@ -19,9 +19,18 @@
 
 #include <volk.h>
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 namespace Seek
 {
     Application* Application::s_Instance = nullptr;
+
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec4 color;
+    };
 
     struct SwapChainSupportDetails
     {
@@ -133,7 +142,8 @@ namespace Seek
         }
     }
 
-    VkShaderModule LoadShaderCode(VkDevice device, const String& filepath)
+    static VkShaderModule LoadShaderCode(VkDevice device,
+                                         const String& filepath)
     {
         Buffer buffer = FileSystem::ReadAllBuffer(filepath);
 
@@ -162,10 +172,47 @@ namespace Seek
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
         m_Window->SetVSync(false);
 
+        const std::vector<Vertex> vertices = {
+            {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}};
+
         VulkanGraphicsContext* context = dynamic_cast<VulkanGraphicsContext*>(
             m_Window->GetGraphicsContext());
 
         VkDevice device = context->GetDevice();
+
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetPhysicalDeviceProperties =
+            vkGetPhysicalDeviceProperties;
+        vulkanFunctions.vkGetPhysicalDeviceMemoryProperties =
+            vkGetPhysicalDeviceMemoryProperties;
+        vulkanFunctions.vkAllocateMemory = vkAllocateMemory;
+        vulkanFunctions.vkFreeMemory = vkFreeMemory;
+        vulkanFunctions.vkMapMemory = vkMapMemory;
+        vulkanFunctions.vkUnmapMemory = vkUnmapMemory;
+        vulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
+        vulkanFunctions.vkInvalidateMappedMemoryRanges =
+            vkInvalidateMappedMemoryRanges;
+        vulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
+        vulkanFunctions.vkBindImageMemory = vkBindImageMemory;
+        vulkanFunctions.vkGetBufferMemoryRequirements =
+            vkGetBufferMemoryRequirements;
+        vulkanFunctions.vkGetImageMemoryRequirements =
+            vkGetImageMemoryRequirements;
+        vulkanFunctions.vkCreateBuffer = vkCreateBuffer;
+        vulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
+        vulkanFunctions.vkCreateImage = vkCreateImage;
+        vulkanFunctions.vkDestroyImage = vkDestroyImage;
+        vulkanFunctions.vkCmdCopyBuffer = vkCmdCopyBuffer;
+
+        VmaAllocatorCreateInfo allocatorCreateInfo = {};
+        allocatorCreateInfo.physicalDevice = context->GetPhysicalDevice();
+        allocatorCreateInfo.device = device;
+        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+
+        VmaAllocator allocator;
+        VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &allocator));
 
         SwapChainSupportDetails swapchainSupport = QuerySwapChainSupport(
             context->GetPhysicalDevice(), context->GetSurface());
@@ -314,11 +361,30 @@ namespace Seek
         VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStage,
                                                           fragmentShaderStage};
 
+        VkVertexInputBindingDescription inputDesc = {};
+        inputDesc.binding = 0;
+        inputDesc.stride = sizeof(Vertex);
+        inputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        VkVertexInputAttributeDescription attributeDescriptions[2];
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, position);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
         vertexInputInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &inputDesc;
+
+        vertexInputInfo.vertexAttributeDescriptionCount = 2;
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
         inputAssembly.sType =
@@ -437,6 +503,29 @@ namespace Seek
             framebuffers[i] = framebuffer;
         }
 
+        VkBufferCreateInfo vertexBufferCreateInfo = {};
+        vertexBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        vertexBufferCreateInfo.size = vertices.size() * sizeof(Vertex);
+        vertexBufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        vertexBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+        VkBuffer vertexBuffer = 0;
+        VmaAllocation vertexBufferAlloc = 0;
+        VK_CHECK(vmaCreateBuffer(allocator, &vertexBufferCreateInfo, &allocInfo,
+                                 &vertexBuffer, &vertexBufferAlloc, nullptr));
+
+        void* dataPtr;
+        vmaMapMemory(allocator, vertexBufferAlloc, &dataPtr);
+
+        memcpy(dataPtr, vertices.data(), vertices.size() * sizeof(Vertex));
+
+        vmaUnmapMemory(allocator, vertexBufferAlloc);
+
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType =
             VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -486,7 +575,12 @@ namespace Seek
             vkCmdBindPipeline(commandBuffers[i],
                               VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+            VkBuffer vertexBuffers[] = {vertexBuffer};
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers,
+                                   offsets);
+
+            vkCmdDraw(commandBuffers[i], vertices.size(), 1, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
 

@@ -16,6 +16,7 @@ IncludeDir["imgui"] = "Seek/Vendor/imgui"
 IncludeDir["stb"] = "Seek/Vendor/stb"
 IncludeDir["Box2D"] = "Seek/Vendor/Box2D/include"
 IncludeDir["volk"] = "Seek/Vendor/volk"
+IncludeDir["VulkanMemoryAllocator"] = "Seek/Vendor/VulkanMemoryAllocator/src"
 
 IncludeDir["Vulkan"] = VULKAN_SDK_PATH .. "/Include"
 
@@ -60,6 +61,7 @@ project "Seek"
 
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.volk}",
+        "%{IncludeDir.VulkanMemoryAllocator}",
     }
 
     links {
