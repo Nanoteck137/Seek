@@ -34,13 +34,6 @@ namespace Seek
         glm::vec4 color;
     };
 
-    struct SwapChainSupportDetails
-    {
-        VkSurfaceCapabilitiesKHR Capabilities;
-        std::vector<VkSurfaceFormatKHR> Formats;
-        std::vector<VkPresentModeKHR> PresentModes;
-    };
-
     struct VulkanBuffer
     {
         VkBuffer Handle;
@@ -54,10 +47,6 @@ namespace Seek
         VkQueue GraphicsQueue;
         VkQueue PresentQueue;
 
-        VkSwapchainKHR Swapchain;
-        VkExtent2D SwapchainExtent;
-
-        std::vector<VkImageView> SwapchainImageViews;
         VkRenderPass RenderPass;
         std::vector<VkFramebuffer> Framebuffers;
 
@@ -75,93 +64,6 @@ namespace Seek
     };
 
     VulkanObjects obj;
-
-    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device,
-                                                  VkSurfaceKHR surface)
-    {
-        SwapChainSupportDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface,
-                                                  &details.Capabilities);
-
-        uint32 formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                                             nullptr);
-
-        if (formatCount != 0)
-        {
-            details.Formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount,
-                                                 details.Formats.data());
-        }
-
-        uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface,
-                                                  &presentModeCount, nullptr);
-
-        if (presentModeCount != 0)
-        {
-            details.PresentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(
-                device, surface, &presentModeCount,
-                details.PresentModes.data());
-        }
-
-        return details;
-    }
-
-    static VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
-        const std::vector<VkSurfaceFormatKHR>& availableFormats)
-    {
-        for (const auto& availableFormat : availableFormats)
-        {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
-                availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-            {
-                return availableFormat;
-            }
-        }
-
-        return availableFormats[0];
-    }
-
-    static VkPresentModeKHR ChooseSwapPresentMode(
-        const std::vector<VkPresentModeKHR>& availablePresentModes)
-    {
-        for (const auto& availablePresentMode : availablePresentModes)
-        {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-            {
-                return availablePresentMode;
-            }
-        }
-
-        return VK_PRESENT_MODE_FIFO_KHR;
-    }
-
-    static VkExtent2D
-    ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, uint32 width,
-                     uint32 height)
-    {
-        if (capabilities.currentExtent.width != UINT32_MAX)
-        {
-            return capabilities.currentExtent;
-        }
-        else
-        {
-            VkExtent2D actualExtent = {width, height};
-
-            actualExtent.width =
-                std::max(capabilities.minImageExtent.width,
-                         std::min(capabilities.maxImageExtent.width,
-                                  actualExtent.width));
-            actualExtent.height =
-                std::max(capabilities.minImageExtent.height,
-                         std::min(capabilities.maxImageExtent.height,
-                                  actualExtent.height));
-
-            return actualExtent;
-        }
-    }
 
     VulkanBuffer CreateBuffer(VmaAllocator allocator, VkBufferUsageFlags usage,
                               const void* data, uint32 size)
@@ -265,94 +167,12 @@ namespace Seek
 
         VkDevice device = context->GetDevice();
         VmaAllocator allocator = context->GetMemoryAllocator();
-
-        SwapChainSupportDetails swapchainSupport = QuerySwapChainSupport(
-            context->GetPhysicalDevice(), context->GetSurface());
-
-        VkSurfaceFormatKHR surfaceFormat =
-            ChooseSwapSurfaceFormat(swapchainSupport.Formats);
-        VkPresentModeKHR presentMode =
-            ChooseSwapPresentMode(swapchainSupport.PresentModes);
-        VkExtent2D extent =
-            ChooseSwapExtent(swapchainSupport.Capabilities,
-                             m_Window->GetWidth(), m_Window->GetHeight());
-
-        uint32 imageCount = swapchainSupport.Capabilities.minImageCount + 1;
-
-        VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
-        swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        swapchainCreateInfo.surface = context->GetSurface();
-        swapchainCreateInfo.minImageCount = imageCount;
-        swapchainCreateInfo.imageFormat = surfaceFormat.format;
-        swapchainCreateInfo.imageColorSpace = surfaceFormat.colorSpace;
-        swapchainCreateInfo.imageExtent = extent;
-        swapchainCreateInfo.imageArrayLayers = 1;
-        swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-        uint32 graphicsFamilyIndex = context->GetGraphicsFamilyIndex();
-        uint32 presentFamilyIndex = context->GetPresentFamilyIndex();
-
-        uint32_t queueFamilyIndices[] = {graphicsFamilyIndex,
-                                         presentFamilyIndex};
-
-        if (graphicsFamilyIndex != presentFamilyIndex)
-        {
-            swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-            swapchainCreateInfo.queueFamilyIndexCount = 2;
-            swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else
-        {
-            swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            swapchainCreateInfo.queueFamilyIndexCount = 0;
-            swapchainCreateInfo.pQueueFamilyIndices = 0;
-        }
-
-        swapchainCreateInfo.preTransform =
-            swapchainSupport.Capabilities.currentTransform;
-        swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        swapchainCreateInfo.presentMode = presentMode;
-        swapchainCreateInfo.clipped = VK_TRUE;
-        swapchainCreateInfo.oldSwapchain = 0;
-
-        VkSwapchainKHR swapchain = 0;
-        VK_CHECK(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr,
-                                      &swapchain));
-
-        uint32 swapImageCount = 0;
-        vkGetSwapchainImagesKHR(device, swapchain, &swapImageCount, nullptr);
-        std::vector<VkImage> swapchainImages(swapImageCount);
-        vkGetSwapchainImagesKHR(device, swapchain, &swapImageCount,
-                                swapchainImages.data());
-
-        std::vector<VkImageView> swapchainImageViews(swapchainImages.size());
-        for (uint32 i = 0; i < swapchainImages.size(); i++)
-        {
-            VkImageViewCreateInfo imageViewCreateInfo = {};
-            imageViewCreateInfo.sType =
-                VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            imageViewCreateInfo.image = swapchainImages[i];
-            imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            imageViewCreateInfo.format = surfaceFormat.format;
-            imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            imageViewCreateInfo.subresourceRange.aspectMask =
-                VK_IMAGE_ASPECT_COLOR_BIT;
-            imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-            imageViewCreateInfo.subresourceRange.levelCount = 1;
-            imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-            imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-            VK_CHECK(vkCreateImageView(device, &imageViewCreateInfo, nullptr,
-                                       &swapchainImageViews[i]));
-        }
+        VulkanSwapchain* swapchain = context->GetSwapchain();
 
         VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = surfaceFormat.format;
+        colorAttachment.format = swapchain->GetFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -390,11 +210,11 @@ namespace Seek
         VK_CHECK(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr,
                                     &renderPass));
 
-        std::vector<VkFramebuffer> framebuffers(swapchainImageViews.size());
+        std::vector<VkFramebuffer> framebuffers(swapchain->GetImageCount());
 
-        for (int i = 0; i < swapchainImageViews.size(); i++)
+        for (int i = 0; i < swapchain->GetImageCount(); i++)
         {
-            VkImageView attachments[] = {swapchainImageViews[i]};
+            VkImageView attachments[1] = {swapchain->GetImageViews()[i]};
 
             VkFramebufferCreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.sType =
@@ -402,8 +222,8 @@ namespace Seek
             framebufferCreateInfo.renderPass = renderPass;
             framebufferCreateInfo.attachmentCount = 1;
             framebufferCreateInfo.pAttachments = attachments;
-            framebufferCreateInfo.width = extent.width;
-            framebufferCreateInfo.height = extent.height;
+            framebufferCreateInfo.width = swapchain->GetExtent().width;
+            framebufferCreateInfo.height = swapchain->GetExtent().height;
             framebufferCreateInfo.layers = 1;
 
             VkFramebuffer framebuffer = 0;
@@ -475,14 +295,14 @@ namespace Seek
         VkViewport viewport = {};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)extent.width;
-        viewport.height = (float)extent.height;
+        viewport.width = (float)swapchain->GetExtent().width;
+        viewport.height = (float)swapchain->GetExtent().height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         VkRect2D scissor = {};
         scissor.offset = {0, 0};
-        scissor.extent = extent;
+        scissor.extent = swapchain->GetExtent();
 
         VkPipelineViewportStateCreateInfo viewportState = {};
         viewportState.sType =
@@ -607,10 +427,7 @@ namespace Seek
         obj.Allocator = allocator;
         obj.GraphicsQueue = context->GetGraphicsQueue();
         obj.PresentQueue = context->GetPresentQueue();
-        obj.Swapchain = swapchain;
-        obj.SwapchainExtent = extent;
 
-        obj.SwapchainImageViews = swapchainImageViews;
         obj.RenderPass = renderPass;
         obj.Framebuffers = framebuffers;
 
@@ -656,9 +473,6 @@ namespace Seek
             vkDestroyFramebuffer(obj.Device, framebuffer, nullptr);
 
         vkDestroyRenderPass(obj.Device, obj.RenderPass, nullptr);
-
-        for (VkImageView swapchainImageView : obj.SwapchainImageViews)
-            vkDestroyImageView(obj.Device, swapchainImageView, nullptr);
 
         m_Window.release();
 
@@ -727,10 +541,13 @@ namespace Seek
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
+            VulkanSwapchain* swapchain =
+                VulkanGraphicsContext::Get()->GetSwapchain();
+
             uint32 imageIndex;
-            vkAcquireNextImageKHR(obj.Device, obj.Swapchain, UINT64_MAX,
-                                  obj.ImageAvailableSemaphore, VK_NULL_HANDLE,
-                                  &imageIndex);
+            vkAcquireNextImageKHR(obj.Device, swapchain->GetHandle(),
+                                  UINT64_MAX, obj.ImageAvailableSemaphore,
+                                  VK_NULL_HANDLE, &imageIndex);
 
             // ---------------------------
             VkCommandBuffer commandBuffer = obj.CommandBuffers[imageIndex];
@@ -746,15 +563,30 @@ namespace Seek
                 VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.renderPass = obj.RenderPass;
             renderPassBeginInfo.framebuffer = obj.Framebuffers[imageIndex];
-            renderPassBeginInfo.renderArea.extent = obj.SwapchainExtent;
+            renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
             renderPassBeginInfo.renderArea.offset = {0, 0};
 
-            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-            renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.pClearValues = &clearColor;
+            // VkClearValue clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
+            // renderPassBeginInfo.clearValueCount = 1;
+            // renderPassBeginInfo.pClearValues = &clearColor;
 
             vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
+
+            VkClearValue clearColor = {0.5f, 0.2f, 0.5f, 1.0f};
+
+            VkClearAttachment attachment = {};
+            attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            attachment.colorAttachment = 0;
+            attachment.clearValue = clearColor;
+
+            VkClearRect clearRect = {};
+            clearRect.rect.offset = {};
+            clearRect.rect.extent = swapchain->GetExtent();
+            clearRect.baseArrayLayer = 0;
+            clearRect.layerCount = 1;
+
+            vkCmdClearAttachments(commandBuffer, 1, &attachment, 1, &clearRect);
 
             vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                               obj.Pipeline);
@@ -798,7 +630,7 @@ namespace Seek
             presentInfo.waitSemaphoreCount = 1;
             presentInfo.pWaitSemaphores = signalSemaphores;
 
-            VkSwapchainKHR swapChains[] = {obj.Swapchain};
+            VkSwapchainKHR swapChains[1] = {swapchain->GetHandle()};
             presentInfo.swapchainCount = 1;
             presentInfo.pSwapchains = swapChains;
             presentInfo.pImageIndices = &imageIndex;

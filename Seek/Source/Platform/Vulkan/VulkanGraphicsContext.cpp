@@ -80,6 +80,11 @@ namespace Seek
         GetQueues();
 
         CreateMemoryAllocator();
+
+        int32 width;
+        int32 height;
+        glfwGetWindowSize(m_WindowHandle, &width, &height);
+        m_Swapchain = new VulkanSwapchain(width, height);
     }
 
     void VulkanGraphicsContext::Shutdown()

@@ -2,6 +2,8 @@
 
 #include "Seek/Renderer/GraphicsContext.h"
 
+#include "Platform/Vulkan/VulkanSwapchain.h"
+
 #include <volk.h>
 
 #include <vk_mem_alloc.h>
@@ -56,6 +58,8 @@ namespace Seek
             return m_MemoryAllocator;
         }
 
+        inline VulkanSwapchain* GetSwapchain() const { return m_Swapchain; }
+
     public:
         static inline VulkanGraphicsContext* Get() { return s_Instance; }
 
@@ -88,6 +92,8 @@ namespace Seek
         VkQueue m_PresentQueue = 0;
 
         VmaAllocator m_MemoryAllocator = 0;
+
+        VulkanSwapchain* m_Swapchain = nullptr;
 
     private:
         static VulkanGraphicsContext* s_Instance;
