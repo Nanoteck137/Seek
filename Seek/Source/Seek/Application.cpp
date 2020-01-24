@@ -11,6 +11,7 @@
 #include "Seek/Debug/Instrumentor.h"
 
 #include "Platform/Vulkan/VulkanGraphicsContext.h"
+#include "Platform/Vulkan/VulkanShader.h"
 
 #include "Seek/System/FileSystem.h"
 
@@ -19,8 +20,9 @@
 
 #include <volk.h>
 
-#define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
+
+#include <spirv_reflect.hpp>
 
 namespace Seek
 {
@@ -42,11 +44,23 @@ namespace Seek
     struct VulkanObjects
     {
         VkDevice Device;
+        VmaAllocator Allocator;
         VkQueue GraphicsQueue;
         VkQueue PresentQueue;
 
         VkSwapchainKHR Swapchain;
 
+        std::vector<VkImageView> SwapchainImageViews;
+        VkRenderPass RenderPass;
+        std::vector<VkFramebuffer> Framebuffers;
+
+        VkPipelineLayout PipelineLayout;
+        VkPipeline Pipeline;
+
+        VkBuffer VertexBuffer;
+        VmaAllocation VertexBufferAllocation;
+
+        VkCommandPool CommandPool;
         std::vector<VkCommandBuffer> CommandBuffers;
 
         VkSemaphore ImageAvailableSemaphore;
@@ -142,25 +156,6 @@ namespace Seek
         }
     }
 
-    static VkShaderModule LoadShaderCode(VkDevice device,
-                                         const String& filepath)
-    {
-        Buffer buffer = FileSystem::ReadAllBuffer(filepath);
-
-        VkShaderModuleCreateInfo shaderCreateInfo = {};
-        shaderCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        shaderCreateInfo.pCode = (const uint32*)buffer.Data;
-        shaderCreateInfo.codeSize = buffer.Size;
-
-        VkShaderModule shaderModule = 0;
-        VK_CHECK(vkCreateShaderModule(device, &shaderCreateInfo, nullptr,
-                                      &shaderModule));
-
-        buffer.Free();
-
-        return shaderModule;
-    }
-
     Application::Application()
     {
         SK_PROFILE_FUNCTION();
@@ -172,6 +167,52 @@ namespace Seek
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
         m_Window->SetVSync(false);
 
+        // std::vector<uint32_t> spirv_binary = load_spirv_file();
+
+        Buffer buffer = FileSystem::ReadAllBuffer(
+            "Assets/Shaders/Vulkan/triangle.vert.spv");
+
+        spirv_cross::CompilerReflection compiler((const uint32*)buffer.Data,
+                                                 buffer.Size / sizeof(uint32));
+
+        // The SPIR-V is now parsed, and we can perform reflection on it.
+        spirv_cross::ShaderResources resources =
+            compiler.get_shader_resources();
+
+        // Get all sampled images in the shader.
+        for (auto& resource : resources.uniform_buffers)
+        {
+            unsigned set = compiler.get_decoration(
+                resource.id, spv::DecorationDescriptorSet);
+            unsigned binding =
+                compiler.get_decoration(resource.id, spv::DecorationBinding);
+            unsigned location =
+                compiler.get_decoration(resource.id, spv::DecorationLocation);
+            SK_CORE_TRACE("Uniform Buffers {0} at set = {1}, binding = {2}, "
+                          "location = {3}\n",
+                          resource.name.c_str(), set, binding, location);
+
+            // Modify the decoration to prepare it for GLSL.
+            compiler.unset_decoration(resource.id,
+                                      spv::DecorationDescriptorSet);
+
+            // Some arbitrary remapping if we want.
+            compiler.set_decoration(resource.id, spv::DecorationBinding,
+                                    set * 16 + binding);
+        }
+
+        /*spirv_cross::CompilerGLSL::Options options;
+        options.version = 330;
+        options.vulkan_semantics = true;
+        options.emit_uniform_buffer_as_plain_uniforms = true;
+        options.force_temporary = true;
+        compiler.set_common_options(options);*/
+
+        // Compile to GLSL, ready to give to GL driver.
+        std::string source = compiler.compile();
+
+        SK_CORE_INFO(source);
+
         const std::vector<Vertex> vertices = {
             {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
             {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
@@ -181,38 +222,7 @@ namespace Seek
             m_Window->GetGraphicsContext());
 
         VkDevice device = context->GetDevice();
-
-        VmaVulkanFunctions vulkanFunctions = {};
-        vulkanFunctions.vkGetPhysicalDeviceProperties =
-            vkGetPhysicalDeviceProperties;
-        vulkanFunctions.vkGetPhysicalDeviceMemoryProperties =
-            vkGetPhysicalDeviceMemoryProperties;
-        vulkanFunctions.vkAllocateMemory = vkAllocateMemory;
-        vulkanFunctions.vkFreeMemory = vkFreeMemory;
-        vulkanFunctions.vkMapMemory = vkMapMemory;
-        vulkanFunctions.vkUnmapMemory = vkUnmapMemory;
-        vulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
-        vulkanFunctions.vkInvalidateMappedMemoryRanges =
-            vkInvalidateMappedMemoryRanges;
-        vulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
-        vulkanFunctions.vkBindImageMemory = vkBindImageMemory;
-        vulkanFunctions.vkGetBufferMemoryRequirements =
-            vkGetBufferMemoryRequirements;
-        vulkanFunctions.vkGetImageMemoryRequirements =
-            vkGetImageMemoryRequirements;
-        vulkanFunctions.vkCreateBuffer = vkCreateBuffer;
-        vulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
-        vulkanFunctions.vkCreateImage = vkCreateImage;
-        vulkanFunctions.vkDestroyImage = vkDestroyImage;
-        vulkanFunctions.vkCmdCopyBuffer = vkCmdCopyBuffer;
-
-        VmaAllocatorCreateInfo allocatorCreateInfo = {};
-        allocatorCreateInfo.physicalDevice = context->GetPhysicalDevice();
-        allocatorCreateInfo.device = device;
-        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-
-        VmaAllocator allocator;
-        VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &allocator));
+        VmaAllocator allocator = context->GetMemoryAllocator();
 
         SwapChainSupportDetails swapchainSupport = QuerySwapChainSupport(
             context->GetPhysicalDevice(), context->GetSurface());
@@ -338,11 +348,39 @@ namespace Seek
         VK_CHECK(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr,
                                     &renderPass));
 
-        VkShaderModule vertexModule =
-            LoadShaderCode(device, "Assets/Shaders/Vulkan/triangle.vert.spv");
+        std::vector<VkFramebuffer> framebuffers(swapchainImageViews.size());
 
+        for (int i = 0; i < swapchainImageViews.size(); i++)
+        {
+            VkImageView attachments[] = {swapchainImageViews[i]};
+
+            VkFramebufferCreateInfo framebufferCreateInfo = {};
+            framebufferCreateInfo.sType =
+                VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferCreateInfo.renderPass = renderPass;
+            framebufferCreateInfo.attachmentCount = 1;
+            framebufferCreateInfo.pAttachments = attachments;
+            framebufferCreateInfo.width = extent.width;
+            framebufferCreateInfo.height = extent.height;
+            framebufferCreateInfo.layers = 1;
+
+            VkFramebuffer framebuffer = 0;
+            VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo,
+                                         nullptr, &framebuffer));
+
+            framebuffers[i] = framebuffer;
+        }
+
+        m_TriangleShader =
+            Shader::Create("Assets/Shaders/Vulkan/triangle.vert.spv",
+                           "Assets/Shaders/Vulkan/triangle.frag.spv");
+
+        VkShaderModule vertexModule =
+            std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader)
+                ->GetVertexShaderModule();
         VkShaderModule fragmentModule =
-            LoadShaderCode(device, "Assets/Shaders/Vulkan/triangle.frag.spv");
+            std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader)
+                ->GetFragmentShaderModule();
 
         VkPipelineShaderStageCreateInfo vertexShaderStage = {};
         vertexShaderStage.sType =
@@ -480,29 +518,6 @@ namespace Seek
         VK_CHECK(vkCreateGraphicsPipelines(device, 0, 1, &pipelineCreateInfo,
                                            nullptr, &pipeline));
 
-        std::vector<VkFramebuffer> framebuffers(swapchainImageViews.size());
-
-        for (int i = 0; i < swapchainImageViews.size(); i++)
-        {
-            VkImageView attachments[] = {swapchainImageViews[i]};
-
-            VkFramebufferCreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.sType =
-                VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = renderPass;
-            framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.pAttachments = attachments;
-            framebufferCreateInfo.width = extent.width;
-            framebufferCreateInfo.height = extent.height;
-            framebufferCreateInfo.layers = 1;
-
-            VkFramebuffer framebuffer = 0;
-            VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo,
-                                         nullptr, &framebuffer));
-
-            framebuffers[i] = framebuffer;
-        }
-
         VkBufferCreateInfo vertexBufferCreateInfo = {};
         vertexBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         vertexBufferCreateInfo.size = vertices.size() * sizeof(Vertex);
@@ -599,10 +614,24 @@ namespace Seek
                                    &renderFinishedSemaphore));
 
         obj.Device = device;
+        obj.Allocator = allocator;
         obj.GraphicsQueue = context->GetGraphicsQueue();
         obj.PresentQueue = context->GetPresentQueue();
         obj.Swapchain = swapchain;
+
+        obj.SwapchainImageViews = swapchainImageViews;
+        obj.RenderPass = renderPass;
+        obj.Framebuffers = framebuffers;
+
+        obj.PipelineLayout = pipelineLayout;
+        obj.Pipeline = pipeline;
+
+        obj.VertexBuffer = vertexBuffer;
+        obj.VertexBufferAllocation = vertexBufferAlloc;
+
+        obj.CommandPool = commandPool;
         obj.CommandBuffers = commandBuffers;
+
         obj.ImageAvailableSemaphore = imageAvailableSemaphore;
         obj.RenderFinishedSemaphore = renderFinishedSemaphore;
 
@@ -617,6 +646,28 @@ namespace Seek
 
     Application::~Application()
     {
+        vkDeviceWaitIdle(obj.Device);
+        vkDestroySemaphore(obj.Device, obj.RenderFinishedSemaphore, nullptr);
+        vkDestroySemaphore(obj.Device, obj.ImageAvailableSemaphore, nullptr);
+
+        vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
+
+        vmaFreeMemory(obj.Allocator, obj.VertexBufferAllocation);
+        vkDestroyBuffer(obj.Device, obj.VertexBuffer, nullptr);
+
+        vkDestroyPipeline(obj.Device, obj.Pipeline, nullptr);
+        vkDestroyPipelineLayout(obj.Device, obj.PipelineLayout, nullptr);
+
+        for (VkFramebuffer framebuffer : obj.Framebuffers)
+            vkDestroyFramebuffer(obj.Device, framebuffer, nullptr);
+
+        vkDestroyRenderPass(obj.Device, obj.RenderPass, nullptr);
+
+        for (VkImageView swapchainImageView : obj.SwapchainImageViews)
+            vkDestroyImageView(obj.Device, swapchainImageView, nullptr);
+
+        m_Window.release();
+
         AudioEngine::Shutdown();
         Renderer::Shutdown();
     }
@@ -667,7 +718,7 @@ namespace Seek
         float32 timer = 0;
         while (m_Running)
         {
-            float32 time = (float)glfwGetTime();
+            float32 time = (float32)glfwGetTime();
             Timestep timestep(time - m_LastFrameTime);
             m_LastFrameTime = time;
 

@@ -349,3 +349,68 @@ project "volk"
     filter "configurations:Dist"
         runtime "Release"
         optimize "On"
+
+project "SPIRV-Cross"
+    location "SPIRV-Cross"
+    kind "StaticLib"
+    language "C++"
+    
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files {
+
+        "%{prj.name}/spirv.h",
+        "%{prj.name}/spirv.hpp",
+        "%{prj.name}/GLSL.std.450.h",
+        "%{prj.name}/spirv_common.hpp",
+        "%{prj.name}/spirv_cross_containers.hpp",
+        "%{prj.name}/spirv_cross_error_handling.hpp",
+        "%{prj.name}/spirv_cross.hpp",
+        "%{prj.name}/spirv_cross.cpp",
+        "%{prj.name}/spirv_parser.hpp",
+        "%{prj.name}/spirv_parser.cpp",
+        "%{prj.name}/spirv_cross_parsed_ir.hpp",
+        "%{prj.name}/spirv_cross_parsed_ir.cpp",
+        "%{prj.name}/spirv_cfg.hpp",
+        "%{prj.name}/spirv_cfg.cpp",
+        "%{prj.name}/spirv_cross_c.cpp",
+        "%{prj.name}/spirv_cross_c.h",
+        "%{prj.name}/spirv_glsl.cpp",
+        "%{prj.name}/spirv_glsl.hpp",
+        "%{prj.name}/spirv_cpp.cpp",
+        "%{prj.name}/spirv_cpp.hpp",
+        "%{prj.name}/spirv_msl.cpp",
+        "%{prj.name}/spirv_msl.hpp",
+        "%{prj.name}/spirv_hlsl.cpp",
+        "%{prj.name}/spirv_hlsl.hpp",
+        "%{prj.name}/spirv_reflect.cpp",
+        "%{prj.name}/spirv_reflect.hpp",
+        "%{prj.name}/spirv_cross_util.cpp",
+        "%{prj.name}/spirv_cross_util.hpp",
+    }
+
+    includedirs {
+        "%{prj.name}/",
+    }
+
+    defines {
+        "ENABLE_HLSL"
+    }
+    
+    filter "system:windows"
+        systemversion "latest"
+        cppdialect "C++17"
+        staticruntime "On"
+
+    filter "configurations:Debug"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        runtime "Release"
+        optimize "on"
+
+    filter "configurations:Dist"
+        runtime "Release"
+        optimize "On"

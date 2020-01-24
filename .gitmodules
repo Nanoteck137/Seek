@@ -20,3 +20,6 @@
 [submodule "Seek/Vendor/volk"]
 	path = Seek/Vendor/volk
 	url = https://github.com/zeux/volk
+[submodule "Seek/Vendor/SPIRV-Cross"]
+	path = Seek/Vendor/SPIRV-Cross
+	url = https://github.com/KhronosGroup/SPIRV-Cross

@@ -8,6 +8,8 @@
 
 namespace Seek
 {
+    VulkanGraphicsContext* VulkanGraphicsContext::s_Instance = nullptr;
+
     static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -56,6 +58,11 @@ namespace Seek
     VulkanGraphicsContext::VulkanGraphicsContext(GLFWwindow* windowHandle)
         : m_WindowHandle(windowHandle)
     {
+        SK_CORE_ASSERT(
+            !s_Instance,
+            "Multiple instances of a vulkan graphics context not allowed");
+
+        s_Instance = this;
     }
 
     void VulkanGraphicsContext::Init()
@@ -71,10 +78,18 @@ namespace Seek
 
         CreateLogicalDevice();
         GetQueues();
+
+        CreateMemoryAllocator();
     }
 
     void VulkanGraphicsContext::Shutdown()
     {
+        if (m_MemoryAllocator)
+        {
+            vmaDestroyAllocator(m_MemoryAllocator);
+            m_MemoryAllocator = 0;
+        }
+
         if (m_Device)
         {
             vkDestroyDevice(m_Device, nullptr);
@@ -260,6 +275,40 @@ namespace Seek
                          &m_GraphicsQueue);
         vkGetDeviceQueue(m_Device, m_PresentQueueFamilyIndex, 0,
                          &m_PresentQueue);
+    }
+
+    void VulkanGraphicsContext::CreateMemoryAllocator()
+    {
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetPhysicalDeviceProperties =
+            vkGetPhysicalDeviceProperties;
+        vulkanFunctions.vkGetPhysicalDeviceMemoryProperties =
+            vkGetPhysicalDeviceMemoryProperties;
+        vulkanFunctions.vkAllocateMemory = vkAllocateMemory;
+        vulkanFunctions.vkFreeMemory = vkFreeMemory;
+        vulkanFunctions.vkMapMemory = vkMapMemory;
+        vulkanFunctions.vkUnmapMemory = vkUnmapMemory;
+        vulkanFunctions.vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges;
+        vulkanFunctions.vkInvalidateMappedMemoryRanges =
+            vkInvalidateMappedMemoryRanges;
+        vulkanFunctions.vkBindBufferMemory = vkBindBufferMemory;
+        vulkanFunctions.vkBindImageMemory = vkBindImageMemory;
+        vulkanFunctions.vkGetBufferMemoryRequirements =
+            vkGetBufferMemoryRequirements;
+        vulkanFunctions.vkGetImageMemoryRequirements =
+            vkGetImageMemoryRequirements;
+        vulkanFunctions.vkCreateBuffer = vkCreateBuffer;
+        vulkanFunctions.vkDestroyBuffer = vkDestroyBuffer;
+        vulkanFunctions.vkCreateImage = vkCreateImage;
+        vulkanFunctions.vkDestroyImage = vkDestroyImage;
+        vulkanFunctions.vkCmdCopyBuffer = vkCmdCopyBuffer;
+
+        VmaAllocatorCreateInfo allocatorCreateInfo = {};
+        allocatorCreateInfo.physicalDevice = m_PhysicalDevice;
+        allocatorCreateInfo.device = m_Device;
+        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+
+        VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &m_MemoryAllocator));
     }
 
 }

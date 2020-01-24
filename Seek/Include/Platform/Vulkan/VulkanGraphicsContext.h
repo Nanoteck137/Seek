@@ -4,6 +4,8 @@
 
 #include <volk.h>
 
+#include <vk_mem_alloc.h>
+
 struct GLFWwindow;
 
 #define VK_CHECK(x)                                                            \
@@ -49,6 +51,14 @@ namespace Seek
         inline VkQueue GetGraphicsQueue() const { return m_GraphicsQueue; }
         inline VkQueue GetPresentQueue() const { return m_PresentQueue; }
 
+        inline VmaAllocator GetMemoryAllocator() const
+        {
+            return m_MemoryAllocator;
+        }
+
+    public:
+        static inline VulkanGraphicsContext* Get() { return s_Instance; }
+
     private:
         void CreateInstance();
         void CreateDebugMessenger();
@@ -58,6 +68,8 @@ namespace Seek
         void GetQueueFamiles();
         void CreateLogicalDevice();
         void GetQueues();
+
+        void CreateMemoryAllocator();
 
     private:
         GLFWwindow* m_WindowHandle = nullptr;
@@ -74,5 +86,10 @@ namespace Seek
 
         VkQueue m_GraphicsQueue = 0;
         VkQueue m_PresentQueue = 0;
+
+        VmaAllocator m_MemoryAllocator = 0;
+
+    private:
+        static VulkanGraphicsContext* s_Instance;
     };
 }

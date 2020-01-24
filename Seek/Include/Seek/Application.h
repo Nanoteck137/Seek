@@ -10,6 +10,8 @@
 
 #include "Seek/ImGui/ImGuiLayer.h"
 
+#include "Seek/Renderer/Shader.h"
+
 namespace Seek
 {
     class Application
@@ -41,6 +43,8 @@ namespace Seek
         LayerStack m_LayerStack;
 
         float32 m_LastFrameTime = 0.0f;
+
+        Ref<Shader> m_TriangleShader;
 
     private:
         static Application* s_Instance;

@@ -4,6 +4,7 @@
 #include "Seek/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/Vulkan/VulkanShader.h"
 
 namespace Seek
 {
@@ -16,6 +17,26 @@ namespace Seek
                 return nullptr;
             case RendererAPI::API::OpenGL:
                 return CreateRef<OpenGLShader>(filePath);
+            case RendererAPI::API::Vulkan:
+                SK_CORE_ASSERT("UNIMPLEMENTED");
+                return Ref<Shader>();
+        }
+
+        SK_CORE_ASSERT(false, "No RenderingAPI selected");
+        return nullptr;
+    }
+
+    Ref<Shader> Shader::Create(const String& vertPath, const String& fragPath)
+    {
+        switch (Renderer::GetAPI())
+        {
+            case RendererAPI::API::None:
+                SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
+                return nullptr;
+            case RendererAPI::API::OpenGL: SK_CORE_ASSERT("UNIMPLEMENTED");
+
+            case RendererAPI::API::Vulkan:
+                return CreateRef<VulkanShader>(vertPath, fragPath);
         }
 
         SK_CORE_ASSERT(false, "No RenderingAPI selected");
@@ -33,6 +54,9 @@ namespace Seek
             case RendererAPI::API::OpenGL:
                 return CreateRef<OpenGLShader>(name, vertexSource,
                                                fragmentSource);
+            case RendererAPI::API::Vulkan:
+                SK_CORE_ASSERT("UNIMPLEMENTED");
+                return Ref<Shader>();
         }
 
         SK_CORE_ASSERT(false, "No RenderingAPI selected");
