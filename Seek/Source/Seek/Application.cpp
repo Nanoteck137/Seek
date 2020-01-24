@@ -41,6 +41,12 @@ namespace Seek
         std::vector<VkPresentModeKHR> PresentModes;
     };
 
+    struct VulkanBuffer
+    {
+        VkBuffer Handle;
+        VmaAllocation Allocation;
+    };
+
     struct VulkanObjects
     {
         VkDevice Device;
@@ -49,6 +55,7 @@ namespace Seek
         VkQueue PresentQueue;
 
         VkSwapchainKHR Swapchain;
+        VkExtent2D SwapchainExtent;
 
         std::vector<VkImageView> SwapchainImageViews;
         VkRenderPass RenderPass;
@@ -57,8 +64,8 @@ namespace Seek
         VkPipelineLayout PipelineLayout;
         VkPipeline Pipeline;
 
-        VkBuffer VertexBuffer;
-        VmaAllocation VertexBufferAllocation;
+        VulkanBuffer VertexBuffer;
+        VulkanBuffer IndexBuffer;
 
         VkCommandPool CommandPool;
         std::vector<VkCommandBuffer> CommandBuffers;
@@ -156,6 +163,39 @@ namespace Seek
         }
     }
 
+    VulkanBuffer CreateBuffer(VmaAllocator allocator, VkBufferUsageFlags usage,
+                              const void* data, uint32 size)
+    {
+        VkBufferCreateInfo bufferCreateInfo = {};
+        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferCreateInfo.size = size;
+        bufferCreateInfo.usage = usage;
+        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
+
+        VkBuffer buffer = 0;
+        VmaAllocation alloc = 0;
+        VK_CHECK(vmaCreateBuffer(allocator, &bufferCreateInfo, &allocInfo,
+                                 &buffer, &alloc, nullptr));
+
+        void* dataPtr;
+        vmaMapMemory(allocator, alloc, &dataPtr);
+
+        memcpy(dataPtr, data, size);
+
+        vmaUnmapMemory(allocator, alloc);
+
+        VulkanBuffer result = {};
+        result.Handle = buffer;
+        result.Allocation = alloc;
+
+        return result;
+    }
+
     Application::Application()
     {
         SK_PROFILE_FUNCTION();
@@ -208,15 +248,17 @@ namespace Seek
         options.force_temporary = true;
         compiler.set_common_options(options);*/
 
-        // Compile to GLSL, ready to give to GL driver.
         std::string source = compiler.compile();
 
         SK_CORE_INFO(source);
 
         const std::vector<Vertex> vertices = {
-            {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}}};
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}}};
+
+        const std::vector<uint32> indices = {0, 1, 2, 2, 3, 0};
 
         VulkanGraphicsContext* context = dynamic_cast<VulkanGraphicsContext*>(
             m_Window->GetGraphicsContext());
@@ -518,32 +560,19 @@ namespace Seek
         VK_CHECK(vkCreateGraphicsPipelines(device, 0, 1, &pipelineCreateInfo,
                                            nullptr, &pipeline));
 
-        VkBufferCreateInfo vertexBufferCreateInfo = {};
-        vertexBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        vertexBufferCreateInfo.size = vertices.size() * sizeof(Vertex);
-        vertexBufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-        vertexBufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        VulkanBuffer vertexBuffer =
+            CreateBuffer(allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                         vertices.data(), vertices.size() * sizeof(Vertex));
 
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-
-        VkBuffer vertexBuffer = 0;
-        VmaAllocation vertexBufferAlloc = 0;
-        VK_CHECK(vmaCreateBuffer(allocator, &vertexBufferCreateInfo, &allocInfo,
-                                 &vertexBuffer, &vertexBufferAlloc, nullptr));
-
-        void* dataPtr;
-        vmaMapMemory(allocator, vertexBufferAlloc, &dataPtr);
-
-        memcpy(dataPtr, vertices.data(), vertices.size() * sizeof(Vertex));
-
-        vmaUnmapMemory(allocator, vertexBufferAlloc);
+        VulkanBuffer indexBuffer =
+            CreateBuffer(allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                         indices.data(), indices.size() * sizeof(uint32));
 
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType =
             VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.flags =
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex =
             context->GetGraphicsFamilyIndex();
 
@@ -563,45 +592,6 @@ namespace Seek
         VK_CHECK(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
                                           commandBuffers.data()));
 
-        for (uint32 i = 0; i < commandBuffers.size(); i++)
-        {
-            VkCommandBufferBeginInfo commandBufferBeginInfo = {};
-            commandBufferBeginInfo.sType =
-                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            VK_CHECK(vkBeginCommandBuffer(commandBuffers[i],
-                                          &commandBufferBeginInfo));
-
-            VkRenderPassBeginInfo renderPassBeginInfo = {};
-            renderPassBeginInfo.sType =
-                VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassBeginInfo.renderPass = renderPass;
-            renderPassBeginInfo.framebuffer = framebuffers[i];
-            renderPassBeginInfo.renderArea.extent = extent;
-            renderPassBeginInfo.renderArea.offset = {0, 0};
-
-            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-            renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.pClearValues = &clearColor;
-
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo,
-                                 VK_SUBPASS_CONTENTS_INLINE);
-
-            vkCmdBindPipeline(commandBuffers[i],
-                              VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-
-            VkBuffer vertexBuffers[] = {vertexBuffer};
-            VkDeviceSize offsets[] = {0};
-            vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers,
-                                   offsets);
-
-            vkCmdDraw(commandBuffers[i], vertices.size(), 1, 0, 0);
-
-            vkCmdEndRenderPass(commandBuffers[i]);
-
-            VK_CHECK(vkEndCommandBuffer(commandBuffers[i]));
-        }
-
         VkSemaphoreCreateInfo semaphoreCreateInfo = {};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -618,6 +608,7 @@ namespace Seek
         obj.GraphicsQueue = context->GetGraphicsQueue();
         obj.PresentQueue = context->GetPresentQueue();
         obj.Swapchain = swapchain;
+        obj.SwapchainExtent = extent;
 
         obj.SwapchainImageViews = swapchainImageViews;
         obj.RenderPass = renderPass;
@@ -627,7 +618,7 @@ namespace Seek
         obj.Pipeline = pipeline;
 
         obj.VertexBuffer = vertexBuffer;
-        obj.VertexBufferAllocation = vertexBufferAlloc;
+        obj.IndexBuffer = indexBuffer;
 
         obj.CommandPool = commandPool;
         obj.CommandBuffers = commandBuffers;
@@ -652,8 +643,11 @@ namespace Seek
 
         vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
 
-        vmaFreeMemory(obj.Allocator, obj.VertexBufferAllocation);
-        vkDestroyBuffer(obj.Device, obj.VertexBuffer, nullptr);
+        vmaFreeMemory(obj.Allocator, obj.IndexBuffer.Allocation);
+        vkDestroyBuffer(obj.Device, obj.IndexBuffer.Handle, nullptr);
+
+        vmaFreeMemory(obj.Allocator, obj.VertexBuffer.Allocation);
+        vkDestroyBuffer(obj.Device, obj.VertexBuffer.Handle, nullptr);
 
         vkDestroyPipeline(obj.Device, obj.Pipeline, nullptr);
         vkDestroyPipelineLayout(obj.Device, obj.PipelineLayout, nullptr);
@@ -722,6 +716,14 @@ namespace Seek
             Timestep timestep(time - m_LastFrameTime);
             m_LastFrameTime = time;
 
+            timer += timestep;
+
+            if (timer >= 1)
+            {
+                SK_CORE_TRACE("FPS: {0}", 1.0f / timestep);
+                timer = 0;
+            }
+
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
@@ -729,6 +731,47 @@ namespace Seek
             vkAcquireNextImageKHR(obj.Device, obj.Swapchain, UINT64_MAX,
                                   obj.ImageAvailableSemaphore, VK_NULL_HANDLE,
                                   &imageIndex);
+
+            // ---------------------------
+            VkCommandBuffer commandBuffer = obj.CommandBuffers[imageIndex];
+            VkCommandBufferBeginInfo commandBufferBeginInfo = {};
+            commandBufferBeginInfo.sType =
+                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+            VK_CHECK(
+                vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+
+            VkRenderPassBeginInfo renderPassBeginInfo = {};
+            renderPassBeginInfo.sType =
+                VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassBeginInfo.renderPass = obj.RenderPass;
+            renderPassBeginInfo.framebuffer = obj.Framebuffers[imageIndex];
+            renderPassBeginInfo.renderArea.extent = obj.SwapchainExtent;
+            renderPassBeginInfo.renderArea.offset = {0, 0};
+
+            VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+            renderPassBeginInfo.clearValueCount = 1;
+            renderPassBeginInfo.pClearValues = &clearColor;
+
+            vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
+                                 VK_SUBPASS_CONTENTS_INLINE);
+
+            vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              obj.Pipeline);
+
+            VkBuffer vertexBuffers[] = {obj.VertexBuffer.Handle};
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+            vkCmdBindIndexBuffer(commandBuffer, obj.IndexBuffer.Handle, 0,
+                                 VK_INDEX_TYPE_UINT32);
+
+            vkCmdDrawIndexed(commandBuffer, 6, 1, 0, 0, 0);
+
+            vkCmdEndRenderPass(commandBuffer);
+
+            VK_CHECK(vkEndCommandBuffer(commandBuffer));
+            // ---------------------------
 
             VkSubmitInfo submitInfo = {};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -741,7 +784,7 @@ namespace Seek
             submitInfo.pWaitDstStageMask = waitStages;
 
             submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &obj.CommandBuffers[imageIndex];
+            submitInfo.pCommandBuffers = &commandBuffer;
 
             VkSemaphore signalSemaphores[] = {obj.RenderFinishedSemaphore};
             submitInfo.signalSemaphoreCount = 1;

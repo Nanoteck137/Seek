@@ -34,7 +34,6 @@ namespace Seek
                 SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
                 return nullptr;
             case RendererAPI::API::OpenGL: SK_CORE_ASSERT("UNIMPLEMENTED");
-
             case RendererAPI::API::Vulkan:
                 return CreateRef<VulkanShader>(vertPath, fragPath);
         }
