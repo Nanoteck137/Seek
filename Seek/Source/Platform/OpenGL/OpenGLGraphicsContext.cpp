@@ -34,7 +34,7 @@ namespace Seek
 
     void OpenGLGraphicsContext::Shutdown() {}
 
-    void OpenGLGraphicsContext::SwapBuffers()
+    void OpenGLGraphicsContext::Present()
     {
         SK_PROFILE_FUNCTION();
 

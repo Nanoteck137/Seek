@@ -160,7 +160,7 @@ namespace Seek
 
         glfwPollEvents();
 
-        m_Context->SwapBuffers();
+        m_Context->Present();
     }
 
     void WindowsWindow::SetVSync(bool enabled)

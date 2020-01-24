@@ -12,6 +12,8 @@
 
 #include "Platform/Vulkan/VulkanGraphicsContext.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanRenderPass.h"
+#include "Platform/Vulkan/VulkanFramebuffer.h"
 
 #include "Seek/System/FileSystem.h"
 
@@ -47,8 +49,8 @@ namespace Seek
         VkQueue GraphicsQueue;
         VkQueue PresentQueue;
 
-        VkRenderPass RenderPass;
-        std::vector<VkFramebuffer> Framebuffers;
+        VulkanRenderPass* RenderPass;
+        std::vector<VulkanFramebuffer*> Framebuffers;
 
         VkPipelineLayout PipelineLayout;
         VkPipeline Pipeline;
@@ -58,9 +60,6 @@ namespace Seek
 
         VkCommandPool CommandPool;
         std::vector<VkCommandBuffer> CommandBuffers;
-
-        VkSemaphore ImageAvailableSemaphore;
-        VkSemaphore RenderFinishedSemaphore;
     };
 
     VulkanObjects obj;
@@ -168,69 +167,19 @@ namespace Seek
         VkDevice device = context->GetDevice();
         VmaAllocator allocator = context->GetMemoryAllocator();
         VulkanSwapchain* swapchain = context->GetSwapchain();
+        VulkanRenderPass* renderPass =
+            new VulkanRenderPass(swapchain->GetFormat());
 
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = swapchain->GetFormat();
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass = {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-
-        VkSubpassDependency dependency = {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                                   VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        VkRenderPassCreateInfo renderPassCreateInfo = {};
-        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.attachmentCount = 1;
-        renderPassCreateInfo.pAttachments = &colorAttachment;
-        renderPassCreateInfo.subpassCount = 1;
-        renderPassCreateInfo.pSubpasses = &subpass;
-        renderPassCreateInfo.dependencyCount = 1;
-        renderPassCreateInfo.pDependencies = &dependency;
-
-        VkRenderPass renderPass = 0;
-        VK_CHECK(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr,
-                                    &renderPass));
-
-        std::vector<VkFramebuffer> framebuffers(swapchain->GetImageCount());
+        std::vector<VulkanFramebuffer*> framebuffers(
+            swapchain->GetImageCount());
 
         for (int i = 0; i < swapchain->GetImageCount(); i++)
         {
-            VkImageView attachments[1] = {swapchain->GetImageViews()[i]};
+            VkImageView attachment = swapchain->GetImageViews()[i];
 
-            VkFramebufferCreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.sType =
-                VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = renderPass;
-            framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.pAttachments = attachments;
-            framebufferCreateInfo.width = swapchain->GetExtent().width;
-            framebufferCreateInfo.height = swapchain->GetExtent().height;
-            framebufferCreateInfo.layers = 1;
-
-            VkFramebuffer framebuffer = 0;
-            VK_CHECK(vkCreateFramebuffer(device, &framebufferCreateInfo,
-                                         nullptr, &framebuffer));
-
-            framebuffers[i] = framebuffer;
+            framebuffers[i] = new VulkanFramebuffer(
+                renderPass, attachment, swapchain->GetExtent().width,
+                swapchain->GetExtent().height);
         }
 
         m_TriangleShader =
@@ -295,8 +244,8 @@ namespace Seek
         VkViewport viewport = {};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)swapchain->GetExtent().width;
-        viewport.height = (float)swapchain->GetExtent().height;
+        viewport.width = (float32)swapchain->GetExtent().width;
+        viewport.height = (float32)swapchain->GetExtent().height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
@@ -371,7 +320,7 @@ namespace Seek
         pipelineCreateInfo.pColorBlendState = &colorBlending;
         pipelineCreateInfo.pDynamicState = nullptr; // Optional
         pipelineCreateInfo.layout = pipelineLayout;
-        pipelineCreateInfo.renderPass = renderPass;
+        pipelineCreateInfo.renderPass = renderPass->GetHandle();
         pipelineCreateInfo.subpass = 0;
         pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
         pipelineCreateInfo.basePipelineIndex = -1;              // Optional
@@ -412,17 +361,6 @@ namespace Seek
         VK_CHECK(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
                                           commandBuffers.data()));
 
-        VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-        VkSemaphore imageAvailableSemaphore = 0;
-        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr,
-                                   &imageAvailableSemaphore));
-
-        VkSemaphore renderFinishedSemaphore = 0;
-        VK_CHECK(vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr,
-                                   &renderFinishedSemaphore));
-
         obj.Device = device;
         obj.Allocator = allocator;
         obj.GraphicsQueue = context->GetGraphicsQueue();
@@ -440,9 +378,6 @@ namespace Seek
         obj.CommandPool = commandPool;
         obj.CommandBuffers = commandBuffers;
 
-        obj.ImageAvailableSemaphore = imageAvailableSemaphore;
-        obj.RenderFinishedSemaphore = renderFinishedSemaphore;
-
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
 
@@ -455,8 +390,6 @@ namespace Seek
     Application::~Application()
     {
         vkDeviceWaitIdle(obj.Device);
-        vkDestroySemaphore(obj.Device, obj.RenderFinishedSemaphore, nullptr);
-        vkDestroySemaphore(obj.Device, obj.ImageAvailableSemaphore, nullptr);
 
         vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
 
@@ -469,10 +402,10 @@ namespace Seek
         vkDestroyPipeline(obj.Device, obj.Pipeline, nullptr);
         vkDestroyPipelineLayout(obj.Device, obj.PipelineLayout, nullptr);
 
-        for (VkFramebuffer framebuffer : obj.Framebuffers)
-            vkDestroyFramebuffer(obj.Device, framebuffer, nullptr);
+        for (VulkanFramebuffer* framebuffer : obj.Framebuffers)
+            delete framebuffer;
 
-        vkDestroyRenderPass(obj.Device, obj.RenderPass, nullptr);
+        delete obj.RenderPass;
 
         m_Window.release();
 
@@ -541,13 +474,10 @@ namespace Seek
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(timestep);
 
-            VulkanSwapchain* swapchain =
-                VulkanGraphicsContext::Get()->GetSwapchain();
+            VulkanGraphicsContext* context = VulkanGraphicsContext::Get();
+            VulkanSwapchain* swapchain = context->GetSwapchain();
 
-            uint32 imageIndex;
-            vkAcquireNextImageKHR(obj.Device, swapchain->GetHandle(),
-                                  UINT64_MAX, obj.ImageAvailableSemaphore,
-                                  VK_NULL_HANDLE, &imageIndex);
+            uint32 imageIndex = context->GetCurrentImage();
 
             // ---------------------------
             VkCommandBuffer commandBuffer = obj.CommandBuffers[imageIndex];
@@ -561,8 +491,9 @@ namespace Seek
             VkRenderPassBeginInfo renderPassBeginInfo = {};
             renderPassBeginInfo.sType =
                 VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassBeginInfo.renderPass = obj.RenderPass;
-            renderPassBeginInfo.framebuffer = obj.Framebuffers[imageIndex];
+            renderPassBeginInfo.renderPass = obj.RenderPass->GetHandle();
+            renderPassBeginInfo.framebuffer =
+                obj.Framebuffers[imageIndex]->GetHandle();
             renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
             renderPassBeginInfo.renderArea.offset = {0, 0};
 
@@ -608,7 +539,8 @@ namespace Seek
             VkSubmitInfo submitInfo = {};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-            VkSemaphore waitSemaphores[] = {obj.ImageAvailableSemaphore};
+            VkSemaphore waitSemaphores[] = {
+                context->GetImageAvailableSemaphore()};
             VkPipelineStageFlags waitStages[] = {
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
             submitInfo.waitSemaphoreCount = 1;
@@ -618,26 +550,12 @@ namespace Seek
             submitInfo.commandBufferCount = 1;
             submitInfo.pCommandBuffers = &commandBuffer;
 
-            VkSemaphore signalSemaphores[] = {obj.RenderFinishedSemaphore};
+            VkSemaphore signalSemaphores[1] = {
+                context->GetRenderFinishedSemaphore()};
             submitInfo.signalSemaphoreCount = 1;
             submitInfo.pSignalSemaphores = signalSemaphores;
 
             VK_CHECK(vkQueueSubmit(obj.GraphicsQueue, 1, &submitInfo, 0));
-
-            VkPresentInfoKHR presentInfo = {};
-            presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-            presentInfo.waitSemaphoreCount = 1;
-            presentInfo.pWaitSemaphores = signalSemaphores;
-
-            VkSwapchainKHR swapChains[1] = {swapchain->GetHandle()};
-            presentInfo.swapchainCount = 1;
-            presentInfo.pSwapchains = swapChains;
-            presentInfo.pImageIndices = &imageIndex;
-            presentInfo.pResults = nullptr; // Optional
-
-            vkQueuePresentKHR(obj.PresentQueue, &presentInfo);
-            vkQueueWaitIdle(obj.PresentQueue);
 
             if (m_ImGuiLayer)
             {

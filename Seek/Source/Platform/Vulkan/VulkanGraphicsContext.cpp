@@ -85,10 +85,31 @@ namespace Seek
         int32 height;
         glfwGetWindowSize(m_WindowHandle, &width, &height);
         m_Swapchain = new VulkanSwapchain(width, height);
+        CreateSemaphores();
+
+        GetNextIndex();
     }
 
     void VulkanGraphicsContext::Shutdown()
     {
+        if (m_RenderFinishedSemaphore)
+        {
+            vkDestroySemaphore(m_Device, m_RenderFinishedSemaphore, nullptr);
+            m_RenderFinishedSemaphore = 0;
+        }
+
+        if (m_ImageAvailableSemaphore)
+        {
+            vkDestroySemaphore(m_Device, m_ImageAvailableSemaphore, nullptr);
+            m_ImageAvailableSemaphore = 0;
+        }
+
+        if (m_Swapchain)
+        {
+            delete m_Swapchain;
+            m_Swapchain = nullptr;
+        }
+
         if (m_MemoryAllocator)
         {
             vmaDestroyAllocator(m_MemoryAllocator);
@@ -121,7 +142,27 @@ namespace Seek
         }
     }
 
-    void VulkanGraphicsContext::SwapBuffers() {}
+    void VulkanGraphicsContext::Present()
+    {
+        VkSemaphore signalSemaphores[1] = {m_RenderFinishedSemaphore};
+
+        VkPresentInfoKHR presentInfo = {};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = signalSemaphores;
+
+        VkSwapchainKHR swapChains[1] = {m_Swapchain->GetHandle()};
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &m_CurrentImage;
+        presentInfo.pResults = nullptr; // Optional
+
+        vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+        vkQueueWaitIdle(m_PresentQueue);
+
+        GetNextIndex();
+    }
 
     void VulkanGraphicsContext::CreateInstance()
     {
@@ -314,6 +355,24 @@ namespace Seek
         allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
 
         VK_CHECK(vmaCreateAllocator(&allocatorCreateInfo, &m_MemoryAllocator));
+    }
+
+    void VulkanGraphicsContext::CreateSemaphores()
+    {
+        VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+        VK_CHECK(vkCreateSemaphore(m_Device, &semaphoreCreateInfo, nullptr,
+                                   &m_ImageAvailableSemaphore));
+        VK_CHECK(vkCreateSemaphore(m_Device, &semaphoreCreateInfo, nullptr,
+                                   &m_RenderFinishedSemaphore));
+    }
+
+    void VulkanGraphicsContext::GetNextIndex()
+    {
+        vkAcquireNextImageKHR(m_Device, m_Swapchain->GetHandle(), UINT64_MAX,
+                              m_ImageAvailableSemaphore, VK_NULL_HANDLE,
+                              &m_CurrentImage);
     }
 
 }

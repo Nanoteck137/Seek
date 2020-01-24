@@ -29,7 +29,7 @@ namespace Seek
         virtual void Init() override;
         virtual void Shutdown() override;
 
-        virtual void SwapBuffers() override;
+        virtual void Present() override;
 
         inline VkInstance GetInstance() const { return m_Instance; }
         inline VkSurfaceKHR GetSurface() const { return m_Surface; }
@@ -60,6 +60,18 @@ namespace Seek
 
         inline VulkanSwapchain* GetSwapchain() const { return m_Swapchain; }
 
+        inline VkSemaphore GetImageAvailableSemaphore() const
+        {
+            return m_ImageAvailableSemaphore;
+        }
+
+        inline VkSemaphore GetRenderFinishedSemaphore() const
+        {
+            return m_RenderFinishedSemaphore;
+        }
+
+        inline uint32 GetCurrentImage() { return m_CurrentImage; }
+
     public:
         static inline VulkanGraphicsContext* Get() { return s_Instance; }
 
@@ -74,6 +86,9 @@ namespace Seek
         void GetQueues();
 
         void CreateMemoryAllocator();
+        void CreateSemaphores();
+
+        void GetNextIndex();
 
     private:
         GLFWwindow* m_WindowHandle = nullptr;
@@ -94,6 +109,11 @@ namespace Seek
         VmaAllocator m_MemoryAllocator = 0;
 
         VulkanSwapchain* m_Swapchain = nullptr;
+
+        VkSemaphore m_ImageAvailableSemaphore = 0;
+        VkSemaphore m_RenderFinishedSemaphore = 0;
+
+        uint32 m_CurrentImage = 0;
 
     private:
         static VulkanGraphicsContext* s_Instance;
