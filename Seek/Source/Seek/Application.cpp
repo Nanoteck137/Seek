@@ -317,14 +317,14 @@ namespace Seek
         pipelineCreateInfo.pViewportState = &viewportState;
         pipelineCreateInfo.pRasterizationState = &rasterizer;
         pipelineCreateInfo.pMultisampleState = &multisampling;
-        pipelineCreateInfo.pDepthStencilState = nullptr; // Optional
+        pipelineCreateInfo.pDepthStencilState = nullptr;
         pipelineCreateInfo.pColorBlendState = &colorBlending;
-        pipelineCreateInfo.pDynamicState = nullptr; // Optional
+        pipelineCreateInfo.pDynamicState = nullptr;
         pipelineCreateInfo.layout = pipelineLayout;
         pipelineCreateInfo.renderPass = renderPass->GetHandle();
         pipelineCreateInfo.subpass = 0;
-        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
-        pipelineCreateInfo.basePipelineIndex = -1;              // Optional
+        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+        pipelineCreateInfo.basePipelineIndex = -1;
 
         VkPipeline pipeline = 0;
         VK_CHECK(vkCreateGraphicsPipelines(device, 0, 1, &pipelineCreateInfo,
