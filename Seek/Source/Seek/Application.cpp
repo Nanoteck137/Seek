@@ -57,7 +57,6 @@ namespace Seek
         VulkanBuffer IndexBuffer;
 
         VulkanCommandQueue* CommandQueue;
-        VkCommandPool CommandPool;
         VulkanCommandBuffer* CommandBuffer;
     };
 
@@ -196,20 +195,8 @@ namespace Seek
         VulkanCommandQueue* commandQueue =
             new VulkanCommandQueue(context->GetGraphicsQueue());
 
-        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
-        commandPoolCreateInfo.sType =
-            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCreateInfo.flags =
-            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        commandPoolCreateInfo.queueFamilyIndex =
-            context->GetGraphicsFamilyIndex();
-
-        VkCommandPool commandPool = 0;
-        VK_CHECK(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr,
-                                     &commandPool));
-
         VulkanCommandBuffer* commandBuffer =
-            new VulkanCommandBuffer(commandPool, swapchain->GetImageCount());
+            new VulkanCommandBuffer(swapchain->GetImageCount());
 
         obj.Device = device;
         obj.Allocator = allocator;
@@ -226,7 +213,6 @@ namespace Seek
         obj.IndexBuffer = indexBuffer;
 
         obj.CommandQueue = commandQueue;
-        obj.CommandPool = commandPool;
         obj.CommandBuffer = commandBuffer;
 
         // m_ImGuiLayer = new ImGuiLayer();
@@ -243,8 +229,6 @@ namespace Seek
         vkDeviceWaitIdle(obj.Device);
 
         delete obj.CommandBuffer;
-
-        vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
         delete obj.CommandQueue;
 
         vmaFreeMemory(obj.Allocator, obj.IndexBuffer.Allocation);

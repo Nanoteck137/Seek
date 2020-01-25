@@ -14,7 +14,7 @@ namespace Seek
     class VulkanCommandBuffer
     {
     public:
-        VulkanCommandBuffer(VkCommandPool pool, uint32 count);
+        VulkanCommandBuffer(uint32 count);
         ~VulkanCommandBuffer();
 
         void Begin();
@@ -39,6 +39,8 @@ namespace Seek
         }
 
     private:
+        void CreateCommandPool();
+        void CreateCommandBuffers();
         void AcquireNextBuffer();
 
     private:

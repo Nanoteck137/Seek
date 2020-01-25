@@ -5,21 +5,10 @@
 
 namespace Seek
 {
-    VulkanCommandBuffer::VulkanCommandBuffer(VkCommandPool pool, uint32 count)
-        : m_CommandPool(pool), m_Count(count)
+    VulkanCommandBuffer::VulkanCommandBuffer(uint32 count) : m_Count(count)
     {
-        VkDevice device = VulkanGraphicsContext::Get()->GetDevice();
-
-        VkCommandBufferAllocateInfo commandBufferAllocInfo = {};
-        commandBufferAllocInfo.sType =
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocInfo.commandPool = pool;
-        commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocInfo.commandBufferCount = count;
-
-        m_Handles.resize(count);
-        VK_CHECK(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
-                                          m_Handles.data()));
+        CreateCommandPool();
+        CreateCommandBuffers();
 
         AcquireNextBuffer();
     }
@@ -28,6 +17,43 @@ namespace Seek
     {
         vkFreeCommandBuffers(VulkanGraphicsContext::Get()->GetDevice(),
                              m_CommandPool, m_Count, m_Handles.data());
+
+        if (m_CommandPool)
+        {
+            vkDestroyCommandPool(VulkanGraphicsContext::Get()->GetDevice(),
+                                 m_CommandPool, nullptr);
+            m_CommandPool = 0;
+        }
+    }
+
+    void VulkanCommandBuffer::CreateCommandPool()
+    {
+        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+        commandPoolCreateInfo.sType =
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.flags =
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        commandPoolCreateInfo.queueFamilyIndex =
+            VulkanGraphicsContext::Get()->GetGraphicsFamilyIndex();
+
+        VK_CHECK(vkCreateCommandPool(VulkanGraphicsContext::Get()->GetDevice(),
+                                     &commandPoolCreateInfo, nullptr,
+                                     &m_CommandPool));
+    }
+
+    void VulkanCommandBuffer::CreateCommandBuffers()
+    {
+        VkCommandBufferAllocateInfo commandBufferAllocInfo = {};
+        commandBufferAllocInfo.sType =
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocInfo.commandPool = m_CommandPool;
+        commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        commandBufferAllocInfo.commandBufferCount = m_Count;
+
+        m_Handles.resize(m_Count);
+        VK_CHECK(vkAllocateCommandBuffers(
+            VulkanGraphicsContext::Get()->GetDevice(), &commandBufferAllocInfo,
+            m_Handles.data()));
     }
 
     void VulkanCommandBuffer::Begin()
