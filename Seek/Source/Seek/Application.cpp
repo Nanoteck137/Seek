@@ -14,6 +14,7 @@
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanRenderPass.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
+#include "Platform/Vulkan/VulkanCommandBuffer.h"
 
 #include "Seek/System/FileSystem.h"
 
@@ -59,7 +60,7 @@ namespace Seek
         VulkanBuffer IndexBuffer;
 
         VkCommandPool CommandPool;
-        std::vector<VkCommandBuffer> CommandBuffers;
+        VulkanCommandBuffer* CommandBuffer;
     };
 
     VulkanObjects obj;
@@ -349,17 +350,8 @@ namespace Seek
         VK_CHECK(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr,
                                      &commandPool));
 
-        std::vector<VkCommandBuffer> commandBuffers(framebuffers.size());
-
-        VkCommandBufferAllocateInfo commandBufferAllocInfo = {};
-        commandBufferAllocInfo.sType =
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocInfo.commandPool = commandPool;
-        commandBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocInfo.commandBufferCount = framebuffers.size();
-
-        VK_CHECK(vkAllocateCommandBuffers(device, &commandBufferAllocInfo,
-                                          commandBuffers.data()));
+        VulkanCommandBuffer* commandBuffer =
+            new VulkanCommandBuffer(commandPool, swapchain->GetImageCount());
 
         obj.Device = device;
         obj.Allocator = allocator;
@@ -376,7 +368,7 @@ namespace Seek
         obj.IndexBuffer = indexBuffer;
 
         obj.CommandPool = commandPool;
-        obj.CommandBuffers = commandBuffers;
+        obj.CommandBuffer = commandBuffer;
 
         // m_ImGuiLayer = new ImGuiLayer();
         // PushOverlay(m_ImGuiLayer);
@@ -390,6 +382,8 @@ namespace Seek
     Application::~Application()
     {
         vkDeviceWaitIdle(obj.Device);
+
+        delete obj.CommandBuffer;
 
         vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
 
@@ -480,13 +474,9 @@ namespace Seek
             uint32 imageIndex = context->GetCurrentImage();
 
             // ---------------------------
-            VkCommandBuffer commandBuffer = obj.CommandBuffers[imageIndex];
-            VkCommandBufferBeginInfo commandBufferBeginInfo = {};
-            commandBufferBeginInfo.sType =
-                VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            VK_CHECK(
-                vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+            obj.CommandBuffer->Begin();
+            VkCommandBuffer commandBuffer =
+                obj.CommandBuffer->GetCurrentHandle();
 
             VkRenderPassBeginInfo renderPassBeginInfo = {};
             renderPassBeginInfo.sType =
@@ -496,10 +486,6 @@ namespace Seek
                 obj.Framebuffers[imageIndex]->GetHandle();
             renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
             renderPassBeginInfo.renderArea.offset = {0, 0};
-
-            // VkClearValue clearColor = {0.0f, 1.0f, 0.0f, 1.0f};
-            // renderPassBeginInfo.clearValueCount = 1;
-            // renderPassBeginInfo.pClearValues = &clearColor;
 
             vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
                                  VK_SUBPASS_CONTENTS_INLINE);
@@ -533,27 +519,15 @@ namespace Seek
 
             vkCmdEndRenderPass(commandBuffer);
 
-            VK_CHECK(vkEndCommandBuffer(commandBuffer));
+            obj.CommandBuffer->End();
             // ---------------------------
 
             VkSubmitInfo submitInfo = {};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-            VkSemaphore waitSemaphores[] = {
-                context->GetImageAvailableSemaphore()};
-            VkPipelineStageFlags waitStages[] = {
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-            submitInfo.waitSemaphoreCount = 1;
-            submitInfo.pWaitSemaphores = waitSemaphores;
-            submitInfo.pWaitDstStageMask = waitStages;
-
+            submitInfo.waitSemaphoreCount = 0;
             submitInfo.commandBufferCount = 1;
             submitInfo.pCommandBuffers = &commandBuffer;
-
-            VkSemaphore signalSemaphores[1] = {
-                context->GetRenderFinishedSemaphore()};
-            submitInfo.signalSemaphoreCount = 1;
-            submitInfo.pSignalSemaphores = signalSemaphores;
+            submitInfo.signalSemaphoreCount = 0;
 
             VK_CHECK(vkQueueSubmit(obj.GraphicsQueue, 1, &submitInfo, 0));
 
