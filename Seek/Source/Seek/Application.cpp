@@ -15,6 +15,9 @@
 #include "Platform/Vulkan/VulkanRenderPass.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
 #include "Platform/Vulkan/VulkanCommandBuffer.h"
+#include "Platform/Vulkan/VulkanPipelineLayout.h"
+#include "Platform/Vulkan/VulkanGraphicsPipeline.h"
+#include "Platform/Vulkan/VulkanCommandQueue.h"
 
 #include "Seek/System/FileSystem.h"
 
@@ -30,12 +33,6 @@
 namespace Seek
 {
     Application* Application::s_Instance = nullptr;
-
-    struct Vertex
-    {
-        glm::vec3 position;
-        glm::vec4 color;
-    };
 
     struct VulkanBuffer
     {
@@ -53,12 +50,13 @@ namespace Seek
         VulkanRenderPass* RenderPass;
         std::vector<VulkanFramebuffer*> Framebuffers;
 
-        VkPipelineLayout PipelineLayout;
-        VkPipeline Pipeline;
+        VulkanPipelineLayout* PipelineLayout;
+        VulkanGraphicsPipeline* Pipeline;
 
         VulkanBuffer VertexBuffer;
         VulkanBuffer IndexBuffer;
 
+        VulkanCommandQueue* CommandQueue;
         VkCommandPool CommandPool;
         VulkanCommandBuffer* CommandBuffer;
     };
@@ -109,19 +107,15 @@ namespace Seek
         m_Window->SetEventCallback(SK_BIND_EVENT_FN(Application::OnEvent));
         m_Window->SetVSync(false);
 
-        // std::vector<uint32_t> spirv_binary = load_spirv_file();
-
         Buffer buffer = FileSystem::ReadAllBuffer(
             "Assets/Shaders/Vulkan/triangle.vert.spv");
 
         spirv_cross::CompilerReflection compiler((const uint32*)buffer.Data,
                                                  buffer.Size / sizeof(uint32));
 
-        // The SPIR-V is now parsed, and we can perform reflection on it.
         spirv_cross::ShaderResources resources =
             compiler.get_shader_resources();
 
-        // Get all sampled images in the shader.
         for (auto& resource : resources.uniform_buffers)
         {
             unsigned set = compiler.get_decoration(
@@ -134,11 +128,9 @@ namespace Seek
                           "location = {3}\n",
                           resource.name.c_str(), set, binding, location);
 
-            // Modify the decoration to prepare it for GLSL.
             compiler.unset_decoration(resource.id,
                                       spv::DecorationDescriptorSet);
 
-            // Some arbitrary remapping if we want.
             compiler.set_decoration(resource.id, spv::DecorationBinding,
                                     set * 16 + binding);
         }
@@ -187,148 +179,11 @@ namespace Seek
             Shader::Create("Assets/Shaders/Vulkan/triangle.vert.spv",
                            "Assets/Shaders/Vulkan/triangle.frag.spv");
 
-        VkShaderModule vertexModule =
-            std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader)
-                ->GetVertexShaderModule();
-        VkShaderModule fragmentModule =
-            std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader)
-                ->GetFragmentShaderModule();
-
-        VkPipelineShaderStageCreateInfo vertexShaderStage = {};
-        vertexShaderStage.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertexShaderStage.module = vertexModule;
-        vertexShaderStage.pName = "main";
-
-        VkPipelineShaderStageCreateInfo fragmentShaderStage = {};
-        fragmentShaderStage.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragmentShaderStage.module = fragmentModule;
-        fragmentShaderStage.pName = "main";
-
-        VkPipelineShaderStageCreateInfo shaderStages[] = {vertexShaderStage,
-                                                          fragmentShaderStage};
-
-        VkVertexInputBindingDescription inputDesc = {};
-        inputDesc.binding = 0;
-        inputDesc.stride = sizeof(Vertex);
-        inputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        VkVertexInputAttributeDescription attributeDescriptions[2];
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(Vertex, position);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-        VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-        vertexInputInfo.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 1;
-        vertexInputInfo.pVertexBindingDescriptions = &inputDesc;
-
-        vertexInputInfo.vertexAttributeDescriptionCount = 2;
-        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
-
-        VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
-        inputAssembly.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        inputAssembly.primitiveRestartEnable = VK_FALSE;
-
-        VkViewport viewport = {};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = (float32)swapchain->GetExtent().width;
-        viewport.height = (float32)swapchain->GetExtent().height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-
-        VkRect2D scissor = {};
-        scissor.offset = {0, 0};
-        scissor.extent = swapchain->GetExtent();
-
-        VkPipelineViewportStateCreateInfo viewportState = {};
-        viewportState.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewportState.viewportCount = 1;
-        viewportState.pViewports = &viewport;
-        viewportState.scissorCount = 1;
-        viewportState.pScissors = &scissor;
-
-        VkPipelineRasterizationStateCreateInfo rasterizer = {};
-        rasterizer.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        rasterizer.depthClampEnable = VK_FALSE;
-        rasterizer.rasterizerDiscardEnable = VK_FALSE;
-        rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-        rasterizer.lineWidth = 1.0f;
-        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
-        rasterizer.depthBiasEnable = VK_FALSE;
-
-        VkPipelineMultisampleStateCreateInfo multisampling = {};
-        multisampling.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        multisampling.sampleShadingEnable = VK_FALSE;
-        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-        VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
-        colorBlendAttachment.colorWriteMask =
-            VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        colorBlendAttachment.blendEnable = VK_FALSE;
-
-        VkPipelineColorBlendStateCreateInfo colorBlending = {};
-        colorBlending.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        colorBlending.logicOpEnable = VK_FALSE;
-        colorBlending.logicOp = VK_LOGIC_OP_COPY;
-        colorBlending.attachmentCount = 1;
-        colorBlending.pAttachments = &colorBlendAttachment;
-        colorBlending.blendConstants[0] = 0.0f;
-        colorBlending.blendConstants[1] = 0.0f;
-        colorBlending.blendConstants[2] = 0.0f;
-        colorBlending.blendConstants[3] = 0.0f;
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-        pipelineLayoutCreateInfo.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-
-        VkPipelineLayout pipelineLayout = 0;
-        VK_CHECK(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo,
-                                        nullptr, &pipelineLayout));
-
-        VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
-        pipelineCreateInfo.sType =
-            VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineCreateInfo.stageCount = 2;
-        pipelineCreateInfo.pStages = shaderStages;
-        pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
-        pipelineCreateInfo.pInputAssemblyState = &inputAssembly;
-        pipelineCreateInfo.pViewportState = &viewportState;
-        pipelineCreateInfo.pRasterizationState = &rasterizer;
-        pipelineCreateInfo.pMultisampleState = &multisampling;
-        pipelineCreateInfo.pDepthStencilState = nullptr;
-        pipelineCreateInfo.pColorBlendState = &colorBlending;
-        pipelineCreateInfo.pDynamicState = nullptr;
-        pipelineCreateInfo.layout = pipelineLayout;
-        pipelineCreateInfo.renderPass = renderPass->GetHandle();
-        pipelineCreateInfo.subpass = 0;
-        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-        pipelineCreateInfo.basePipelineIndex = -1;
-
-        VkPipeline pipeline = 0;
-        VK_CHECK(vkCreateGraphicsPipelines(device, 0, 1, &pipelineCreateInfo,
-                                           nullptr, &pipeline));
+        VulkanPipelineLayout* pipelineLayout = new VulkanPipelineLayout();
+        VulkanGraphicsPipeline* pipeline = new VulkanGraphicsPipeline(
+            renderPass,
+            std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader).get(),
+            pipelineLayout);
 
         VulkanBuffer vertexBuffer =
             CreateBuffer(allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -337,6 +192,9 @@ namespace Seek
         VulkanBuffer indexBuffer =
             CreateBuffer(allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                          indices.data(), indices.size() * sizeof(uint32));
+
+        VulkanCommandQueue* commandQueue =
+            new VulkanCommandQueue(context->GetGraphicsQueue());
 
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType =
@@ -367,6 +225,7 @@ namespace Seek
         obj.VertexBuffer = vertexBuffer;
         obj.IndexBuffer = indexBuffer;
 
+        obj.CommandQueue = commandQueue;
         obj.CommandPool = commandPool;
         obj.CommandBuffer = commandBuffer;
 
@@ -386,6 +245,7 @@ namespace Seek
         delete obj.CommandBuffer;
 
         vkDestroyCommandPool(obj.Device, obj.CommandPool, nullptr);
+        delete obj.CommandQueue;
 
         vmaFreeMemory(obj.Allocator, obj.IndexBuffer.Allocation);
         vkDestroyBuffer(obj.Device, obj.IndexBuffer.Handle, nullptr);
@@ -393,8 +253,8 @@ namespace Seek
         vmaFreeMemory(obj.Allocator, obj.VertexBuffer.Allocation);
         vkDestroyBuffer(obj.Device, obj.VertexBuffer.Handle, nullptr);
 
-        vkDestroyPipeline(obj.Device, obj.Pipeline, nullptr);
-        vkDestroyPipelineLayout(obj.Device, obj.PipelineLayout, nullptr);
+        delete obj.Pipeline;
+        delete obj.PipelineLayout;
 
         for (VulkanFramebuffer* framebuffer : obj.Framebuffers)
             delete framebuffer;
@@ -475,61 +335,24 @@ namespace Seek
 
             // ---------------------------
             obj.CommandBuffer->Begin();
-            VkCommandBuffer commandBuffer =
-                obj.CommandBuffer->GetCurrentHandle();
 
-            VkRenderPassBeginInfo renderPassBeginInfo = {};
-            renderPassBeginInfo.sType =
-                VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassBeginInfo.renderPass = obj.RenderPass->GetHandle();
-            renderPassBeginInfo.framebuffer =
-                obj.Framebuffers[imageIndex]->GetHandle();
-            renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
-            renderPassBeginInfo.renderArea.offset = {0, 0};
+            obj.CommandBuffer->BeginRenderPass(obj.RenderPass,
+                                               obj.Framebuffers[imageIndex]);
 
-            vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo,
-                                 VK_SUBPASS_CONTENTS_INLINE);
+            obj.CommandBuffer->Clear();
+            obj.CommandBuffer->BindPipeline(obj.Pipeline);
 
-            VkClearValue clearColor = {0.5f, 0.2f, 0.5f, 1.0f};
+            obj.CommandBuffer->BindVertexBuffer(obj.VertexBuffer.Handle);
+            obj.CommandBuffer->BindIndexBuffer(obj.IndexBuffer.Handle);
 
-            VkClearAttachment attachment = {};
-            attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            attachment.colorAttachment = 0;
-            attachment.clearValue = clearColor;
+            obj.CommandBuffer->DrawIndexed(6, 0);
 
-            VkClearRect clearRect = {};
-            clearRect.rect.offset = {};
-            clearRect.rect.extent = swapchain->GetExtent();
-            clearRect.baseArrayLayer = 0;
-            clearRect.layerCount = 1;
-
-            vkCmdClearAttachments(commandBuffer, 1, &attachment, 1, &clearRect);
-
-            vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              obj.Pipeline);
-
-            VkBuffer vertexBuffers[] = {obj.VertexBuffer.Handle};
-            VkDeviceSize offsets[] = {0};
-            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-            vkCmdBindIndexBuffer(commandBuffer, obj.IndexBuffer.Handle, 0,
-                                 VK_INDEX_TYPE_UINT32);
-
-            vkCmdDrawIndexed(commandBuffer, 6, 1, 0, 0, 0);
-
-            vkCmdEndRenderPass(commandBuffer);
+            obj.CommandBuffer->EndRenderPass();
 
             obj.CommandBuffer->End();
             // ---------------------------
 
-            VkSubmitInfo submitInfo = {};
-            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            submitInfo.waitSemaphoreCount = 0;
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &commandBuffer;
-            submitInfo.signalSemaphoreCount = 0;
-
-            VK_CHECK(vkQueueSubmit(obj.GraphicsQueue, 1, &submitInfo, 0));
+            obj.CommandQueue->Submit(obj.CommandBuffer);
 
             if (m_ImGuiLayer)
             {
