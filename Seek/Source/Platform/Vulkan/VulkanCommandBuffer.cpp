@@ -121,18 +121,18 @@ namespace Seek
                           pipeline->GetHandle());
     }
 
-    void VulkanCommandBuffer::BindVertexBuffer(VkBuffer vertexBuffer)
+    void VulkanCommandBuffer::BindVertexBuffer(VulkanVertexBuffer* vertexBuffer)
     {
-        VkBuffer vertexBuffers[] = {vertexBuffer};
+        VkBuffer vertexBuffers[1] = {vertexBuffer->GetHandle()};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(m_CurrentCommandBuffer, 0, 1, vertexBuffers,
                                offsets);
     }
 
-    void VulkanCommandBuffer::BindIndexBuffer(VkBuffer indexBuffer)
+    void VulkanCommandBuffer::BindIndexBuffer(VulkanIndexBuffer* indexBuffer)
     {
-        vkCmdBindIndexBuffer(m_CurrentCommandBuffer, indexBuffer, 0,
-                             VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(m_CurrentCommandBuffer, indexBuffer->GetHandle(),
+                             0, VK_INDEX_TYPE_UINT32);
     }
 
     void VulkanCommandBuffer::DrawIndexed(uint32 count, uint32 firstIndex)

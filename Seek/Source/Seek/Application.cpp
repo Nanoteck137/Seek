@@ -18,6 +18,8 @@
 #include "Platform/Vulkan/VulkanPipelineLayout.h"
 #include "Platform/Vulkan/VulkanGraphicsPipeline.h"
 #include "Platform/Vulkan/VulkanCommandQueue.h"
+#include "Platform/Vulkan/VulkanVertexBuffer.h"
+#include "Platform/Vulkan/VulkanIndexBuffer.h"
 
 #include "Seek/System/FileSystem.h"
 
@@ -34,12 +36,6 @@ namespace Seek
 {
     Application* Application::s_Instance = nullptr;
 
-    struct VulkanBuffer
-    {
-        VkBuffer Handle;
-        VmaAllocation Allocation;
-    };
-
     struct VulkanObjects
     {
         VkDevice Device;
@@ -53,47 +49,14 @@ namespace Seek
         VulkanPipelineLayout* PipelineLayout;
         VulkanGraphicsPipeline* Pipeline;
 
-        VulkanBuffer VertexBuffer;
-        VulkanBuffer IndexBuffer;
+        VulkanVertexBuffer* VertexBuffer;
+        VulkanIndexBuffer* IndexBuffer;
 
         VulkanCommandQueue* CommandQueue;
         VulkanCommandBuffer* CommandBuffer;
     };
 
     VulkanObjects obj;
-
-    VulkanBuffer CreateBuffer(VmaAllocator allocator, VkBufferUsageFlags usage,
-                              const void* data, uint32 size)
-    {
-        VkBufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCreateInfo.size = size;
-        bufferCreateInfo.usage = usage;
-        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        allocInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT;
-
-        VkBuffer buffer = 0;
-        VmaAllocation alloc = 0;
-        VK_CHECK(vmaCreateBuffer(allocator, &bufferCreateInfo, &allocInfo,
-                                 &buffer, &alloc, nullptr));
-
-        void* dataPtr;
-        vmaMapMemory(allocator, alloc, &dataPtr);
-
-        memcpy(dataPtr, data, size);
-
-        vmaUnmapMemory(allocator, alloc);
-
-        VulkanBuffer result = {};
-        result.Handle = buffer;
-        result.Allocation = alloc;
-
-        return result;
-    }
 
     Application::Application()
     {
@@ -184,13 +147,11 @@ namespace Seek
             std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader).get(),
             pipelineLayout);
 
-        VulkanBuffer vertexBuffer =
-            CreateBuffer(allocator, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                         vertices.data(), vertices.size() * sizeof(Vertex));
+        VulkanVertexBuffer* vertexBuffer = new VulkanVertexBuffer(
+            vertices.data(), vertices.size() * sizeof(Vertex));
 
-        VulkanBuffer indexBuffer =
-            CreateBuffer(allocator, VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                         indices.data(), indices.size() * sizeof(uint32));
+        VulkanIndexBuffer* indexBuffer =
+            new VulkanIndexBuffer(indices.data(), indices.size());
 
         VulkanCommandQueue* commandQueue =
             new VulkanCommandQueue(context->GetGraphicsQueue());
@@ -231,11 +192,8 @@ namespace Seek
         delete obj.CommandBuffer;
         delete obj.CommandQueue;
 
-        vmaFreeMemory(obj.Allocator, obj.IndexBuffer.Allocation);
-        vkDestroyBuffer(obj.Device, obj.IndexBuffer.Handle, nullptr);
-
-        vmaFreeMemory(obj.Allocator, obj.VertexBuffer.Allocation);
-        vkDestroyBuffer(obj.Device, obj.VertexBuffer.Handle, nullptr);
+        delete obj.IndexBuffer;
+        delete obj.VertexBuffer;
 
         delete obj.Pipeline;
         delete obj.PipelineLayout;
@@ -326,8 +284,8 @@ namespace Seek
             obj.CommandBuffer->Clear();
             obj.CommandBuffer->BindPipeline(obj.Pipeline);
 
-            obj.CommandBuffer->BindVertexBuffer(obj.VertexBuffer.Handle);
-            obj.CommandBuffer->BindIndexBuffer(obj.IndexBuffer.Handle);
+            obj.CommandBuffer->BindVertexBuffer(obj.VertexBuffer);
+            obj.CommandBuffer->BindIndexBuffer(obj.IndexBuffer);
 
             obj.CommandBuffer->DrawIndexed(6, 0);
 

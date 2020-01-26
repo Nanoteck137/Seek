@@ -7,6 +7,9 @@
 #include "Platform/Vulkan/VulkanGraphicsPipeline.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
 
+#include "Platform/Vulkan/VulkanVertexBuffer.h"
+#include "Platform/Vulkan/VulkanIndexBuffer.h"
+
 #include <volk.h>
 
 namespace Seek
@@ -28,8 +31,8 @@ namespace Seek
         void Clear();
 
         void BindPipeline(VulkanGraphicsPipeline* pipeline);
-        void BindVertexBuffer(VkBuffer vertexBuffer);
-        void BindIndexBuffer(VkBuffer indexBuffer);
+        void BindVertexBuffer(VulkanVertexBuffer* vertexBuffer);
+        void BindIndexBuffer(VulkanIndexBuffer* indexBuffer);
 
         void DrawIndexed(uint32 count, uint32 firstIndex);
 
