@@ -23,3 +23,6 @@
 [submodule "Seek/Vendor/SPIRV-Cross"]
 	path = Seek/Vendor/SPIRV-Cross
 	url = https://github.com/KhronosGroup/SPIRV-Cross
+[submodule "Seek/Vendor/tinyobjloader"]
+	path = Seek/Vendor/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git
