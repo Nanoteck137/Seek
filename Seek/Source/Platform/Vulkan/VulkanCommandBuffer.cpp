@@ -103,11 +103,21 @@ namespace Seek
             VulkanGraphicsContext::Get()->GetSwapchain();
 
         VkClearValue clearColor = {0.5f, 0.2f, 0.5f, 1.0f};
+        VkClearValue depthClear = {};
+        depthClear.depthStencil = {1.0f, 0};
 
-        VkClearAttachment attachment = {};
-        attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        attachment.colorAttachment = 0;
-        attachment.clearValue = clearColor;
+        VkClearAttachment colorAttachment = {};
+        colorAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        colorAttachment.colorAttachment = 0;
+        colorAttachment.clearValue = clearColor;
+
+        VkClearAttachment depthAttachment = {};
+        depthAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        depthAttachment.colorAttachment = 0;
+        depthAttachment.clearValue = depthClear;
+
+        std::array<VkClearAttachment, 2> attachments = {colorAttachment,
+                                                        depthAttachment};
 
         VkClearRect clearRect = {};
         clearRect.rect.offset = {0, 0};
@@ -115,8 +125,8 @@ namespace Seek
         clearRect.baseArrayLayer = 0;
         clearRect.layerCount = 1;
 
-        vkCmdClearAttachments(m_CurrentCommandBuffer, 1, &attachment, 1,
-                              &clearRect);
+        vkCmdClearAttachments(m_CurrentCommandBuffer, attachments.size(),
+                              attachments.data(), 1, &clearRect);
     }
 
     void VulkanCommandBuffer::BindPipeline(VulkanGraphicsPipeline* pipeline)

@@ -6,6 +6,7 @@
 #include "Platform/Vulkan/VulkanRenderPass.h"
 
 #include <volk.h>
+#include <vk_mem_alloc.h>
 
 namespace Seek
 {
@@ -20,11 +21,15 @@ namespace Seek
 
     private:
         void CreateRenderPass();
+        void CreateDepthImage();
         void CreateFramebuffers();
 
     private:
         VulkanSwapchain* m_Swapchain = nullptr;
         VulkanRenderPass* m_RenderPass = nullptr;
+        VkImage m_DepthImage = 0;
+        VmaAllocation m_DepthMemory = 0;
+        VkImageView m_DepthImageView = 0;
         std::vector<VkFramebuffer> m_Framebuffers;
     };
 }

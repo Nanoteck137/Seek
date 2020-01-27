@@ -10,7 +10,7 @@ namespace Seek
     class VulkanRenderPass
     {
     public:
-        VulkanRenderPass(VkFormat format);
+        VulkanRenderPass(VkFormat format, VkFormat depthFormat);
         ~VulkanRenderPass();
 
         inline VkRenderPass GetHandle() const { return m_Handle; }
