@@ -17,6 +17,11 @@ namespace Seek
     {
         glm::vec3 position;
         glm::vec4 color;
+
+        bool operator==(const Vertex& other) const
+        {
+            return position == other.position && color == other.color;
+        }
     };
 
     class VulkanGraphicsPipeline

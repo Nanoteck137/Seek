@@ -17,13 +17,15 @@ IncludeDir["stb"] = "Seek/Vendor/stb"
 IncludeDir["Box2D"] = "Seek/Vendor/Box2D/include"
 
 IncludeDir["volk"] = "Seek/Vendor/volk"
-IncludeDir["VulkanMemoryAllocator"] = "Seek/Vendor/VulkanMemoryAllocator/src"
 IncludeDir["SPIRVCross"] = "Seek/Vendor/SPIRV-Cross"
 IncludeDir["Vulkan"] = VULKAN_SDK_PATH .. "/Include"
 
+IncludeDir["tinyobjloader"] = "Seek/Vendor/tinyobjloader"
+
 -- Header Only Includes
-IncludeDir["spdlog"] = "Seek/Vendor/spdlog/include/"
-IncludeDir["glm"] = "Seek/Vendor/glm/"
+IncludeDir["spdlog"] = "Seek/Vendor/spdlog/include"
+IncludeDir["glm"] = "Seek/Vendor/glm"
+IncludeDir["VulkanMemoryAllocator"] = "Seek/Vendor/VulkanMemoryAllocator/src"
 
 group "Dependencies"
     include "Seek/Vendor"
@@ -64,6 +66,8 @@ project "Seek"
         "%{IncludeDir.VulkanMemoryAllocator}",
         "%{IncludeDir.SPIRVCross}",
         "%{IncludeDir.Vulkan}",
+
+        "%{IncludeDir.tinyobjloader}",
     }
 
     links {
@@ -74,6 +78,7 @@ project "Seek"
         "Box2D",
         "volk",
         "SPIRV-Cross",
+        "tinyobjloader",
 
         "opengl32.lib",
         "Xaudio2.lib"

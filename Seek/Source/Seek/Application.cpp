@@ -24,13 +24,32 @@
 
 #include "Seek/System/FileSystem.h"
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/hash.hpp>
+
 #include <GLFW/glfw3.h>
 
 #include <volk.h>
 #include <vk_mem_alloc.h>
 #include <spirv_reflect.hpp>
+
+#include <tiny_obj_loader.h>
+
+namespace std
+{
+    template <> struct hash<Seek::Vertex>
+    {
+        size_t operator()(Seek::Vertex const& vertex) const
+        {
+            return ((hash<glm::vec3>()(vertex.position) ^
+                     (hash<glm::vec3>()(vertex.color) << 1)) >>
+                    1);
+        }
+    };
+}
 
 namespace Seek
 {
@@ -45,11 +64,6 @@ namespace Seek
 
     struct VulkanObjects
     {
-        VkDevice Device;
-        VmaAllocator Allocator;
-        VkQueue GraphicsQueue;
-        VkQueue PresentQueue;
-
         VulkanPipelineLayout* PipelineLayout;
         VulkanGraphicsPipeline* Pipeline;
 
@@ -113,7 +127,6 @@ namespace Seek
         compiler.set_common_options(options);*/
 
         std::string source = compiler.compile();
-
         SK_CORE_INFO(source);
 
         VulkanGraphicsContext* context = dynamic_cast<VulkanGraphicsContext*>(
@@ -123,24 +136,63 @@ namespace Seek
         VmaAllocator allocator = context->GetMemoryAllocator();
         VulkanSwapchain* swapchain = context->GetSwapchain();
 
-        const std::vector<Vertex> vertices = {
+        std::vector<Vertex> vertices;
+        /*= {
             {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
             {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}},
             {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
             {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-        };
+        };*/
 
-        const std::vector<uint32> indices = {0, 1, 2, 2, 3, 0};
+        std::vector<uint32> indices;
+        // = {0, 1, 2, 2, 3, 0};
+
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        String warn, err;
+
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
+                              "Assets/Models/test.obj"))
+        {
+            String msg = warn + err;
+            SK_CORE_ASSERT(false, "{0}", msg);
+        }
+
+        std::unordered_map<Vertex, uint32_t> uniqueVertices = {};
+        for (const auto& shape : shapes)
+        {
+            for (const auto& index : shape.mesh.indices)
+            {
+                Vertex vertex = {};
+
+                vertex.position = {attrib.vertices[3 * index.vertex_index + 0],
+                                   attrib.vertices[3 * index.vertex_index + 1],
+                                   attrib.vertices[3 * index.vertex_index + 2]};
+
+                vertex.color = {1.0f, 1.0f, 1.0f, 1.0f};
+
+                if (uniqueVertices.count(vertex) == 0)
+                {
+                    uniqueVertices[vertex] =
+                        static_cast<uint32_t>(vertices.size());
+                    vertices.push_back(vertex);
+                }
+
+                indices.push_back(uniqueVertices[vertex]);
+            }
+        }
 
         UniformBufferObject uniforms = {};
         uniforms.model = glm::mat4(1.0f);
         uniforms.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
                                     glm::vec3(0.0f, 0.0f, 0.0f),
-                                    glm::vec3(0.0f, 1.0f, 0.0f));
-        uniforms.proj = glm::perspective(
-            glm::radians(45.0f),
-            swapchain->GetExtent().width / (float)swapchain->GetExtent().height,
-            0.1f, 10.0f);
+                                    glm::vec3(0.0f, 0.0f, 1.0f));
+        uniforms.proj =
+            glm::perspective(glm::radians(45.0f),
+                             swapchain->GetExtent().width /
+                                 (float32)swapchain->GetExtent().height,
+                             0.1f, 10.0f);
 
         m_TriangleShader =
             Shader::Create("Assets/Shaders/Vulkan/triangle.vert.spv",
@@ -213,11 +265,6 @@ namespace Seek
         VulkanCommandBuffer* commandBuffer =
             new VulkanCommandBuffer(swapchain->GetImageCount());
 
-        obj.Device = device;
-        obj.Allocator = allocator;
-        obj.GraphicsQueue = context->GetGraphicsQueue();
-        obj.PresentQueue = context->GetPresentQueue();
-
         obj.PipelineLayout = pipelineLayout;
         obj.Pipeline = pipeline;
 
@@ -242,7 +289,7 @@ namespace Seek
 
     Application::~Application()
     {
-        vkDeviceWaitIdle(obj.Device);
+        vkDeviceWaitIdle(VulkanGraphicsContext::Get()->GetDevice());
 
         delete obj.CommandBuffer;
         delete obj.CommandQueue;
@@ -340,7 +387,7 @@ namespace Seek
                                     obj.PipelineLayout->GetHandle(), 0, 1,
                                     &obj.DescriptorSet, 0, nullptr);
 
-            obj.CommandBuffer->DrawIndexed(6, 0);
+            obj.CommandBuffer->DrawIndexed(obj.IndexBuffer->GetCount(), 0);
 
             obj.CommandBuffer->EndRenderPass();
 
@@ -360,6 +407,6 @@ namespace Seek
             m_Window->OnUpdate();
         }
 
-        vkDeviceWaitIdle(obj.Device);
+        vkDeviceWaitIdle(VulkanGraphicsContext::Get()->GetDevice());
     }
 }
