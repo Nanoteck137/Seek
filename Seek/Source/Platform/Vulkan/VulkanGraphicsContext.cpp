@@ -85,6 +85,9 @@ namespace Seek
         int32 height;
         glfwGetWindowSize(m_WindowHandle, &width, &height);
         m_Swapchain = new VulkanSwapchain(width, height);
+
+        m_RenderTarget = new VulkanRenderTargetSwapchain(m_Swapchain);
+
         CreateSemaphores();
 
         GetNextIndex();

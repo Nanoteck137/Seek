@@ -3,6 +3,8 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
+#include "Seek/Renderer/RenderTarget.h"
+
 #include "Platform/Vulkan/VulkanRenderPass.h"
 #include "Platform/Vulkan/VulkanGraphicsPipeline.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
@@ -24,8 +26,7 @@ namespace Seek
         void End();
 
         // Commands
-        void BeginRenderPass(VulkanRenderPass* renderPass,
-                             VulkanFramebuffer* framebuffer);
+        void BeginRenderPass(RenderTarget* renderTarget);
         void EndRenderPass();
 
         void Clear();

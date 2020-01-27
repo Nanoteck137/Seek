@@ -2,6 +2,7 @@
 #include "Platform/Vulkan/VulkanCommandBuffer.h"
 
 #include "Platform/Vulkan/VulkanGraphicsContext.h"
+#include "Platform/Vulkan/VulkanRenderTargetSwapchain.h"
 
 namespace Seek
 {
@@ -70,16 +71,20 @@ namespace Seek
         VK_CHECK(vkEndCommandBuffer(m_Handles[m_Index]));
     }
 
-    void VulkanCommandBuffer::BeginRenderPass(VulkanRenderPass* renderPass,
-                                              VulkanFramebuffer* framebuffer)
+    void VulkanCommandBuffer::BeginRenderPass(RenderTarget* renderTarget)
     {
+        // TODO(patrik): Remove
+        VulkanRenderTargetSwapchain* renderTargetSwapchain =
+            (VulkanRenderTargetSwapchain*)renderTarget;
         VulkanSwapchain* swapchain =
             VulkanGraphicsContext::Get()->GetSwapchain();
 
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass = renderPass->GetHandle();
-        renderPassBeginInfo.framebuffer = framebuffer->GetHandle();
+        renderPassBeginInfo.renderPass =
+            renderTargetSwapchain->GetRenderPass()->GetHandle();
+        renderPassBeginInfo.framebuffer =
+            renderTargetSwapchain->GetCurrentFramebuffer();
         renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
         renderPassBeginInfo.renderArea.offset = {0, 0};
 

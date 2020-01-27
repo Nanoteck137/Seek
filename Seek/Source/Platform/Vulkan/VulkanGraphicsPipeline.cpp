@@ -63,9 +63,9 @@ namespace Seek
             VulkanGraphicsContext::Get()->GetSwapchain();
         VkViewport viewport = {};
         viewport.x = 0.0f;
-        viewport.y = 0.0f;
+        viewport.y = swapchain->GetExtent().height;
         viewport.width = (float32)swapchain->GetExtent().width;
-        viewport.height = (float32)swapchain->GetExtent().height;
+        viewport.height = -(float32)swapchain->GetExtent().height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 

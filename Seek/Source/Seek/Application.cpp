@@ -20,21 +20,28 @@
 #include "Platform/Vulkan/VulkanCommandQueue.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
+#include "Platform/Vulkan/VulkanUniformBuffer.h"
 
 #include "Seek/System/FileSystem.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 
 #include <volk.h>
-
 #include <vk_mem_alloc.h>
-
 #include <spirv_reflect.hpp>
 
 namespace Seek
 {
     Application* Application::s_Instance = nullptr;
+
+    struct UniformBufferObject
+    {
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 proj;
+    };
 
     struct VulkanObjects
     {
@@ -43,14 +50,15 @@ namespace Seek
         VkQueue GraphicsQueue;
         VkQueue PresentQueue;
 
-        VulkanRenderPass* RenderPass;
-        std::vector<VulkanFramebuffer*> Framebuffers;
-
         VulkanPipelineLayout* PipelineLayout;
         VulkanGraphicsPipeline* Pipeline;
 
         VulkanVertexBuffer* VertexBuffer;
         VulkanIndexBuffer* IndexBuffer;
+        VulkanUniformBuffer* UniformBuffer;
+
+        VkDescriptorPool DescriptorPool;
+        VkDescriptorSet DescriptorSet;
 
         VulkanCommandQueue* CommandQueue;
         VulkanCommandBuffer* CommandBuffer;
@@ -108,34 +116,31 @@ namespace Seek
 
         SK_CORE_INFO(source);
 
-        const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}}};
-
-        const std::vector<uint32> indices = {0, 1, 2, 2, 3, 0};
-
         VulkanGraphicsContext* context = dynamic_cast<VulkanGraphicsContext*>(
             m_Window->GetGraphicsContext());
 
         VkDevice device = context->GetDevice();
         VmaAllocator allocator = context->GetMemoryAllocator();
         VulkanSwapchain* swapchain = context->GetSwapchain();
-        VulkanRenderPass* renderPass =
-            new VulkanRenderPass(swapchain->GetFormat());
 
-        std::vector<VulkanFramebuffer*> framebuffers(
-            swapchain->GetImageCount());
+        const std::vector<Vertex> vertices = {
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+            {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+        };
 
-        for (int i = 0; i < swapchain->GetImageCount(); i++)
-        {
-            VkImageView attachment = swapchain->GetImageViews()[i];
+        const std::vector<uint32> indices = {0, 1, 2, 2, 3, 0};
 
-            framebuffers[i] = new VulkanFramebuffer(
-                renderPass, attachment, swapchain->GetExtent().width,
-                swapchain->GetExtent().height);
-        }
+        UniformBufferObject uniforms = {};
+        uniforms.model = glm::mat4(1.0f);
+        uniforms.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+                                    glm::vec3(0.0f, 0.0f, 0.0f),
+                                    glm::vec3(0.0f, 1.0f, 0.0f));
+        uniforms.proj = glm::perspective(
+            glm::radians(45.0f),
+            swapchain->GetExtent().width / (float)swapchain->GetExtent().height,
+            0.1f, 10.0f);
 
         m_TriangleShader =
             Shader::Create("Assets/Shaders/Vulkan/triangle.vert.spv",
@@ -143,7 +148,7 @@ namespace Seek
 
         VulkanPipelineLayout* pipelineLayout = new VulkanPipelineLayout();
         VulkanGraphicsPipeline* pipeline = new VulkanGraphicsPipeline(
-            renderPass,
+            context->GetRenderTarget()->GetRenderPass(),
             std::dynamic_pointer_cast<VulkanShader>(m_TriangleShader).get(),
             pipelineLayout);
 
@@ -152,6 +157,55 @@ namespace Seek
 
         VulkanIndexBuffer* indexBuffer =
             new VulkanIndexBuffer(indices.data(), indices.size());
+
+        VulkanUniformBuffer* uniformBuffer =
+            new VulkanUniformBuffer(&uniforms, sizeof(uniforms));
+
+        VkDescriptorPoolSize poolSize = {};
+        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSize.descriptorCount = 1;
+
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
+        descriptorPoolCreateInfo.sType =
+            VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        descriptorPoolCreateInfo.poolSizeCount = 1;
+        descriptorPoolCreateInfo.pPoolSizes = &poolSize;
+        descriptorPoolCreateInfo.maxSets = 1;
+
+        VkDescriptorPool descriptorPool = 0;
+        VK_CHECK(vkCreateDescriptorPool(device, &descriptorPoolCreateInfo,
+                                        nullptr, &descriptorPool));
+
+        VkDescriptorSetLayout descriptorSetLayout =
+            pipelineLayout->GetDescriptorSetLayout();
+        VkDescriptorSetAllocateInfo descriptorSetAllocInfo = {};
+        descriptorSetAllocInfo.sType =
+            VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetAllocInfo.descriptorPool = descriptorPool;
+        descriptorSetAllocInfo.descriptorSetCount = 1;
+        descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
+
+        VkDescriptorSet descriptorSet = 0;
+        VK_CHECK(vkAllocateDescriptorSets(device, &descriptorSetAllocInfo,
+                                          &descriptorSet));
+
+        VkDescriptorBufferInfo descriptorBufferInfo = {};
+        descriptorBufferInfo.buffer = uniformBuffer->GetHandle();
+        descriptorBufferInfo.offset = 0;
+        descriptorBufferInfo.range = sizeof(UniformBufferObject);
+
+        VkWriteDescriptorSet descriptorWrite = {};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSet;
+        descriptorWrite.dstBinding = 0;
+        descriptorWrite.dstArrayElement = 0;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.pBufferInfo = &descriptorBufferInfo;
+        descriptorWrite.pImageInfo = nullptr;
+        descriptorWrite.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 
         VulkanCommandQueue* commandQueue =
             new VulkanCommandQueue(context->GetGraphicsQueue());
@@ -164,14 +218,15 @@ namespace Seek
         obj.GraphicsQueue = context->GetGraphicsQueue();
         obj.PresentQueue = context->GetPresentQueue();
 
-        obj.RenderPass = renderPass;
-        obj.Framebuffers = framebuffers;
-
         obj.PipelineLayout = pipelineLayout;
         obj.Pipeline = pipeline;
 
         obj.VertexBuffer = vertexBuffer;
         obj.IndexBuffer = indexBuffer;
+        obj.UniformBuffer = uniformBuffer;
+
+        obj.DescriptorPool = descriptorPool;
+        obj.DescriptorSet = descriptorSet;
 
         obj.CommandQueue = commandQueue;
         obj.CommandBuffer = commandBuffer;
@@ -197,11 +252,6 @@ namespace Seek
 
         delete obj.Pipeline;
         delete obj.PipelineLayout;
-
-        for (VulkanFramebuffer* framebuffer : obj.Framebuffers)
-            delete framebuffer;
-
-        delete obj.RenderPass;
 
         m_Window.release();
 
@@ -271,21 +321,22 @@ namespace Seek
                 layer->OnUpdate(timestep);
 
             VulkanGraphicsContext* context = VulkanGraphicsContext::Get();
-            VulkanSwapchain* swapchain = context->GetSwapchain();
-
-            uint32 imageIndex = context->GetCurrentImage();
 
             // ---------------------------
             obj.CommandBuffer->Begin();
 
-            obj.CommandBuffer->BeginRenderPass(obj.RenderPass,
-                                               obj.Framebuffers[imageIndex]);
+            obj.CommandBuffer->BeginRenderPass(context->GetRenderTarget());
 
             obj.CommandBuffer->Clear();
             obj.CommandBuffer->BindPipeline(obj.Pipeline);
 
             obj.CommandBuffer->BindVertexBuffer(obj.VertexBuffer);
             obj.CommandBuffer->BindIndexBuffer(obj.IndexBuffer);
+
+            vkCmdBindDescriptorSets(obj.CommandBuffer->GetCurrentHandle(),
+                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    obj.PipelineLayout->GetHandle(), 0, 1,
+                                    &obj.DescriptorSet, 0, nullptr);
 
             obj.CommandBuffer->DrawIndexed(6, 0);
 

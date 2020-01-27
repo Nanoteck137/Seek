@@ -3,6 +3,7 @@
 #include "Seek/Renderer/GraphicsContext.h"
 
 #include "Platform/Vulkan/VulkanSwapchain.h"
+#include "Platform/Vulkan/VulkanRenderTargetSwapchain.h"
 
 #include <volk.h>
 
@@ -72,6 +73,11 @@ namespace Seek
 
         inline uint32 GetCurrentImage() { return m_CurrentImage; }
 
+        inline VulkanRenderTargetSwapchain* GetRenderTarget() const
+        {
+            return m_RenderTarget;
+        }
+
     public:
         static inline VulkanGraphicsContext* Get() { return s_Instance; }
 
@@ -114,6 +120,8 @@ namespace Seek
         VkSemaphore m_RenderFinishedSemaphore = 0;
 
         uint32 m_CurrentImage = 0;
+
+        VulkanRenderTargetSwapchain* m_RenderTarget;
 
     private:
         static VulkanGraphicsContext* s_Instance;

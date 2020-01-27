@@ -14,8 +14,13 @@ namespace Seek
         ~VulkanPipelineLayout();
 
         inline VkPipelineLayout GetHandle() const { return m_Handle; }
+        inline VkDescriptorSetLayout GetDescriptorSetLayout() const
+        {
+            return m_DescriptorSetLayout;
+        }
 
     private:
         VkPipelineLayout m_Handle = 0;
+        VkDescriptorSetLayout m_DescriptorSetLayout = 0;
     };
 }
