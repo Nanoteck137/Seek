@@ -5,8 +5,30 @@
 
 namespace Seek
 {
-    VulkanCommandQueue::VulkanCommandQueue(VkQueue queue) : m_Queue(queue) {}
-    VulkanCommandQueue::~VulkanCommandQueue() {}
+    VulkanCommandQueue::VulkanCommandQueue(VkQueue queue) : m_Queue(queue)
+    {
+        CreateFence();
+    }
+
+    VulkanCommandQueue::~VulkanCommandQueue()
+    {
+        if (m_ExecutedFence)
+        {
+            vkDestroyFence(VulkanGraphicsContext::Get()->GetDevice(),
+                           m_ExecutedFence, nullptr);
+            m_ExecutedFence = 0;
+        }
+    }
+
+    void VulkanCommandQueue::CreateFence()
+    {
+        VkFenceCreateInfo fenceCreateInfo = {};
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        VK_CHECK(vkCreateFence(VulkanGraphicsContext::Get()->GetDevice(),
+                               &fenceCreateInfo, nullptr, &m_ExecutedFence));
+    }
 
     void VulkanCommandQueue::Submit(VulkanCommandBuffer* commandBuffer)
     {
@@ -19,7 +41,15 @@ namespace Seek
         submitInfo.pCommandBuffers = &handle;
         submitInfo.signalSemaphoreCount = 0;
 
-        VK_CHECK(vkQueueSubmit(m_Queue, 1, &submitInfo, 0));
+        VK_CHECK(vkResetFences(VulkanGraphicsContext::Get()->GetDevice(), 1,
+                               &m_ExecutedFence));
+        VK_CHECK(vkQueueSubmit(m_Queue, 1, &submitInfo, m_ExecutedFence));
+    }
+
+    void VulkanCommandQueue::WaitExecutionFinished()
+    {
+        VK_CHECK(vkWaitForFences(VulkanGraphicsContext::Get()->GetDevice(), 1,
+                                 &m_ExecutedFence, VK_TRUE, UINT64_MAX));
     }
 
     void VulkanCommandQueue::WaitIdle() { VK_CHECK(vkQueueWaitIdle(m_Queue)); }

@@ -15,9 +15,14 @@ namespace Seek
         ~VulkanCommandQueue();
 
         void Submit(VulkanCommandBuffer* commandBuffer);
+        void WaitExecutionFinished();
         void WaitIdle();
 
     private:
+        void CreateFence();
+
+    private:
         VkQueue m_Queue = 0;
+        VkFence m_ExecutedFence = 0;
     };
 }

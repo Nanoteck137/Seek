@@ -322,6 +322,8 @@ namespace Seek
 
             VulkanGraphicsContext* context = VulkanGraphicsContext::Get();
 
+            obj.CommandQueue->WaitExecutionFinished();
+
             // ---------------------------
             obj.CommandBuffer->Begin();
 

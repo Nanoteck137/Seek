@@ -177,7 +177,6 @@ namespace Seek
         presentInfo.pResults = nullptr; // Optional
 
         vkQueuePresentKHR(m_PresentQueue, &presentInfo);
-        vkQueueWaitIdle(m_PresentQueue);
 
         GetNextIndex();
     }
