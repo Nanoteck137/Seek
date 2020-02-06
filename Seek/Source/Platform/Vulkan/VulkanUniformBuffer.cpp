@@ -24,12 +24,7 @@ namespace Seek
         VK_CHECK(vmaCreateBuffer(allocator, &bufferCreateInfo, &allocInfo,
                                  &m_Handle, &m_Memory, nullptr));
 
-        void* dataPtr;
-        vmaMapMemory(allocator, m_Memory, &dataPtr);
-
-        memcpy(dataPtr, data, size);
-
-        vmaUnmapMemory(allocator, m_Memory);
+        SetData(data, size);
     }
 
     VulkanUniformBuffer::~VulkanUniformBuffer()
@@ -47,5 +42,17 @@ namespace Seek
                             nullptr);
             m_Handle = 0;
         }
+    }
+
+    void VulkanUniformBuffer::SetData(const void* data, uint32 size)
+    {
+        void* dataPtr;
+        vmaMapMemory(VulkanGraphicsContext::Get()->GetMemoryAllocator(),
+                     m_Memory, &dataPtr);
+
+        memcpy(dataPtr, data, size);
+
+        vmaUnmapMemory(VulkanGraphicsContext::Get()->GetMemoryAllocator(),
+                       m_Memory);
     }
 }

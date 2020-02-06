@@ -88,6 +88,16 @@ namespace Seek
 
         m_RenderTarget = new VulkanRenderTargetSwapchain(m_Swapchain);
 
+        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+        commandPoolCreateInfo.sType =
+            VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.flags =
+            VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        commandPoolCreateInfo.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
+
+        VK_CHECK(vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr,
+                                     &m_CommandPool));
+
         CreateSemaphores();
 
         GetNextIndex();
@@ -95,6 +105,18 @@ namespace Seek
 
     void VulkanGraphicsContext::Shutdown()
     {
+        if (m_CommandPool)
+        {
+            vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+            m_CommandPool = 0;
+        }
+
+        if (m_RenderTarget)
+        {
+            delete m_RenderTarget;
+            m_RenderTarget = nullptr;
+        }
+
         if (m_RenderFinishedSemaphore)
         {
             vkDestroySemaphore(m_Device, m_RenderFinishedSemaphore, nullptr);
@@ -179,6 +201,42 @@ namespace Seek
         vkQueuePresentKHR(m_PresentQueue, &presentInfo);
 
         GetNextIndex();
+    }
+
+    VkCommandBuffer VulkanGraphicsContext::BeginSingleTimeCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo = {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = m_CommandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(m_Device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        return commandBuffer;
+    }
+
+    void VulkanGraphicsContext::EndSingleTimeCommandBuffer(
+        VkCommandBuffer commandBuffer)
+    {
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(m_GraphicsQueue);
+
+        vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &commandBuffer);
     }
 
     void VulkanGraphicsContext::CreateInstance()

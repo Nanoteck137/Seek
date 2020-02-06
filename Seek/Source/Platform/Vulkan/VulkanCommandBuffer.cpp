@@ -103,8 +103,7 @@ namespace Seek
             VulkanGraphicsContext::Get()->GetSwapchain();
 
         VkClearValue clearColor = {0.5f, 0.2f, 0.5f, 1.0f};
-        VkClearValue depthClear = {};
-        depthClear.depthStencil = {1.0f, 0};
+        VkClearDepthStencilValue depthClear = {1.0f, 0};
 
         VkClearAttachment colorAttachment = {};
         colorAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -114,7 +113,7 @@ namespace Seek
         VkClearAttachment depthAttachment = {};
         depthAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         depthAttachment.colorAttachment = 0;
-        depthAttachment.clearValue = depthClear;
+        depthAttachment.clearValue.depthStencil = depthClear;
 
         std::array<VkClearAttachment, 2> attachments = {colorAttachment,
                                                         depthAttachment};

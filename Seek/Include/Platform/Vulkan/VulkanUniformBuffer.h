@@ -14,6 +14,8 @@ namespace Seek
         VulkanUniformBuffer(const void* data, uint32 size);
         ~VulkanUniformBuffer();
 
+        void SetData(const void* data, uint32 size);
+
         inline VkBuffer GetHandle() const { return m_Handle; }
         inline VmaAllocation GetMemory() const { return m_Memory; }
 

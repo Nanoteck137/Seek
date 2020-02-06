@@ -33,7 +33,7 @@ namespace Seek
         inputDesc.stride = sizeof(Vertex);
         inputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-        VkVertexInputAttributeDescription attributeDescriptions[2];
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -44,14 +44,21 @@ namespace Seek
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attributeDescriptions[1].offset = offsetof(Vertex, color);
 
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
         vertexInputInfo.sType =
             VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexBindingDescriptionCount = 1;
         vertexInputInfo.pVertexBindingDescriptions = &inputDesc;
 
-        vertexInputInfo.vertexAttributeDescriptionCount = 2;
-        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
+        vertexInputInfo.vertexAttributeDescriptionCount =
+            attributeDescriptions.size();
+        vertexInputInfo.pVertexAttributeDescriptions =
+            attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
         inputAssembly.sType =
@@ -103,7 +110,7 @@ namespace Seek
             VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         depthStencil.depthTestEnable = VK_TRUE;
         depthStencil.depthWriteEnable = VK_TRUE;
-        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
         depthStencil.depthBoundsTestEnable = VK_FALSE;
         depthStencil.minDepthBounds = 0.0f;
         depthStencil.maxDepthBounds = 1.0f;

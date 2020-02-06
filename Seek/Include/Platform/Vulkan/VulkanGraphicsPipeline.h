@@ -17,10 +17,12 @@ namespace Seek
     {
         glm::vec3 position;
         glm::vec4 color;
+        glm::vec2 texCoord;
 
         bool operator==(const Vertex& other) const
         {
-            return position == other.position && color == other.color;
+            return position == other.position && color == other.color &&
+                   texCoord == other.texCoord;
         }
     };
 

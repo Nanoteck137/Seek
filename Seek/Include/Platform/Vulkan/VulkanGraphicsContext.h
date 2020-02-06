@@ -32,6 +32,9 @@ namespace Seek
 
         virtual void Present() override;
 
+        VkCommandBuffer BeginSingleTimeCommandBuffer();
+        void EndSingleTimeCommandBuffer(VkCommandBuffer commandBuffer);
+
         inline VkInstance GetInstance() const { return m_Instance; }
         inline VkSurfaceKHR GetSurface() const { return m_Surface; }
 
@@ -121,7 +124,9 @@ namespace Seek
 
         uint32 m_CurrentImage = 0;
 
-        VulkanRenderTargetSwapchain* m_RenderTarget;
+        VulkanRenderTargetSwapchain* m_RenderTarget = nullptr;
+
+        VkCommandPool m_CommandPool = 0;
 
     private:
         static VulkanGraphicsContext* s_Instance;

@@ -21,8 +21,10 @@
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Platform/Vulkan/VulkanTexture.h"
 
 #include "Seek/System/FileSystem.h"
+#include "Seek/Input.h"
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_ENABLE_EXPERIMENTAL
@@ -45,8 +47,9 @@ namespace std
         size_t operator()(Seek::Vertex const& vertex) const
         {
             return ((hash<glm::vec3>()(vertex.position) ^
-                     (hash<glm::vec3>()(vertex.color) << 1)) >>
-                    1);
+                     (hash<glm::vec4>()(vertex.color) << 1)) >>
+                    1) ^
+                   (hash<glm::vec2>()(vertex.texCoord) << 1);
         }
     };
 }
@@ -70,6 +73,7 @@ namespace Seek
         VulkanVertexBuffer* VertexBuffer;
         VulkanIndexBuffer* IndexBuffer;
         VulkanUniformBuffer* UniformBuffer;
+        VulkanTexture* Texture;
 
         VkDescriptorPool DescriptorPool;
         VkDescriptorSet DescriptorSet;
@@ -153,7 +157,7 @@ namespace Seek
         String warn, err;
 
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
-                              "Assets/Models/test.obj"))
+                              "Assets/Models/test2.obj"))
         {
             String msg = warn + err;
             SK_CORE_ASSERT(false, "{0}", msg);
@@ -171,23 +175,28 @@ namespace Seek
                                    attrib.vertices[3 * index.vertex_index + 2]};
 
                 vertex.color = {1.0f, 1.0f, 1.0f, 1.0f};
+                vertex.texCoord = {
+                    attrib.texcoords[2 * index.texcoord_index + 0],
+                    attrib.texcoords[2 * index.texcoord_index + 1],
+                };
 
-                if (uniqueVertices.count(vertex) == 0)
+                // if (uniqueVertices.count(vertex) == 0)
                 {
-                    uniqueVertices[vertex] =
-                        static_cast<uint32_t>(vertices.size());
+                    // uniqueVertices[vertex] =
+                    // static_cast<uint32_t>(vertices.size());
                     vertices.push_back(vertex);
                 }
 
-                indices.push_back(uniqueVertices[vertex]);
+                indices.push_back(indices.size());
             }
         }
 
         UniformBufferObject uniforms = {};
-        uniforms.model = glm::mat4(1.0f);
-        uniforms.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+        uniforms.model =
+            glm::scale(glm::mat4(1.0f), glm::vec3(0.4f, 0.4f, 0.4f));
+        uniforms.view = glm::lookAt(glm::vec3(-2.0f, 2.0f, -2.0f),
                                     glm::vec3(0.0f, 0.0f, 0.0f),
-                                    glm::vec3(0.0f, 0.0f, 1.0f));
+                                    glm::vec3(0.0f, 1.0f, 0.0f));
         uniforms.proj =
             glm::perspective(glm::radians(45.0f),
                              swapchain->GetExtent().width /
@@ -213,15 +222,19 @@ namespace Seek
         VulkanUniformBuffer* uniformBuffer =
             new VulkanUniformBuffer(&uniforms, sizeof(uniforms));
 
-        VkDescriptorPoolSize poolSize = {};
-        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        poolSize.descriptorCount = 1;
+        VulkanTexture* texture = new VulkanTexture("Assets/Textures/model.jpg");
+
+        std::array<VkDescriptorPoolSize, 2> poolSizes = {};
+        poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSizes[0].descriptorCount = 1;
+        poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        poolSizes[1].descriptorCount = 1;
 
         VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
         descriptorPoolCreateInfo.sType =
             VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        descriptorPoolCreateInfo.poolSizeCount = 1;
-        descriptorPoolCreateInfo.pPoolSizes = &poolSize;
+        descriptorPoolCreateInfo.poolSizeCount = poolSizes.size();
+        descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
         descriptorPoolCreateInfo.maxSets = 1;
 
         VkDescriptorPool descriptorPool = 0;
@@ -246,18 +259,36 @@ namespace Seek
         descriptorBufferInfo.offset = 0;
         descriptorBufferInfo.range = sizeof(UniformBufferObject);
 
-        VkWriteDescriptorSet descriptorWrite = {};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptorSet;
-        descriptorWrite.dstBinding = 0;
-        descriptorWrite.dstArrayElement = 0;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrite.descriptorCount = 1;
-        descriptorWrite.pBufferInfo = &descriptorBufferInfo;
-        descriptorWrite.pImageInfo = nullptr;
-        descriptorWrite.pTexelBufferView = nullptr;
+        VkDescriptorImageInfo descriptorImageInfo = {};
+        descriptorImageInfo.imageLayout =
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        descriptorImageInfo.imageView = texture->GetImageView();
+        descriptorImageInfo.sampler = texture->GetSampler();
 
-        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet = descriptorSet;
+        descriptorWrites[0].dstBinding = 0;
+        descriptorWrites[0].dstArrayElement = 0;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo = &descriptorBufferInfo;
+        descriptorWrites[0].pImageInfo = nullptr;
+        descriptorWrites[0].pTexelBufferView = nullptr;
+
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = descriptorSet;
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType =
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pBufferInfo = nullptr;
+        descriptorWrites[1].pImageInfo = &descriptorImageInfo;
+        descriptorWrites[1].pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(device, descriptorWrites.size(),
+                               descriptorWrites.data(), 0, nullptr);
 
         VulkanCommandQueue* commandQueue =
             new VulkanCommandQueue(context->GetGraphicsQueue());
