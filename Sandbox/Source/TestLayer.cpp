@@ -1,9 +1,6 @@
 #include "TestLayer.h"
 
-TestLayer::TestLayer()
-    : Layer("Test"), m_Camera(4 * -1.6f, 4 * 1.6f, 4 * -0.9f, 4 * 0.9f)
-{
-}
+TestLayer::TestLayer() : Layer("Test"), m_Camera(0.0f, 1280.0f, 0.0f, 720.0f) {}
 
 void TestLayer::OnAttach()
 {
@@ -23,8 +20,10 @@ void TestLayer::OnAttach()
         m_World, Seek::PhysicsBodyType::Static, glm::vec2(-25.0f, -4.0f),
         glm::vec2(50.0f, 1.0f));
 
-    m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
-    m_Sound->Play();
+    m_Font = Seek::CreateRef<Seek::Font>("Assets/Fonts/Roboto-Regular.ttf");
+
+    // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
+    // m_Sound->Play();
     // Sound* sound = Seek::AudioEngine::CreateSound();
     // effect->Play();
 }
@@ -87,7 +86,7 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     Seek::Renderer2D::BeginScene(m_Camera);
 
-    Seek::Renderer2D::DrawQuad(m_Box->GetPosition(), m_Box->GetSize(),
+    /*Seek::Renderer2D::DrawQuad(m_Box->GetPosition(), m_Box->GetSize(),
                                {1.0f, 0.0f, 1.0f, 1.0f});
 
     Seek::Renderer2D::DrawQuad(m_Box2->GetPosition(), m_Box2->GetSize(),
@@ -99,7 +98,9 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     float x = Lerp(0.0f, 2.0f, m_Progress);
     Seek::Renderer2D::DrawQuad({-4 * 1.6f + 0.1f + x, -0.5f}, {2.0f, 4.0f},
-                               {1.0f, 0.0f, 1.0f, 1.0f});
+                               {1.0f, 0.0f, 1.0f, 1.0f});*/
+
+    Seek::Renderer2D::DrawText(glm::vec2(0.0f, 0.0f), "Hello World", m_Font);
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();

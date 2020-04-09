@@ -164,6 +164,10 @@ project "stb"
         -- stb_image
         "%{prj.name}/stb_image.h",
         "%{prj.name}/stb_image.cpp",
+
+        -- stb_truetype
+        "%{prj.name}/stb_truetype.h",
+        "%{prj.name}/stb_truetype.cpp",
     }
     
     filter "system:windows"

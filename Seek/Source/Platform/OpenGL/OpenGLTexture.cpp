@@ -8,14 +8,23 @@
 
 namespace Seek
 {
-    OpenGLTexture2D::OpenGLTexture2D(uint32 width, uint32 height)
+    OpenGLTexture2D::OpenGLTexture2D(uint32 width, uint32 height,
+                                     TextureParameters params)
         : m_Width(width), m_Height(height)
     {
         SK_PROFILE_FUNCTION();
 
         // TODO(patrik): Change this!??!?!?
-        m_InternalFormat = GL_RGBA8;
-        m_DataFormat = GL_RGBA;
+        if (params.Format == TextureFormat::ALPHA)
+        {
+            m_InternalFormat = GL_RGB8;
+            m_DataFormat = GL_RED;
+        }
+        else
+        {
+            m_InternalFormat = GL_RGBA8;
+            m_DataFormat = GL_RGBA;
+        }
 
         SK_CORE_ASSERT(m_InternalFormat && m_DataFormat,
                        "Format not supported");

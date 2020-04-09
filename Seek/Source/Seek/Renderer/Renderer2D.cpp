@@ -93,7 +93,8 @@ namespace Seek
                             22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
         s_Data->Shader->SetUnifromIntArray("u_Textures", values, 32);
 
-        s_Data->WhiteTexture = Texture2D::Create(1, 1);
+        TextureParameters params = {};
+        s_Data->WhiteTexture = Texture2D::Create(1, 1, params);
 
         uint8 data[4] = {0xff, 0xff, 0xff, 0xff};
         s_Data->WhiteTexture->SetData(data, sizeof(data));
@@ -253,6 +254,50 @@ namespace Seek
         s_Data->VertexBufferDataWritePtr++;
 
         s_Data->IndexCounter += 6;
+    }
+
+    void Renderer2D::DrawText(const glm::vec2& position, const String& text,
+                              const Ref<Font>& font)
+    {
+        float textureID = SubmitTexture(font->GetTexture());
+
+        char c = 'A';
+
+        FontGlyph glyph = font->GetGlyphInfo(c, position.x, position.y);
+
+        glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            glm::vec3(glyph.Pos0.x, glyph.Pos0.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord =
+            glm::vec2(glyph.TexCoord0.x, glyph.TexCoord0.y);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            glm::vec3(glyph.Pos0.x, glyph.Pos1.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord =
+            glm::vec2(glyph.TexCoord0.x, glyph.TexCoord1.y);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            glm::vec3(glyph.Pos1.x, glyph.Pos1.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord =
+            glm::vec2(glyph.TexCoord1.x, glyph.TexCoord1.y);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            glm::vec3(glyph.Pos1.x, glyph.Pos0.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord =
+            glm::vec2(glyph.TexCoord1.x, glyph.TexCoord0.y);
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
     }
 
     const RenderStats& Renderer2D::GetRenderStats() { return s_Data->Stats; }

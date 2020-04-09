@@ -26,5 +26,7 @@ private:
     Seek::Ref<Seek::PhysicsBox2D> m_Box2;
     Seek::Ref<Seek::PhysicsBox2D> m_GroundBox;
 
+    Seek::Ref<Seek::Font> m_Font;
+
     float m_Progress = 0.0f;
 };

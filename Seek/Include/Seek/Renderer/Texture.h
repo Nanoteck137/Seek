@@ -5,6 +5,19 @@
 
 namespace Seek
 {
+    enum class TextureFormat
+    {
+        NONE = 0,
+        RGB,
+        RGBA,
+        ALPHA
+    };
+
+    struct TextureParameters
+    {
+        TextureFormat Format;
+    };
+
     class Texture
     {
     public:
@@ -23,7 +36,8 @@ namespace Seek
     public:
         virtual ~Texture2D() {}
 
-        static Ref<Texture2D> Create(uint32 width, uint32 height);
+        static Ref<Texture2D> Create(uint32 width, uint32 height,
+                                     TextureParameters params);
         static Ref<Texture2D> Create(const String& path);
     };
 }

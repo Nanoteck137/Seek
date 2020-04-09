@@ -7,7 +7,7 @@ namespace Seek
     class OpenGLTexture2D : public Texture2D
     {
     public:
-        OpenGLTexture2D(uint32 width, uint32 height);
+        OpenGLTexture2D(uint32 width, uint32 height, TextureParameters params);
         OpenGLTexture2D(const String& path);
         ~OpenGLTexture2D();
 
