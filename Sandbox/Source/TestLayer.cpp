@@ -38,14 +38,6 @@ static float Lerp(float v0, float v1, float t) { return (1 - t) * v0 + t * v1; }
 
 void TestLayer::OnUpdate(Seek::Timestep ts)
 {
-    static float dir = 1.0f;
-    if (m_Progress >= 1.0f || m_Progress < 0)
-    {
-        dir *= -1.0f;
-    }
-
-    m_Progress += ts * dir;
-
     m_World->OnUpdate(ts);
 
     const float cameraMoveSpeed = 5.0f;
@@ -105,7 +97,8 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
                                {1.0f, 0.0f, 1.0f, 1.0f});*/
 
     Seek::Renderer2D::DrawText(glm::vec2(32.0f, 32.0f), "Hello World", m_Font);
-    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), "Hello World", m_Font2);
+    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), "Hello World", m_Font2,
+                               m_Scale);
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
@@ -133,6 +126,6 @@ void TestLayer::OnImGuiRender(Seek::Timestep ts)
     ImGui::End();
 
     ImGui::Begin("Test");
-    ImGui::SliderFloat("Progress", &m_Progress, 0.0f, 1.0f);
+    ImGui::SliderFloat("Text Scale", &m_Scale, 0.0f, 2.0f);
     ImGui::End();
 }

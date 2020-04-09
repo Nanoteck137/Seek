@@ -267,7 +267,7 @@ namespace Seek
     }
 
     void Renderer2D::DrawText(const glm::vec2& position, const String& text,
-                              const Ref<Font>& font)
+                              const Ref<Font>& font, float scale)
     {
         float textureID = SubmitTexture(font->GetTexture());
         glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -275,22 +275,19 @@ namespace Seek
         float x = position.x;
         for (int i = 0; i < text.size(); i++)
         {
-            // if (i > 1)
-            // break;
-
             char c = text[i];
             FontGlyph glyph = font->GetGlyphInfo(c);
 
-            float width = glyph.Size.x;  // glyph.Pos1.x - glyph.Pos0.x;
-            float height = glyph.Size.y; // glyph.Pos0.y - glyph.Pos1.y;
+            float width = glyph.Size.x;
+            float height = glyph.Size.y;
 
-            float xOffset = glyph.Offset.x; // x - width;
-            float yOffset = glyph.Offset.y; // y - height;
+            float xOffset = glyph.Offset.x;
+            float yOffset = glyph.Offset.y;
 
-            float x0 = x + xOffset;
-            float y0 = position.y - yOffset;
-            float x1 = x0 + width;
-            float y1 = y0 + height;
+            float x0 = x + xOffset * scale;
+            float y0 = position.y - yOffset * scale;
+            float x1 = x0 + width * scale;
+            float y1 = y0 + height * scale;
 
             float u0 = glyph.UVRect.x;
             float v0 = glyph.UVRect.y;
@@ -325,7 +322,7 @@ namespace Seek
             s_Data->VertexBufferDataWritePtr->TextureID = textureID;
             s_Data->VertexBufferDataWritePtr++;
 
-            x += glyph.XAdvance;
+            x += glyph.XAdvance * scale;
 
             s_Data->IndexCounter += 6;
         }

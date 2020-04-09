@@ -29,5 +29,7 @@ private:
     Seek::Ref<Seek::Font> m_Font;
     Seek::Ref<Seek::Font> m_Font2;
 
+    float m_Scale = 1.0f;
+
     float m_Progress = 0.0f;
 };

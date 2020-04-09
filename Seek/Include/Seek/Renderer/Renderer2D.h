@@ -43,7 +43,7 @@ namespace Seek
                              const Ref<Texture2D>& texture);
 
         static void DrawText(const glm::vec2& position, const String& text,
-                             const Ref<Font>& font);
+                             const Ref<Font>& font, float scale = 1.0f);
 
         static const RenderStats& GetRenderStats();
 

@@ -20,8 +20,6 @@ namespace Seek
         float XAdvance;
     };
 
-    struct FontData;
-
     class Font
     {
     public:
