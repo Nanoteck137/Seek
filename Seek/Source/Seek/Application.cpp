@@ -6,6 +6,8 @@
 #include "Seek/Renderer/Renderer.h"
 #include "Seek/Renderer/Renderer2D.h"
 
+#include "Seek/Renderer/FontManager.h"
+
 #include "Seek/Audio/AudioEngine.h"
 
 #include "Seek/Debug/Instrumentor.h"
@@ -33,6 +35,7 @@ namespace Seek
 
         Renderer::Init();
         AudioEngine::Init();
+        FontManager::Init();
 
         m_Running = true;
     }

@@ -20,7 +20,11 @@ void TestLayer::OnAttach()
         m_World, Seek::PhysicsBodyType::Static, glm::vec2(-25.0f, -4.0f),
         glm::vec2(50.0f, 1.0f));
 
-    m_Font = Seek::CreateRef<Seek::Font>("Assets/Fonts/Roboto-Regular.ttf");
+    m_Font =
+        Seek::FontManager::CreateFont("Assets/Fonts/Roboto-Regular.ttf", 40.0f);
+    m_Font2 =
+        Seek::FontManager::CreateFont("Assets/Fonts/Roboto-Regular.ttf", 30.0f);
+    // m_Font = Seek::CreateRef<Seek::Font>("Assets/Fonts/Roboto-Regular.ttf");
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();
@@ -101,6 +105,7 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
                                {1.0f, 0.0f, 1.0f, 1.0f});*/
 
     Seek::Renderer2D::DrawText(glm::vec2(32.0f, 32.0f), "Hello World", m_Font);
+    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), "Hello World", m_Font2);
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();

@@ -25,17 +25,19 @@ namespace Seek
     class Font
     {
     public:
-        Font(const String& filename);
+        Font(const Ref<Texture2D>& texture, FontGlyph* glyphData,
+             char firstChar, char lastChar);
 
         FontGlyph GetGlyphInfo(char c);
 
+    public:
         inline const Ref<Texture2D>& GetTexture() const { return m_Texture; }
 
     private:
-        String m_Filename;
         Ref<Texture2D> m_Texture;
-        Buffer m_FileData;
+        FontGlyph* m_Glyphs;
 
-        FontData* m_Data;
+        char m_FirstChar;
+        char m_LastChar;
     };
 }

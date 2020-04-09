@@ -42,6 +42,7 @@ namespace Seek
 
     void Renderer2D::Init()
     {
+        SK_CORE_ASSERT(!s_Data, "Renderer2D already initialized");
         s_Data = new Renderer2DStorage();
 
         const uint32 MAX_QUADS = 100000;
@@ -104,8 +105,17 @@ namespace Seek
 
     void Renderer2D::Shutdown()
     {
-        delete[] s_Data->VertexBufferData;
-        delete s_Data;
+        if (s_Data->VertexBufferData)
+        {
+            delete[] s_Data->VertexBufferData;
+            s_Data->VertexBufferData = nullptr;
+        }
+
+        if (s_Data)
+        {
+            delete s_Data;
+            s_Data = nullptr;
+        }
     }
 
     void Renderer2D::BeginScene(const OrthographicCamera& camera)
