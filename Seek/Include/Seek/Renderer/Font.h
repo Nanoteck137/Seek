@@ -17,6 +17,8 @@ namespace Seek
 
         glm::vec2 TexCoord0;
         glm::vec2 TexCoord1;
+
+        glm::vec2 Offset;
     };
 
     struct FontData;

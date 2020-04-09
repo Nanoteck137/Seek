@@ -61,7 +61,8 @@ project "Seek"
         "imgui",
         "stb",
         "Box2D",
-        "opengl32.lib"
+        "opengl32.lib",
+        "xaudio2.lib"
     }
 
     filter "system:windows"

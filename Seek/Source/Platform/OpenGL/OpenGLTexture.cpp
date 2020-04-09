@@ -17,8 +17,8 @@ namespace Seek
         // TODO(patrik): Change this!??!?!?
         if (params.Format == TextureFormat::ALPHA)
         {
-            m_InternalFormat = GL_RGB8;
-            m_DataFormat = GL_RED;
+            m_InternalFormat = GL_RGBA8;
+            m_DataFormat = GL_RGBA;
         }
         else
         {
