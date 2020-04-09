@@ -10,6 +10,8 @@ namespace Seek
         OpenGLRendererAPI();
         ~OpenGLRendererAPI();
 
+        virtual void UpdateDisplaySize(int32 width, int32 height) override;
+
         virtual void Init() override;
         virtual void Shutdown() override;
 

@@ -35,6 +35,21 @@
 #include "Seek/Renderer/Font.h"
 #include "Seek/Renderer/FontManager.h"
 
+// ------------------ UI-------------------
+#include "Seek/UI/Components/UIBlock.h"
+
+#include "Seek/UI/Transition/Transition.h"
+#include "Seek/UI/Transition/SlideTransition.h"
+
+#include "Seek/UI/Constraints/UICenterConstraint.h"
+#include "Seek/UI/Constraints/UIPixelConstraint.h"
+#include "Seek/UI/Constraints/UIRelativeConstraint.h"
+#include "Seek/UI/Constraints/UITextHeightConstraint.h"
+
+#include "Seek/UI/UIConstraint.h"
+#include "Seek/UI/UIConstraints.h"
+#include "Seek/UI/UIManager.h"
+
 // --------------- PHYSICS 2D ---------------
 #include "Seek/Physics/PhysicsWorld2D.h"
 #include "Seek/Physics/PhysicsBox2D.h"

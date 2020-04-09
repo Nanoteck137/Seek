@@ -24,6 +24,8 @@ namespace Seek
         virtual void Init() = 0;
         virtual void Shutdown() = 0;
 
+        virtual void UpdateDisplaySize(int32 width, int32 height) = 0;
+
         virtual void SetClearColor(const glm::vec4& color) = 0;
         virtual void Clear() = 0;
 

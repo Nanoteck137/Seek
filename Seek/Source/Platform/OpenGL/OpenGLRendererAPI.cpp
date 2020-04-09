@@ -11,6 +11,11 @@ namespace Seek
 
     OpenGLRendererAPI::~OpenGLRendererAPI() { SK_PROFILE_FUNCTION(); }
 
+    void OpenGLRendererAPI::UpdateDisplaySize(int32 width, int32 height)
+    {
+        glViewport(0, 0, width, height);
+    }
+
     void OpenGLRendererAPI::Init()
     {
         SK_PROFILE_FUNCTION();

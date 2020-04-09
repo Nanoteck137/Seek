@@ -15,6 +15,11 @@ public:
     void OnUpdate(Seek::Timestep ts) override;
     void OnImGuiRender(Seek::Timestep ts) override;
 
+    virtual void OnEvent(Seek::Event& event) override;
+
+private:
+    bool OnWindowResize(Seek::WindowResizeEvent& e);
+
 private:
     Seek::OrthographicCamera m_Camera;
     Seek::Ref<Seek::Texture2D> m_Texture;

@@ -31,6 +31,7 @@ namespace Seek
 
     private:
         bool OnWindowClosed(WindowCloseEvent& e);
+        bool OnWindowResize(WindowResizeEvent& e);
 
     private:
         bool m_Running = false;

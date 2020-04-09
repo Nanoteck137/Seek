@@ -54,6 +54,8 @@ namespace Seek
 
     void FontManager::Shutdown()
     {
+        SK_CORE_ASSERT(s_Data, "FontManager already shutdown");
+
         if (s_Data->TextureBuffer)
         {
             delete[] s_Data->TextureBuffer;

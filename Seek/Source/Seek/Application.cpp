@@ -8,6 +8,8 @@
 
 #include "Seek/Renderer/FontManager.h"
 
+#include "Seek/UI/UIManager.h"
+
 #include "Seek/Audio/AudioEngine.h"
 
 #include "Seek/Debug/Instrumentor.h"
@@ -36,6 +38,10 @@ namespace Seek
         Renderer::Init();
         AudioEngine::Init();
         FontManager::Init();
+        UIManager::Init();
+
+        UIManager::UpdateDisplaySize(m_Window->GetWidth(),
+                                     m_Window->GetHeight());
 
         m_Running = true;
     }
@@ -44,6 +50,8 @@ namespace Seek
     {
         AudioEngine::Shutdown();
         Renderer::Shutdown();
+        FontManager::Shutdown();
+        UIManager::Shutdown();
     }
 
     void Application::OnEvent(Event& e)
@@ -53,6 +61,8 @@ namespace Seek
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(
             SK_BIND_EVENT_FN(Application::OnWindowClosed));
+        dispatcher.Dispatch<WindowResizeEvent>(
+            SK_BIND_EVENT_FN(Application::OnWindowResize));
 
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
         {
@@ -67,6 +77,14 @@ namespace Seek
         m_Running = false;
 
         return true;
+    }
+
+    bool Application::OnWindowResize(WindowResizeEvent& e)
+    {
+        RenderCommand::UpdateDisplaySize(e.GetWidth(), e.GetHeight());
+        UIManager::UpdateDisplaySize(e.GetWidth(), e.GetHeight());
+
+        return false;
     }
 
     void Application::PushLayer(Layer* layer)

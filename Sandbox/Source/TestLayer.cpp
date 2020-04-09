@@ -24,7 +24,23 @@ void TestLayer::OnAttach()
         Seek::FontManager::CreateFont("Assets/Fonts/Roboto-Regular.ttf", 40.0f);
     m_Font2 =
         Seek::FontManager::CreateFont("Assets/Fonts/Roboto-Regular.ttf", 30.0f);
-    // m_Font = Seek::CreateRef<Seek::Font>("Assets/Fonts/Roboto-Regular.ttf");
+
+    Seek::UIContainer* container = Seek::UIManager::GetContainer();
+
+    Seek::UIConstraints* constraints = new Seek::UIConstraints();
+    constraints->SetX(new Seek::UICenterConstraint());
+    constraints->SetY(new Seek::UICenterConstraint());
+    constraints->SetWidth(new Seek::UIPixelConstraint(100));
+    constraints->SetHeight(new Seek::UIPixelConstraint(100));
+
+    Seek::UIBlock* block = new Seek::UIBlock();
+    container->Add(block, constraints);
+
+    Seek::Transition* transition = new Seek::Transition();
+    transition->Add(Seek::TransitionType::XPOS,
+                    new Seek::SlideTransition(-1.5f, 0.5f));
+
+    block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();
@@ -82,6 +98,8 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     Seek::Renderer2D::BeginScene(m_Camera);
 
+    Seek::UIManager::GetContainer()->Update(ts);
+
     /*Seek::Renderer2D::DrawQuad(m_Box->GetPosition(), m_Box->GetSize(),
                                {1.0f, 0.0f, 1.0f, 1.0f});
 
@@ -128,4 +146,18 @@ void TestLayer::OnImGuiRender(Seek::Timestep ts)
     ImGui::Begin("Test");
     ImGui::SliderFloat("Text Scale", &m_Scale, 0.0f, 2.0f);
     ImGui::End();
+}
+
+void TestLayer::OnEvent(Seek::Event& event)
+{
+    Seek::EventDispatcher dispatcher(event);
+    dispatcher.Dispatch<Seek::WindowResizeEvent>(
+        SK_BIND_EVENT_FN(TestLayer::OnWindowResize));
+}
+
+bool TestLayer::OnWindowResize(Seek::WindowResizeEvent& e)
+{
+    m_Camera =
+        Seek::OrthographicCamera(0.0f, e.GetWidth(), 0.0f, e.GetHeight());
+    return false;
 }

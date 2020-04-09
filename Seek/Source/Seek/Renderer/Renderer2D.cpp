@@ -105,6 +105,8 @@ namespace Seek
 
     void Renderer2D::Shutdown()
     {
+        SK_CORE_ASSERT(s_Data, "FontManager already shutdown");
+
         if (s_Data->VertexBufferData)
         {
             delete[] s_Data->VertexBufferData;

@@ -13,6 +13,11 @@ namespace Seek
         static void Init();
         static void Shutdown();
 
+        static inline void UpdateDisplaySize(int32 width, int32 height)
+        {
+            s_RendererAPI->UpdateDisplaySize(width, height);
+        }
+
         static inline void SetClearColor(const glm::vec4& color)
         {
             s_RendererAPI->SetClearColor(color);
