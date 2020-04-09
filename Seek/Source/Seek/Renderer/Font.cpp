@@ -49,18 +49,20 @@ namespace Seek
     {
         FontGlyph result;
 
+        int index = c - ' ';
+
         stbtt_aligned_quad quad;
-        /*stbtt_GetBakedQuad(m_Data->Bakedchars, 512, 512, c - 32, &x, &y,
-           &quad, 1);*/
+        stbtt_GetPackedQuad(m_Data->Bakedchars, 512, 512, index, &x, &y, &quad,
+                            1);
 
-        stbtt_GetPackedQuad(m_Data->Bakedchars, 512, 512, c - ' ', &x, &y,
-                            &quad, 1);
+        stbtt_packedchar* data = m_Data->Bakedchars + index;
 
-        result.Pos0 = glm::vec2(quad.x0, -quad.y1);
-        result.Pos1 = glm::vec2(quad.x1, -quad.y0);
+        result.Pos0 = glm::vec2(quad.x0, quad.y1);
+        result.Pos1 = glm::vec2(quad.x1, quad.y0);
         result.TexCoord0 = glm::vec2(quad.s0, quad.t0);
         result.TexCoord1 = glm::vec2(quad.s1, quad.t1);
-        result.Offset = glm::vec2(x, y);
+        result.Offset = glm::vec2(data->xoff, data->yoff2);
+        result.XAdvance = data->xadvance;
 
         return result;
     }

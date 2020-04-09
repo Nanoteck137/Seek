@@ -100,7 +100,7 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
     Seek::Renderer2D::DrawQuad({-4 * 1.6f + 0.1f + x, -0.5f}, {2.0f, 4.0f},
                                {1.0f, 0.0f, 1.0f, 1.0f});*/
 
-    Seek::Renderer2D::DrawText(glm::vec2(64.0f, 32.0f), "Hello World", m_Font);
+    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 32.0f), "Hello World", m_Font);
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
