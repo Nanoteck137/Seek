@@ -8,7 +8,7 @@ namespace Seek
     {
     public:
         OpenGLTexture2D(uint32 width, uint32 height, TextureParameters params);
-        OpenGLTexture2D(const String& path);
+        OpenGLTexture2D(const String& path, TextureParameters params);
         ~OpenGLTexture2D();
 
         virtual uint32 GetWidth() const override { return m_Width; }
@@ -22,6 +22,7 @@ namespace Seek
         String m_Path;
         uint32 m_RendererID = 0;
         uint32 m_Width = 0, m_Height = 0;
-        uint32 m_InternalFormat = 0, m_DataFormat = 0;
+        uint32 m_InternalFormat = 0;
+        TextureParameters m_Parameters;
     };
 }

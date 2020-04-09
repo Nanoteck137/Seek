@@ -12,11 +12,8 @@ namespace Seek
 {
     struct FontGlyph
     {
-        glm::vec2 Pos0;
-        glm::vec2 Pos1;
-
-        glm::vec2 TexCoord0;
-        glm::vec2 TexCoord1;
+        glm::vec2 Size;
+        glm::vec4 UVRect;
 
         glm::vec2 Offset;
 
@@ -30,7 +27,7 @@ namespace Seek
     public:
         Font(const String& filename);
 
-        FontGlyph GetGlyphInfo(char c, float x, float y);
+        FontGlyph GetGlyphInfo(char c);
 
         inline const Ref<Texture2D>& GetTexture() const { return m_Texture; }
 

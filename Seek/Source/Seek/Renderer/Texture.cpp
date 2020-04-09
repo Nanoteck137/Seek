@@ -23,6 +23,22 @@ namespace Seek
         return nullptr;
     }
 
+    Ref<Texture2D> Texture2D::Create(const String& path,
+                                     TextureParameters params)
+    {
+        switch (Renderer::GetAPI())
+        {
+            case RendererAPI::API::None:
+                SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
+                return nullptr;
+            case RendererAPI::API::OpenGL:
+                return CreateRef<OpenGLTexture2D>(path, params);
+        }
+
+        SK_CORE_ASSERT(false, "No RenderingAPI selected");
+        return nullptr;
+    }
+
     Ref<Texture2D> Texture2D::Create(const String& path)
     {
         switch (Renderer::GetAPI())
@@ -31,7 +47,7 @@ namespace Seek
                 SK_CORE_ASSERT(false, "RendererAPI::None is not supported!")
                 return nullptr;
             case RendererAPI::API::OpenGL:
-                return CreateRef<OpenGLTexture2D>(path);
+                return CreateRef<OpenGLTexture2D>(path, TextureParameters());
         }
 
         SK_CORE_ASSERT(false, "No RenderingAPI selected");

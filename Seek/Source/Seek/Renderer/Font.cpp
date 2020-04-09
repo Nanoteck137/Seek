@@ -12,9 +12,10 @@ namespace Seek
 
     Font::Font(const String& filename) : m_Filename(filename)
     {
-        TextureParameters params = {};
-        params.Format = TextureFormat::ALPHA;
-        m_Texture = Texture2D::Create(512, 512, params);
+        m_Texture = Texture2D::Create(
+            512, 512,
+            TextureParameters(TextureFormat::RGBA, TextureFilter::NEAREST,
+                              TextureWrap::CLAMP_TO_EDGE));
 
         m_FileData = FileSystem::ReadAllBuffer(filename);
 
@@ -30,12 +31,12 @@ namespace Seek
         stbtt_pack_context packContext;
         stbtt_PackBegin(&packContext, buffer, 512, 512, 0, 1, nullptr);
 
-        stbtt_PackFontRange(&packContext, (const uint8*)m_FileData.Data, 0, 32,
+        stbtt_PackFontRange(&packContext, (const uint8*)m_FileData.Data, 0, 40,
                             ' ', '~' - ' ', m_Data->Bakedchars);
 
         stbtt_PackEnd(&packContext);
 
-        for (int i = 0; i < 512 * 512; i++)
+        for (uint32 i = 0; i < 512 * 512; i++)
         {
             uint8 alpha = buffer[i];
             textureData[i] =
@@ -45,24 +46,26 @@ namespace Seek
         m_Texture->SetData(textureData, 512 * 512 * 4);
     }
 
-    FontGlyph Font::GetGlyphInfo(char c, float x, float y)
+    FontGlyph Font::GetGlyphInfo(char c)
     {
-        FontGlyph result;
+        int32 index = c - ' ';
+        stbtt_packedchar* characterData = m_Data->Bakedchars + index;
 
-        int index = c - ' ';
+        float32 ipw = 1.0f / m_Texture->GetWidth();
+        float32 iph = 1.0f / m_Texture->GetHeight();
+        float32 u0 = characterData->x0 * ipw;
+        float32 v0 = characterData->y0 * iph;
+        float32 u1 = characterData->x1 * ipw;
+        float32 v1 = characterData->y1 * iph;
 
-        stbtt_aligned_quad quad;
-        stbtt_GetPackedQuad(m_Data->Bakedchars, 512, 512, index, &x, &y, &quad,
-                            1);
+        float32 width = characterData->xoff2 - characterData->xoff;
+        float32 height = characterData->yoff2 - characterData->yoff;
 
-        stbtt_packedchar* data = m_Data->Bakedchars + index;
-
-        result.Pos0 = glm::vec2(quad.x0, quad.y1);
-        result.Pos1 = glm::vec2(quad.x1, quad.y0);
-        result.TexCoord0 = glm::vec2(quad.s0, quad.t0);
-        result.TexCoord1 = glm::vec2(quad.s1, quad.t1);
-        result.Offset = glm::vec2(data->xoff, data->yoff2);
-        result.XAdvance = data->xadvance;
+        FontGlyph result = {};
+        result.Size = glm::vec2(width, height);
+        result.UVRect = glm::vec4(u0, v0, u1, v1);
+        result.Offset = glm::vec2(characterData->xoff, characterData->yoff2);
+        result.XAdvance = characterData->xadvance;
 
         return result;
     }

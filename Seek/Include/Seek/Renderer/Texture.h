@@ -5,17 +5,58 @@
 
 namespace Seek
 {
+    enum class TextureWrap
+    {
+        NONE = 0,
+        REPEAT,
+        MIRRORED_REPEAT,
+        CLAMP_TO_EDGE,
+        CLAMP_TO_BORDER
+    };
+
+    enum class TextureFilter
+    {
+        NONE = 0,
+        LINEAR,
+        NEAREST
+    };
+
     enum class TextureFormat
     {
         NONE = 0,
         RGB,
         RGBA,
-        ALPHA
     };
 
     struct TextureParameters
     {
         TextureFormat Format;
+        TextureFilter Filter;
+        TextureWrap Wrap;
+
+        TextureParameters()
+        {
+            Format = TextureFormat::RGBA;
+            Filter = TextureFilter::NEAREST;
+            Wrap = TextureWrap::CLAMP_TO_EDGE;
+        }
+
+        TextureParameters(TextureFormat format, TextureFilter filter,
+                          TextureWrap wrap)
+            : Format(format), Filter(filter), Wrap(wrap)
+        {
+        }
+
+        TextureParameters(TextureFilter filter)
+            : Format(TextureFormat::RGBA), Filter(filter),
+              Wrap(TextureWrap::CLAMP_TO_EDGE)
+        {
+        }
+
+        TextureParameters(TextureFilter filter, TextureWrap wrap)
+            : Format(TextureFormat::RGBA), Filter(filter), Wrap(wrap)
+        {
+        }
     };
 
     class Texture
@@ -37,6 +78,9 @@ namespace Seek
         virtual ~Texture2D() {}
 
         static Ref<Texture2D> Create(uint32 width, uint32 height,
+                                     TextureParameters params);
+
+        static Ref<Texture2D> Create(const String& path,
                                      TextureParameters params);
         static Ref<Texture2D> Create(const String& path);
     };
