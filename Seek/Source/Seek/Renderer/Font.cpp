@@ -56,4 +56,9 @@ namespace Seek
 
         return abs(min) + abs(max);
     }
+
+    glm::vec2 Font::GetTextSize(const String& text)
+    {
+        return glm::vec2(GetTextWidth(text), GetTextHeight(text));
+    }
 }

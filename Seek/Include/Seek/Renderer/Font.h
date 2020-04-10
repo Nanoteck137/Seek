@@ -30,6 +30,7 @@ namespace Seek
 
         float32 GetTextWidth(const String& text);
         float32 GetTextHeight(const String& text);
+        glm::vec2 GetTextSize(const String& text);
 
     public:
         inline const Ref<Texture2D>& GetTexture() const { return m_Texture; }

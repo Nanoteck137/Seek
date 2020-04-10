@@ -30,29 +30,12 @@ void TestLayer::OnAttach()
     Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UICenterConstraint());
     constraints->SetY(new Seek::UICenterConstraint());
-    constraints->SetWidth(new Seek::UIPixelConstraint(300));
-    constraints->SetHeight(new Seek::UIPixelConstraint(300));
+    constraints->SetWidth(new Seek::UIPixelConstraint(200));
+    constraints->SetHeight(new Seek::UIPixelConstraint(60));
 
-    Seek::UIBlock* block = new Seek::UIBlock();
-    container->Add(block, constraints);
+    Seek::UIButton* button = new Seek::UIButton("Hello World", m_Font);
 
-    Seek::Ref<Seek::Transition> transition =
-        Seek::CreateRef<Seek::Transition>();
-    transition->Add(Seek::TransitionType::XPOS,
-                    new Seek::SlideTransition(-4.0f, 0.5f));
-
-    // block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
-
-    Seek::UIText* text = new Seek::UIText("Hello World", m_Font, 0.0f,
-                                          Seek::TextAlignment::CENTER);
-
-    Seek::UIConstraints* textConstraints = new Seek::UIConstraints();
-    textConstraints->SetX(new Seek::UIRelativeConstraint(0.0f));
-    textConstraints->SetY(new Seek::UIPixelConstraint(20));
-    textConstraints->SetWidth(new Seek::UIRelativeConstraint(1.0f));
-    textConstraints->SetHeight(new Seek::UITextHeightConstraint());
-
-    block->Add(text, textConstraints);
+    container->Add(button, constraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();

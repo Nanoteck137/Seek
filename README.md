@@ -11,8 +11,13 @@
     - File Change Callback???
 
 ### Renderering Engine
+* UI 
+  - More Components
+    - Slider
+    - TextBox
+  - Fix Memory issues
+  - More transitions
 * 2D
-  - Animations and Transitions
 * 3D
 * General
   - Framebuffers/RenderTargets
@@ -23,4 +28,3 @@
   - Collision Callback
   - Collisions Masks
   - Triggers/Sensors
-  - 

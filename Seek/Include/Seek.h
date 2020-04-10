@@ -37,16 +37,25 @@
 
 // ------------------ UI-------------------
 #include "Seek/UI/Components/UIBlock.h"
+#include "Seek/UI/Components/UIButton.h"
+#include "Seek/UI/Components/UIContainer.h"
 #include "Seek/UI/Components/UIText.h"
-
-#include "Seek/UI/Transition/Transition.h"
-#include "Seek/UI/Transition/SlideTransition.h"
 
 #include "Seek/UI/Constraints/UICenterConstraint.h"
 #include "Seek/UI/Constraints/UIPixelConstraint.h"
 #include "Seek/UI/Constraints/UIRelativeConstraint.h"
 #include "Seek/UI/Constraints/UITextHeightConstraint.h"
 
+#include "Seek/UI/Transition/Animator.h"
+#include "Seek/UI/Transition/Modifier.h"
+#include "Seek/UI/Transition/SlideDriver.h"
+#include "Seek/UI/Transition/SlideTransition.h"
+#include "Seek/UI/Transition/Transition.h"
+#include "Seek/UI/Transition/TransitionType.h"
+#include "Seek/UI/Transition/ValueDriver.h"
+#include "Seek/UI/Transition/ValueTransition.h"
+
+#include "Seek/UI/UIComponent.h"
 #include "Seek/UI/UIConstraint.h"
 #include "Seek/UI/UIConstraints.h"
 #include "Seek/UI/UIManager.h"

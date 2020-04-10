@@ -38,7 +38,6 @@ namespace Seek
         if (!s_GLFWInitialized)
         {
             int success = glfwInit();
-            // TODO(patrik): Assert
             SK_CORE_ASSERT(success, "Could not initialize GLFW");
 
             s_GLFWInitialized = true;
@@ -75,20 +74,17 @@ namespace Seek
 
             switch (action)
             {
-                case GLFW_PRESS:
-                {
+                case GLFW_PRESS: {
                     KeyPressedEvent event(key, 0);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_RELEASE:
-                {
+                case GLFW_RELEASE: {
                     KeyReleasedEvent event(key);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_REPEAT:
-                {
+                case GLFW_REPEAT: {
                     KeyPressedEvent event(key, 1);
                     data.EventCallback(event);
                     break;
@@ -110,14 +106,12 @@ namespace Seek
 
             switch (action)
             {
-                case GLFW_PRESS:
-                {
+                case GLFW_PRESS: {
                     MouseButtonPressedEvent event(button);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_RELEASE:
-                {
+                case GLFW_RELEASE: {
                     MouseButtonReleasedEvent event(button);
                     data.EventCallback(event);
                     break;
@@ -162,10 +156,7 @@ namespace Seek
     {
         SK_PROFILE_FUNCTION();
 
-        if (enabled)
-            glfwSwapInterval(1);
-        else
-            glfwSwapInterval(0);
+        glfwSwapInterval(enabled ? 1 : 0);
 
         m_Data.VSync = enabled;
     }

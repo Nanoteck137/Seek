@@ -49,6 +49,8 @@ namespace Seek
         void SetFontSize(float size) { m_FontSize = size; }
         inline float GetFontSize() const { return m_FontSize; }
 
+        inline const Ref<Font>& GetFont() const { return m_Font; }
+
     private:
         std::string m_Text;
         TextAlignment m_Alignment = TextAlignment::LEFT;
