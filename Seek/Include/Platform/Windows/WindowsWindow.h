@@ -8,7 +8,6 @@ struct GLFWwindow;
 
 namespace Seek
 {
-
     class WindowsWindow : public Window
     {
     public:
@@ -17,13 +16,14 @@ namespace Seek
 
         void OnUpdate() override;
 
-        inline unsigned int GetWidth() override { return m_Data.Width; }
-        inline unsigned int GetHeight() override { return m_Data.Height; }
+        inline uint32 GetWidth() override { return m_Data.Width; }
+        inline uint32 GetHeight() override { return m_Data.Height; }
 
         void SetEventCallback(const EventCallbackFn& callback) override
         {
             m_Data.EventCallback = callback;
         }
+
         void SetVSync(bool enabled) override;
         bool GetVSync() const override;
 
@@ -34,8 +34,8 @@ namespace Seek
         virtual void Shutdown();
 
     private:
-        GLFWwindow* m_Window;
-        GraphicsContext* m_Context;
+        GLFWwindow* m_Window = nullptr;
+        GraphicsContext* m_Context = nullptr;
 
         struct WindowData
         {

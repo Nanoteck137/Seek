@@ -13,7 +13,6 @@ namespace Seek
 
     void UIBlock::OnUpdate(float deltaTime)
     {
-        Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
-                             glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+        Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(), m_Color);
     }
 }

@@ -37,7 +37,7 @@ namespace Seek
 
         if (!s_GLFWInitialized)
         {
-            int success = glfwInit();
+            int32 success = glfwInit();
             SK_CORE_ASSERT(success, "Could not initialize GLFW");
 
             s_GLFWInitialized = true;
@@ -52,8 +52,8 @@ namespace Seek
         glfwSetWindowUserPointer(m_Window, &m_Data);
         SetVSync(true);
 
-        glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width,
-                                               int height) {
+        glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int32 width,
+                                               int32 height) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             data.Width = width;
             data.Height = height;
@@ -68,23 +68,27 @@ namespace Seek
             data.EventCallback(event);
         });
 
-        glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key,
-                                        int scancode, int action, int mods) {
+        glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int32 key,
+                                        int32 scancode, int32 action,
+                                        int32 mods) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
             switch (action)
             {
-                case GLFW_PRESS: {
+                case GLFW_PRESS:
+                {
                     KeyPressedEvent event(key, 0);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_RELEASE: {
+                case GLFW_RELEASE:
+                {
                     KeyReleasedEvent event(key);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_REPEAT: {
+                case GLFW_REPEAT:
+                {
                     KeyPressedEvent event(key, 1);
                     data.EventCallback(event);
                     break;
@@ -92,46 +96,54 @@ namespace Seek
             }
         });
 
-        glfwSetCharCallback(m_Window, [](GLFWwindow* window,
-                                         unsigned int code) {
+        glfwSetCharCallback(m_Window, [](GLFWwindow* window, uint32 code) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
             KeyTypedEvent event(code);
             data.EventCallback(event);
         });
 
-        glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button,
-                                                int action, int mods) {
+        glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window,
+                                                int32 button, int32 action,
+                                                int32 mods) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            float64 mouseX = 0.0f;
+            float64 mouseY = 0.0f;
+            glfwGetCursorPos(window, &mouseX, &mouseY);
 
             switch (action)
             {
-                case GLFW_PRESS: {
-                    MouseButtonPressedEvent event(button);
+                case GLFW_PRESS:
+                {
+                    MouseButtonPressedEvent event(button, (float32)mouseX,
+                                                  (float32)mouseY);
                     data.EventCallback(event);
                     break;
                 }
-                case GLFW_RELEASE: {
-                    MouseButtonReleasedEvent event(button);
+                case GLFW_RELEASE:
+                {
+                    MouseButtonReleasedEvent event(button, (float32)mouseX,
+                                                   (float32)mouseY);
                     data.EventCallback(event);
                     break;
                 }
             }
         });
 
-        glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset,
-                                           double yOffset) {
+        glfwSetScrollCallback(m_Window, [](GLFWwindow* window, float64 xOffset,
+                                           float64 yOffset) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-            MouseScrolledEvent event((float)xOffset, (float)yOffset);
+            MouseScrolledEvent event((float32)xOffset, (float32)yOffset);
             data.EventCallback(event);
         });
 
-        glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos,
-                                              double yPos) {
+        glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, float64 xPos,
+                                              float64 yPos) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-            MouseMovedEvent event((float)xPos, (float)yPos);
+            MouseMovedEvent event((float32)xPos, (float32)yPos);
             data.EventCallback(event);
         });
     }

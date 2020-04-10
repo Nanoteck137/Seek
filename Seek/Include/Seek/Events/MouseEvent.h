@@ -7,10 +7,10 @@ namespace Seek
     class MouseMovedEvent : public Event
     {
     public:
-        MouseMovedEvent(float x, float y) : m_MouseX(x), m_MouseY(y) {}
+        MouseMovedEvent(float32 x, float32 y) : m_MouseX(x), m_MouseY(y) {}
 
-        inline float GetX() const { return m_MouseX; }
-        inline float GetY() const { return m_MouseY; }
+        inline float32 GetX() const { return m_MouseX; }
+        inline float32 GetY() const { return m_MouseY; }
 
         std::string ToString() const override
         {
@@ -22,19 +22,20 @@ namespace Seek
         EVENT_CLASS_TYPE(MouseMoved)
         EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
     private:
-        float m_MouseX, m_MouseY;
+        float32 m_MouseX;
+        float32 m_MouseY;
     };
 
     class MouseScrolledEvent : public Event
     {
     public:
-        MouseScrolledEvent(float xOffset, float yOffset)
+        MouseScrolledEvent(float32 xOffset, float32 yOffset)
             : m_XOffset(xOffset), m_YOffset(yOffset)
         {
         }
 
-        inline float GetXOffset() const { return m_XOffset; }
-        inline float GetYOffset() const { return m_YOffset; }
+        inline float32 GetXOffset() const { return m_XOffset; }
+        inline float32 GetYOffset() const { return m_YOffset; }
 
         std::string ToString() const override
         {
@@ -47,30 +48,42 @@ namespace Seek
         EVENT_CLASS_TYPE(MouseScrolled)
         EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
     private:
-        float m_XOffset, m_YOffset;
+        float32 m_XOffset;
+        float32 m_YOffset;
     };
 
     class MouseButtonEvent : public Event
     {
     public:
-        inline int GetMouseButton() const { return m_Button; }
+        inline int32 GetMouseButton() const { return m_Button; }
+        inline float32 GetX() const { return m_MouseX; }
+        inline float32 GetY() const { return m_MouseY; }
 
         EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
     protected:
-        MouseButtonEvent(int button) : m_Button(button) {}
+        MouseButtonEvent(int32 button, float32 mouseX, float32 mouseY)
+            : m_Button(button), m_MouseX(mouseX), m_MouseY(mouseY)
+        {
+        }
 
-        int m_Button;
+        int32 m_Button;
+        float32 m_MouseX;
+        float32 m_MouseY;
     };
 
     class MouseButtonPressedEvent : public MouseButtonEvent
     {
     public:
-        MouseButtonPressedEvent(int button) : MouseButtonEvent(button) {}
+        MouseButtonPressedEvent(int32 button, float32 mouseX, float32 mouseY)
+            : MouseButtonEvent(button, mouseX, mouseY)
+        {
+        }
 
         std::string ToString() const override
         {
             std::stringstream ss;
-            ss << "MouseButtonPressedEvent: " << m_Button;
+            ss << "MouseButtonPressedEvent: " << m_MouseX << ", " << m_MouseY
+               << " " << m_Button;
             return ss.str();
         }
 
@@ -80,12 +93,16 @@ namespace Seek
     class MouseButtonReleasedEvent : public MouseButtonEvent
     {
     public:
-        MouseButtonReleasedEvent(int button) : MouseButtonEvent(button) {}
+        MouseButtonReleasedEvent(int32 button, float32 mouseX, float32 mouseY)
+            : MouseButtonEvent(button, mouseX, mouseY)
+        {
+        }
 
         std::string ToString() const override
         {
             std::stringstream ss;
-            ss << "MouseButtonReleasedEvent: " << m_Button;
+            ss << "MouseButtonReleasedEvent: " << m_MouseX << ", " << m_MouseY
+               << " " << m_Button;
             return ss.str();
         }
 

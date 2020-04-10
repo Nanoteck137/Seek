@@ -34,7 +34,6 @@ void TestLayer::OnAttach()
     constraints->SetHeight(new Seek::UIPixelConstraint(60));
 
     Seek::UIButton* button = new Seek::UIButton("Hello World", m_Font);
-
     container->Add(button, constraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
@@ -44,8 +43,6 @@ void TestLayer::OnAttach()
 }
 
 void TestLayer::OnDetach() {}
-
-static float Lerp(float v0, float v1, float t) { return (1 - t) * v0 + t * v1; }
 
 void TestLayer::OnUpdate(Seek::Timestep ts)
 {
