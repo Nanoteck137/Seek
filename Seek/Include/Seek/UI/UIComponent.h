@@ -49,8 +49,9 @@ namespace Seek
         void InitChild(UIComponent* child);
 
     protected:
-        virtual void Init() {}
-        virtual void UpdateSelf(float deltaTime) = 0;
+        virtual void OnInit() {}
+        virtual void OnUpdate(float deltaTime) {}
+        virtual void OnDimentionsChange() {}
 
     public:
         inline const std::vector<UIComponent*>& GetChildren() const

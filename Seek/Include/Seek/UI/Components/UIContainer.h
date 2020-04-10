@@ -12,8 +12,5 @@ namespace Seek
     public:
         UIContainer();
         ~UIContainer();
-
-    protected:
-        virtual void UpdateSelf(float deltaTime) override;
     };
 }

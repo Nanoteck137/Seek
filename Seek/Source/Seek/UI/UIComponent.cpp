@@ -41,7 +41,7 @@ namespace Seek
     {
         m_Animator->Update(deltaTime);
 
-        UpdateSelf(deltaTime);
+        OnUpdate(deltaTime);
         for (int i = 0; i < m_Children.size(); i++)
         {
             m_Children[i]->Update(deltaTime);
@@ -101,6 +101,7 @@ namespace Seek
     void UIComponent::NotifyDimensionChange(bool sizeChange)
     {
         CalculateScreenSpacePosition(sizeChange);
+        OnDimentionsChange();
 
         for (UIComponent* child : m_Children)
         {
@@ -142,6 +143,6 @@ namespace Seek
     {
         m_Children.push_back(child);
         child->CalculateScreenSpacePosition(true);
-        child->Init();
+        child->OnInit();
     }
 }

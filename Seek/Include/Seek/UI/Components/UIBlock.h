@@ -14,8 +14,7 @@ namespace Seek
         ~UIBlock();
 
     protected:
-        virtual void Init() override;
-        virtual void UpdateSelf(float deltaTime) override;
+        virtual void OnUpdate(float deltaTime) override;
 
     public:
         inline void SetRoundedRadius(float radius) { m_RoundedRadius = radius; }

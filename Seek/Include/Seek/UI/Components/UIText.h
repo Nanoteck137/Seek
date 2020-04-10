@@ -24,8 +24,9 @@ namespace Seek
         ~UIText();
 
     protected:
-        virtual void Init() override;
-        virtual void UpdateSelf(float deltaTime) override;
+        virtual void OnInit() override;
+        virtual void OnUpdate(float deltaTime) override;
+        virtual void OnDimentionsChange() override;
 
     private:
         void UpdateObjects();

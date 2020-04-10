@@ -11,9 +11,7 @@ namespace Seek
 
     UIBlock::~UIBlock() {}
 
-    void UIBlock::Init() {}
-
-    void UIBlock::UpdateSelf(float deltaTime)
+    void UIBlock::OnUpdate(float deltaTime)
     {
         Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
                              glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));

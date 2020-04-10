@@ -14,7 +14,7 @@ namespace Seek
             SK_BIND_EVENT_FN(UIButton::OnMousePressedEvent));
     }
 
-    void UIButton::UpdateSelf(float deltaTime) {}
+    void UIButton::OnUpdate(float deltaTime) {}
 
     bool UIButton::OnMousePressedEvent(MouseButtonPressedEvent& event)
     {

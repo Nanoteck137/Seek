@@ -30,8 +30,8 @@ void TestLayer::OnAttach()
     Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UICenterConstraint());
     constraints->SetY(new Seek::UICenterConstraint());
-    constraints->SetWidth(new Seek::UIPixelConstraint(100));
-    constraints->SetHeight(new Seek::UIPixelConstraint(100));
+    constraints->SetWidth(new Seek::UIPixelConstraint(300));
+    constraints->SetHeight(new Seek::UIPixelConstraint(300));
 
     Seek::UIBlock* block = new Seek::UIBlock();
     container->Add(block, constraints);
@@ -44,14 +44,15 @@ void TestLayer::OnAttach()
     // block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
 
     Seek::UIText* text = new Seek::UIText("Hello World", m_Font, 0.0f,
-                                          Seek::TextAlignment::RIGHT);
+                                          Seek::TextAlignment::CENTER);
+
     Seek::UIConstraints* textConstraints = new Seek::UIConstraints();
     textConstraints->SetX(new Seek::UIRelativeConstraint(0.0f));
     textConstraints->SetY(new Seek::UIPixelConstraint(20));
-    textConstraints->SetWidth(new Seek::UIRelativeConstraint(0.5f));
+    textConstraints->SetWidth(new Seek::UIRelativeConstraint(1.0f));
     textConstraints->SetHeight(new Seek::UITextHeightConstraint());
 
-    container->Add(text, textConstraints);
+    block->Add(text, textConstraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();
@@ -161,10 +162,6 @@ void TestLayer::OnImGuiRender(Seek::Timestep ts)
 
     ImGui::Text("FPS: %u", fps);
     ImGui::Text("Framtime: %.2fms", frameTime);
-    ImGui::End();
-
-    ImGui::Begin("Test");
-    ImGui::SliderFloat("Text Scale", &m_Scale, 0.0f, 2.0f);
     ImGui::End();
 }
 

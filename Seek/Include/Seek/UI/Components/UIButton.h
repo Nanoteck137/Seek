@@ -17,7 +17,7 @@ namespace Seek
         virtual void OnEvent(Event& event) override;
 
     protected:
-        virtual void UpdateSelf(float deltaTime) override;
+        virtual void OnUpdate(float deltaTime) override;
 
     private:
         bool OnMousePressedEvent(MouseButtonPressedEvent& event);
