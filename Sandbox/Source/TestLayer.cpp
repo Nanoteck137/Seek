@@ -29,16 +29,17 @@ void TestLayer::OnAttach()
 
     Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UICenterConstraint());
-    constraints->SetY(new Seek::UICenterConstraint());
-    constraints->SetWidth(new Seek::UIPixelConstraint(100));
-    constraints->SetHeight(new Seek::UIPixelConstraint(100));
+    constraints->SetY(new Seek::UIPixelConstraint(20));
+    constraints->SetWidth(new Seek::UIRelativeConstraint(0.1f));
+    constraints->SetHeight(new Seek::UIRelativeConstraint(0.1f));
 
     Seek::UIBlock* block = new Seek::UIBlock();
     container->Add(block, constraints);
 
-    Seek::Transition* transition = new Seek::Transition();
+    Seek::Ref<Seek::Transition> transition =
+        Seek::CreateRef<Seek::Transition>();
     transition->Add(Seek::TransitionType::XPOS,
-                    new Seek::SlideTransition(-1.5f, 0.5f));
+                    new Seek::SlideTransition(-4.0f, 0.5f));
 
     block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
 

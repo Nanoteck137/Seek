@@ -13,7 +13,8 @@ namespace Seek
     class Modifier
     {
     public:
-        Modifier(std::unordered_map<TransitionType*, ValueDriver*> valueDrivers,
+        Modifier(const std::unordered_map<TransitionType*, Ref<ValueDriver>>&
+                     valueDrivers,
                  bool reverse, float duration);
 
         void Update(float deltaTime, Animator* animator);
@@ -23,7 +24,7 @@ namespace Seek
         bool IsRedundant();
 
     private:
-        std::unordered_map<TransitionType*, ValueDriver*> m_ValueDrivers;
+        std::unordered_map<TransitionType*, Ref<ValueDriver>> m_ValueDrivers;
         float m_Duration = 0.0f;
         bool m_Reverse = false;
 

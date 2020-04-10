@@ -56,6 +56,11 @@ namespace Seek
     {
         SK_CORE_ASSERT(s_Data, "FontManager already shutdown");
 
+        for (auto& it : s_Data->Files)
+        {
+            it.second->Data.Free();
+        }
+
         if (s_Data->TextureBuffer)
         {
             delete[] s_Data->TextureBuffer;

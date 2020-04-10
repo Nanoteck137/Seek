@@ -18,15 +18,16 @@ namespace Seek
 
     float SlideTransition::GetHiddenValue() { return m_OffsetValue; }
 
-    ValueDriver* SlideTransition::InitDriver(float baseValue,
-                                             float currentValue, bool reverse,
-                                             float delay, float totalDuration)
+    Ref<ValueDriver> SlideTransition::InitDriver(float baseValue,
+                                                 float currentValue,
+                                                 bool reverse, float delay,
+                                                 float totalDuration)
     {
         float target = reverse ? baseValue : m_OffsetValue;
         float selfDelay =
             reverse ? totalDuration - (m_SelfDelay + m_Duration) : m_SelfDelay;
-        return new SlideDriver(currentValue, target, m_Duration,
-                               delay + selfDelay);
+        return CreateRef<SlideDriver>(currentValue, target, m_Duration,
+                                      delay + selfDelay);
     }
 
     float SlideTransition::GetDuration() { return m_Duration + m_SelfDelay; }

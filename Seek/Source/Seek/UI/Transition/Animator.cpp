@@ -12,29 +12,27 @@ namespace Seek
 
     Animator::~Animator() { m_Component = nullptr; }
 
-    void Animator::ApplyModifier(Transition* transition, bool reverse,
-                                 float delay)
+    void Animator::ApplyModifier(const Ref<Transition>& transition,
+                                 bool reverse, float delay)
     {
-        Modifier* oldModifier = nullptr;
+        Ref<Modifier> oldModifier = nullptr;
         if (m_Modifiers.find(transition) != m_Modifiers.end())
         {
-            Modifier* oldModifier = m_Modifiers[transition];
+            oldModifier = m_Modifiers[transition];
             m_Modifiers.erase(transition);
         }
 
-        Modifier* newModifier =
+        Ref<Modifier> newModifier =
             transition->CreateModifier(oldModifier, reverse, delay);
         m_Modifiers[transition] = newModifier;
     }
 
-    bool Animator::IsDoingTransition(Transition* transition)
+    bool Animator::IsDoingTransition(const Ref<Transition>& transition)
     {
         if (m_Modifiers.find(transition) == m_Modifiers.end())
             return false;
 
-        Modifier* modifier = m_Modifiers[transition];
-
-        return !modifier->HasFinishedTransition();
+        return !m_Modifiers[transition]->HasFinishedTransition();
     }
 
     void Animator::UpdateComponent()
@@ -61,9 +59,13 @@ namespace Seek
         {
             (*it).second->Update(deltaTime, this);
             if ((*it).second->IsRedundant())
+            {
                 m_Modifiers.erase(it++);
+            }
             else
+            {
                 ++it;
+            }
         }
 
         UpdateComponent();

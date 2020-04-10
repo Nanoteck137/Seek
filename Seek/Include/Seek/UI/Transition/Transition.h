@@ -17,12 +17,12 @@ namespace Seek
         ~Transition();
 
         Transition* Add(TransitionType* type, ValueTransition* transition);
-        Modifier* CreateModifier(Modifier* oldModifier, bool reverse,
-                                 float delay);
-        ValueDriver* InitDriver(TransitionType* type,
-                                ValueTransition* transition,
-                                Modifier* oldModifier, bool reverse,
-                                float delay);
+        Ref<Modifier> CreateModifier(const Ref<Modifier>& oldModifier,
+                                     bool reverse, float delay);
+        Ref<ValueDriver> InitDriver(TransitionType* type,
+                                    ValueTransition* transition,
+                                    const Ref<Modifier>& oldModifier,
+                                    bool reverse, float delay);
 
     private:
         std::unordered_map<TransitionType*, ValueTransition*> m_ValueDrivers;

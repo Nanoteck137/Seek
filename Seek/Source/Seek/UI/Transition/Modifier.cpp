@@ -5,9 +5,9 @@
 
 namespace Seek
 {
-    Modifier::Modifier(
-        std::unordered_map<TransitionType*, ValueDriver*> valueDrivers,
-        bool reverse, float duration)
+    Modifier::Modifier(const std::unordered_map<TransitionType*,
+                                                Ref<ValueDriver>>& valueDrivers,
+                       bool reverse, float duration)
         : m_ValueDrivers(valueDrivers), m_Reverse(reverse), m_Duration(duration)
     {
     }
@@ -28,7 +28,7 @@ namespace Seek
 
     float Modifier::GetCurrentValue(TransitionType* type)
     {
-        ValueDriver* driver = m_ValueDrivers[type];
+        const Ref<ValueDriver>& driver = m_ValueDrivers[type];
         return driver->GetCurrentValue();
     }
 

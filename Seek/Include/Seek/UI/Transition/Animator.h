@@ -17,8 +17,9 @@ namespace Seek
         Animator(UIComponent* component);
         ~Animator();
 
-        void ApplyModifier(Transition* transition, bool reverse, float delay);
-        bool IsDoingTransition(Transition* transition);
+        void ApplyModifier(const Ref<Transition>& transition, bool reverse,
+                           float delay);
+        bool IsDoingTransition(const Ref<Transition>& transition);
 
         void UpdateComponent();
 
@@ -42,7 +43,7 @@ namespace Seek
 
     private:
         UIComponent* m_Component = nullptr;
-        std::unordered_map<Transition*, Modifier*> m_Modifiers;
+        std::unordered_map<Ref<Transition>, Ref<Modifier>> m_Modifiers;
 
         bool m_PosChange = false;
         bool m_SizeChange = false;

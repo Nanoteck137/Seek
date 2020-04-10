@@ -7,7 +7,13 @@ namespace Seek
 {
     Transition::Transition() {}
 
-    Transition::~Transition() {}
+    Transition::~Transition()
+    {
+        for (auto& it : m_ValueDrivers)
+        {
+            delete it.second;
+        }
+    }
 
     Transition* Transition::Add(TransitionType* type,
                                 ValueTransition* transition)
@@ -17,26 +23,27 @@ namespace Seek
         return this;
     }
 
-    Modifier* Transition::CreateModifier(Modifier* oldModifier, bool reverse,
-                                         float delay)
+    Ref<Modifier> Transition::CreateModifier(const Ref<Modifier>& oldModifier,
+                                             bool reverse, float delay)
     {
         float transitionDuration = m_Duration + delay;
-        std::unordered_map<TransitionType*, ValueDriver*> driverInstances;
+        std::unordered_map<TransitionType*, Ref<ValueDriver>> driverInstances;
 
         for (auto& it : m_ValueDrivers)
         {
-            ValueDriver* driverInstance =
+            Ref<ValueDriver> driverInstance =
                 InitDriver(it.first, it.second, oldModifier, reverse, delay);
             driverInstances[it.first] = driverInstance;
         }
 
-        return new Modifier(driverInstances, reverse, transitionDuration);
+        return CreateRef<Modifier>(driverInstances, reverse,
+                                   transitionDuration);
     }
 
-    ValueDriver* Transition::InitDriver(TransitionType* type,
-                                        ValueTransition* transition,
-                                        Modifier* oldModifier, bool reverse,
-                                        float delay)
+    Ref<ValueDriver> Transition::InitDriver(TransitionType* type,
+                                            ValueTransition* transition,
+                                            const Ref<Modifier>& oldModifier,
+                                            bool reverse, float delay)
     {
         float baseValue = type->GetBaseValue();
         float currentValue = reverse ? transition->GetHiddenValue() : baseValue;

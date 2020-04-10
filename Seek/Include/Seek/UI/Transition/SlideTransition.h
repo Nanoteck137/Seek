@@ -14,9 +14,9 @@ namespace Seek
         SlideTransition(float offset, float duration, float selfDelay);
 
         virtual float GetHiddenValue() override;
-        virtual ValueDriver* InitDriver(float baseValue, float currentValue,
-                                        bool reverse, float delay,
-                                        float totalDuration) override;
+        virtual Ref<ValueDriver> InitDriver(float baseValue, float currentValue,
+                                            bool reverse, float delay,
+                                            float totalDuration) override;
         virtual float GetDuration() override;
 
     private:
