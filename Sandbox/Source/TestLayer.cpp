@@ -29,9 +29,9 @@ void TestLayer::OnAttach()
 
     Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UICenterConstraint());
-    constraints->SetY(new Seek::UIPixelConstraint(20));
-    constraints->SetWidth(new Seek::UIRelativeConstraint(0.1f));
-    constraints->SetHeight(new Seek::UIRelativeConstraint(0.1f));
+    constraints->SetY(new Seek::UICenterConstraint());
+    constraints->SetWidth(new Seek::UIPixelConstraint(100));
+    constraints->SetHeight(new Seek::UIPixelConstraint(100));
 
     Seek::UIBlock* block = new Seek::UIBlock();
     container->Add(block, constraints);
@@ -41,7 +41,17 @@ void TestLayer::OnAttach()
     transition->Add(Seek::TransitionType::XPOS,
                     new Seek::SlideTransition(-4.0f, 0.5f));
 
-    block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
+    // block->GetAnimator()->ApplyModifier(transition, false, 2.0f);
+
+    Seek::UIText* text = new Seek::UIText("Hello World", m_Font, 0.0f,
+                                          Seek::TextAlignment::RIGHT);
+    Seek::UIConstraints* textConstraints = new Seek::UIConstraints();
+    textConstraints->SetX(new Seek::UIRelativeConstraint(0.0f));
+    textConstraints->SetY(new Seek::UIPixelConstraint(20));
+    textConstraints->SetWidth(new Seek::UIRelativeConstraint(0.5f));
+    textConstraints->SetHeight(new Seek::UITextHeightConstraint());
+
+    container->Add(text, textConstraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();
@@ -115,9 +125,18 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
     Seek::Renderer2D::DrawQuad({-4 * 1.6f + 0.1f + x, -0.5f}, {2.0f, 4.0f},
                                {1.0f, 0.0f, 1.0f, 1.0f});*/
 
-    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 32.0f), "Hello World", m_Font);
-    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), "Hello World", m_Font2,
-                               m_Scale);
+    /*String text = "Hello World";
+    float32 width = m_Font->GetTextWidth(text);
+    float32 height = m_Font->GetTextHeight(text);
+
+    Seek::Renderer2D::DrawQuad(glm::vec2(32.0f, 200.0f),
+                               glm::vec2(width, height),
+                               glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+
+    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 200.0f), text, m_Font);
+
+    Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), text, m_Font2,
+    m_Scale);*/
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();

@@ -37,6 +37,7 @@
 
 // ------------------ UI-------------------
 #include "Seek/UI/Components/UIBlock.h"
+#include "Seek/UI/Components/UIText.h"
 
 #include "Seek/UI/Transition/Transition.h"
 #include "Seek/UI/Transition/SlideTransition.h"
