@@ -51,6 +51,9 @@ namespace Seek
 
         inline const Ref<Font>& GetFont() const { return m_Font; }
 
+        inline void SetColor(const glm::vec4& color) { m_Color = color; }
+        inline const glm::vec4& GetColor() const { return m_Color; }
+
     private:
         std::string m_Text;
         TextAlignment m_Alignment = TextAlignment::LEFT;
@@ -58,8 +61,8 @@ namespace Seek
         float32 m_FontSize = 0.0f;
         Ref<Font> m_Font = nullptr;
 
-        bool m_Update = false;
-
         float m_TextX = 0.0f;
+
+        glm::vec4 m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     };
 }

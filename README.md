@@ -9,6 +9,7 @@
   - File Infomation
   - Directory Infomation
     - File Change Callback???
+* Color Class (Change all glm::vec4)
 
 ### Renderering Engine
 * UI 

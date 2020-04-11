@@ -269,10 +269,12 @@ namespace Seek
     }
 
     void Renderer2D::DrawText(const glm::vec2& position, const String& text,
-                              const Ref<Font>& font, float scale)
+                              const Ref<Font>& font, const glm::vec4& color,
+                              float scale)
     {
+        SK_CORE_ASSERT(font, "No font");
+
         float textureID = SubmitTexture(font->GetTexture());
-        glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
         float x = position.x;
         for (int i = 0; i < text.size(); i++)

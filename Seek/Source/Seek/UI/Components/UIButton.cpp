@@ -12,11 +12,7 @@
 
 namespace Seek
 {
-    UIButton::UIButton(const String& text, const Ref<Font>& font)
-    {
-        m_Block = new UIBlock();
-        m_Text = new UIText(text, font, 0.0f, TextAlignment::CENTER);
-    }
+    UIButton::UIButton(const Properties& props) : m_Props(props) {}
 
     UIButton::~UIButton() {}
 
@@ -52,12 +48,17 @@ namespace Seek
 
     void UIButton::OnInit()
     {
+        m_Block = new UIBlock();
         UIConstraints* constraints = new UIConstraints();
         constraints->SetX(new UIRelativeConstraint(0.0f));
         constraints->SetY(new UIRelativeConstraint(0.0f));
         constraints->SetWidth(new UIRelativeConstraint(1.0f));
         constraints->SetHeight(new UIRelativeConstraint(1.0f));
         Add(m_Block, constraints);
+
+        m_Text = new UIText(m_Props.Label, m_Props.Font, 0.0f,
+                            TextAlignment::CENTER);
+        m_Text->SetColor(m_Props.LabelColor);
 
         constraints = new UIConstraints();
         constraints->SetX(new UIRelativeConstraint(0.0f));
@@ -71,15 +72,7 @@ namespace Seek
                                new SlideTransition(0.05f, 0.10f));
     }
 
-    void UIButton::OnUpdate(float deltaTime)
-    {
-        if (m_MouseOver)
-        {
-        }
-        else
-        {
-        }
-    }
+    void UIButton::OnUpdate(float deltaTime) {}
 
     bool UIButton::OnMouseMoved(MouseMovedEvent& event)
     {
@@ -92,7 +85,7 @@ namespace Seek
             {
                 m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, false,
                                                       0.0f);
-                m_Block->SetColor(glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+                m_Block->SetColor(m_Props.HoverColor);
             }
 
             m_MouseOver = true;
@@ -103,7 +96,7 @@ namespace Seek
             {
                 m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, true,
                                                       0.0f);
-                m_Block->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                m_Block->SetColor(m_Props.Color);
             }
             m_MouseOver = false;
         }
@@ -119,6 +112,7 @@ namespace Seek
         if (InsideButton(mouseX, mouseY))
         {
             m_State = ButtonState::PRESSED;
+            m_Block->SetColor(m_Props.ClickColor);
             return true;
         }
 
@@ -132,7 +126,12 @@ namespace Seek
 
         if (InsideButton(mouseX, mouseY) && m_State == ButtonState::PRESSED)
         {
+            m_Block->SetColor(m_Props.HoverColor);
             OnAction();
+        }
+        else
+        {
+            m_Block->SetColor(m_Props.Color);
         }
 
         m_State = ButtonState::UNPRESSED;

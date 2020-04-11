@@ -10,9 +10,21 @@
 
 namespace Seek
 {
+
     class UIButton : public UIComponent
     {
     public:
+        struct Properties
+        {
+            String Label;
+            Ref<Font> Font;
+            glm::vec4 LabelColor;
+
+            glm::vec4 Color;
+            glm::vec4 HoverColor;
+            glm::vec4 ClickColor;
+        };
+
         using ActionHandler = std::function<void()>;
 
     private:
@@ -23,7 +35,7 @@ namespace Seek
         };
 
     public:
-        UIButton(const String& text, const Ref<Font>& font);
+        UIButton(const Properties& props);
         ~UIButton();
 
     private:
@@ -53,6 +65,8 @@ namespace Seek
     private:
         UIBlock* m_Block = nullptr;
         UIText* m_Text = nullptr;
+
+        Properties m_Props;
 
         Ref<Transition> m_HoverTransition;
 

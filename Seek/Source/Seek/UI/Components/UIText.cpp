@@ -14,6 +14,7 @@ namespace Seek
         : m_Text(text), m_Font(font), m_FontSize(fontSize),
           m_Alignment(alignment)
     {
+        SK_CORE_ASSERT(font, "No font");
     }
 
     UIText::~UIText() {}
@@ -28,12 +29,13 @@ namespace Seek
 
     void UIText::OnUpdate(float deltaTime)
     {
-        Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
-                             glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
+        // NOTE(patrik): Debug bounds
+        // Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
+        //                     glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
 
         float x = m_TextX * UIManager::GetDisplayWidth();
         float y = m_Position.y * UIManager::GetDisplayHeight();
-        Renderer2D::DrawText(glm::vec2(x, y), m_Text, m_Font, 1.0f);
+        Renderer2D::DrawText(glm::vec2(x, y), m_Text, m_Font, m_Color, 1.0f);
     }
 
     void UIText::OnDimentionsChange() { UpdateObjects(); }

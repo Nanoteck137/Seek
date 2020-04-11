@@ -33,7 +33,15 @@ void TestLayer::OnAttach()
     constraints->SetWidth(new Seek::UIPixelConstraint(200));
     constraints->SetHeight(new Seek::UIPixelConstraint(60));
 
-    Seek::UIButton* button = new Seek::UIButton("Hello World", m_Font);
+    Seek::UIButton::Properties buttonProps;
+    buttonProps.Label = "Hello World";
+    buttonProps.Font = m_Font;
+    buttonProps.LabelColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+    buttonProps.Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    buttonProps.HoverColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f);
+    buttonProps.ClickColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+
+    Seek::UIButton* button = new Seek::UIButton(buttonProps);
     button->SetAction([]() { SK_APP_INFO("Button clicked"); });
 
     container->Add(button, constraints);
