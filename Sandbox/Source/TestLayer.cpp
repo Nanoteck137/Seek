@@ -34,6 +34,8 @@ void TestLayer::OnAttach()
     constraints->SetHeight(new Seek::UIPixelConstraint(60));
 
     Seek::UIButton* button = new Seek::UIButton("Hello World", m_Font);
+    button->SetAction([]() { SK_APP_INFO("Button clicked"); });
+
     container->Add(button, constraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");

@@ -12,6 +12,9 @@ namespace Seek
 {
     class UIButton : public UIComponent
     {
+    public:
+        using ActionHandler = std::function<void()>;
+
     private:
         enum class ButtonState
         {
@@ -25,6 +28,7 @@ namespace Seek
 
     private:
         bool InsideButton(float32 x, float32 y);
+        void OnAction();
 
     public:
         virtual void OnEvent(Event& event) override;
@@ -34,9 +38,17 @@ namespace Seek
         bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
         bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
 
+        static void NoAction() {}
+
     protected:
         virtual void OnInit() override;
         virtual void OnUpdate(float deltaTime) override;
+
+    public:
+        inline void SetAction(ActionHandler action)
+        {
+            m_ActionHandler = action;
+        }
 
     private:
         UIBlock* m_Block = nullptr;
@@ -44,8 +56,9 @@ namespace Seek
 
         Ref<Transition> m_HoverTransition;
 
+        ButtonState m_State = ButtonState::UNPRESSED;
         bool m_MouseOver = false;
 
-        ButtonState m_State = ButtonState::UNPRESSED;
+        ActionHandler m_ActionHandler = &UIButton::NoAction;
     };
 }

@@ -19,6 +19,7 @@
 #endif
 
 #define SK_BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+#define SK_BIND_ACTION_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 #define BIT(x) (1 << x)
 

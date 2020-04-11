@@ -33,6 +33,12 @@ namespace Seek
         return false;
     }
 
+    void UIButton::OnAction()
+    {
+        if (m_ActionHandler)
+            m_ActionHandler();
+    }
+
     void UIButton::OnEvent(Event& event)
     {
         EventDispatcher dispatcher(event);
@@ -62,20 +68,16 @@ namespace Seek
 
         m_HoverTransition = CreateRef<Transition>();
         m_HoverTransition->Add(TransitionType::XPOS,
-                               new SlideTransition(0.05f, 0.25f));
+                               new SlideTransition(0.05f, 0.10f));
     }
 
     void UIButton::OnUpdate(float deltaTime)
     {
         if (m_MouseOver)
         {
-            // m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, false,
-            //                                      0.0f);
         }
         else
         {
-            // m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, true,
-            //                                      0.0f);
         }
     }
 
@@ -86,10 +88,23 @@ namespace Seek
 
         if (InsideButton(mouseX, mouseY))
         {
+            if (m_MouseOver == false)
+            {
+                m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, false,
+                                                      0.0f);
+                m_Block->SetColor(glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+            }
+
             m_MouseOver = true;
         }
         else
         {
+            if (m_MouseOver == true)
+            {
+                m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, true,
+                                                      0.0f);
+                m_Block->SetColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+            }
             m_MouseOver = false;
         }
 
@@ -101,13 +116,10 @@ namespace Seek
         float32 mouseX = event.GetX() / UIManager::GetDisplayWidth();
         float32 mouseY = event.GetY() / UIManager::GetDisplayHeight();
 
-        if (mouseX >= m_Position.x && mouseX <= m_Position.x + m_Size.x)
+        if (InsideButton(mouseX, mouseY))
         {
-            if (mouseY >= m_Position.y && mouseY <= m_Position.y + m_Size.y)
-            {
-                printf("Inside button\n");
-                return true;
-            }
+            m_State = ButtonState::PRESSED;
+            return true;
         }
 
         return false;
@@ -115,6 +127,16 @@ namespace Seek
 
     bool UIButton::OnMouseButtonReleased(MouseButtonReleasedEvent& event)
     {
+        float32 mouseX = event.GetX() / UIManager::GetDisplayWidth();
+        float32 mouseY = event.GetY() / UIManager::GetDisplayHeight();
+
+        if (InsideButton(mouseX, mouseY) && m_State == ButtonState::PRESSED)
+        {
+            OnAction();
+        }
+
+        m_State = ButtonState::UNPRESSED;
+
         return false;
     }
 }
