@@ -6,8 +6,6 @@ void TestLayer::OnAttach()
 {
     m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 
-    bool res = Seek::FileSystem::FileExists("Assets/Textures/Test.png");
-
     m_World = Seek::PhysicsWorld2D::Create();
     m_Box = Seek::PhysicsBox2D::Create(m_World, Seek::PhysicsBodyType::Dynamic,
                                        glm::vec2(0.0f, 10.0f),
@@ -27,11 +25,11 @@ void TestLayer::OnAttach()
 
     Seek::UIContainer* container = Seek::UIManager::GetContainer();
 
-    Seek::UIConstraints* constraints = new Seek::UIConstraints();
+    /*Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UICenterConstraint());
     constraints->SetY(new Seek::UICenterConstraint());
-    constraints->SetWidth(new Seek::UIPixelConstraint(200));
-    constraints->SetHeight(new Seek::UIPixelConstraint(60));
+    constraints->SetWidth(new Seek::UIRatioConstraint(6.0f));
+    constraints->SetHeight(new Seek::UIRelativeConstraint(0.09f));
 
     Seek::UIButton::Properties buttonProps;
     buttonProps.Label = "Hello World";
@@ -44,7 +42,16 @@ void TestLayer::OnAttach()
     Seek::UIButton* button = new Seek::UIButton(buttonProps);
     button->SetAction([]() { SK_APP_INFO("Button clicked"); });
 
-    container->Add(button, constraints);
+    container->Add(button, constraints);*/
+
+    m_Menu = new Menu();
+    Seek::UIConstraints* constraints = new Seek::UIConstraints();
+    constraints->SetX(new Seek::UIRelativeConstraint(0.0f));
+    constraints->SetY(new Seek::UIRelativeConstraint(0.0f));
+    constraints->SetWidth(new Seek::UIRelativeConstraint(1.0f));
+    constraints->SetHeight(new Seek::UIRelativeConstraint(1.0f));
+
+    container->Add(m_Menu, constraints);
 
     // m_Sound = Seek::AudioEngine::CreateSound("Assets/Sounds/test.wav");
     // m_Sound->Play();

@@ -76,9 +76,6 @@ namespace Seek
 
     bool Application::OnWindowClosed(WindowCloseEvent& e)
     {
-        new int[4];
-
-        _CrtDumpMemoryLeaks();
         m_Running = false;
 
         return true;
@@ -129,5 +126,7 @@ namespace Seek
 
             m_Window->OnUpdate();
         }
+
+        glfwTerminate();
     }
 }

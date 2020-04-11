@@ -58,6 +58,21 @@ namespace Seek
         return m_Size.y * UIManager::GetDisplayHeight();
     }
 
+    float UIComponent::GetAbsAspectRatio()
+    {
+        return GetPixelWidth() / GetPixelHeight();
+    }
+
+    float UIComponent::GetRelativeHeightCoords(float relativeWidth)
+    {
+        return relativeWidth * GetAbsAspectRatio();
+    }
+
+    float UIComponent::GetRelativeWidthCoords(float relativeHeight)
+    {
+        return relativeHeight / GetAbsAspectRatio();
+    }
+
     float UIComponent::GetAnimationWidth() { return m_Animator->GetWidth(); }
 
     float UIComponent::GetAnimationHeight() { return m_Animator->GetHeight(); }

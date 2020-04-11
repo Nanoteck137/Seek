@@ -27,7 +27,7 @@ namespace Seek
     public:
         void SetAxis(bool xAxis, bool posValue);
 
-        inline bool GetPosValue() const { return m_PosValue; }
+        inline bool IsPosValue() const { return m_PosValue; }
         inline bool IsXAxis() const { return m_XAxis; }
 
         inline UIComponent* GetCurrent() const { return m_Current; }

@@ -16,13 +16,17 @@ namespace Seek
     public:
         struct Properties
         {
-            String Label;
-            Ref<Font> Font;
-            glm::vec4 LabelColor;
+            String Label = "";
+            Ref<Font> Font = nullptr;
+            glm::vec4 LabelColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-            glm::vec4 Color;
-            glm::vec4 HoverColor;
-            glm::vec4 ClickColor;
+            glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            glm::vec4 HoverColor = glm::vec4(0.9f, 0.9f, 0.9f, 1.0f);
+            glm::vec4 ClickColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+
+            bool Border = false;
+            float BorderThickness = 0.0f;
+            glm::vec4 BorderColor = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
         };
 
         using ActionHandler = std::function<void()>;
@@ -68,7 +72,8 @@ namespace Seek
 
         Properties m_Props;
 
-        Ref<Transition> m_HoverTransition;
+        Ref<Transition> m_HoverBlockTransition;
+        Ref<Transition> m_HoverTextTransition;
 
         ButtonState m_State = ButtonState::UNPRESSED;
         bool m_MouseOver = false;

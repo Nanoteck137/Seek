@@ -18,6 +18,7 @@
     - TextBox
   - Fix Memory issues
   - More transitions
+  - Fix text scaling
 * 2D
 * 3D
 * General

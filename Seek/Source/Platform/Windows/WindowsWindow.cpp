@@ -112,6 +112,8 @@ namespace Seek
             float64 mouseY = 0.0f;
             glfwGetCursorPos(window, &mouseX, &mouseY);
 
+            mouseY = -(mouseY - data.Height);
+
             switch (action)
             {
                 case GLFW_PRESS:
@@ -143,6 +145,7 @@ namespace Seek
                                               float64 yPos) {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
+            yPos = -(yPos - data.Height);
             MouseMovedEvent event((float32)xPos, (float32)yPos);
             data.EventCallback(event);
         });

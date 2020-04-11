@@ -43,6 +43,7 @@
 
 #include "Seek/UI/Constraints/UICenterConstraint.h"
 #include "Seek/UI/Constraints/UIPixelConstraint.h"
+#include "Seek/UI/Constraints/UIRatioConstraint.h"
 #include "Seek/UI/Constraints/UIRelativeConstraint.h"
 #include "Seek/UI/Constraints/UITextHeightConstraint.h"
 

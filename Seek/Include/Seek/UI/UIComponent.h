@@ -29,6 +29,10 @@ namespace Seek
         float GetPixelWidth();
         float GetPixelHeight();
 
+        float GetAbsAspectRatio();
+        float GetRelativeHeightCoords(float relativeWidth);
+        float GetRelativeWidthCoords(float relativeHeight);
+
         float GetAnimationWidth();
         float GetAnimationHeight();
         float GetAnimationX();

@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <box2d/box2d.h>
 
+#include "Menu.h"
+
 class TestLayer : public Seek::Layer
 {
 public:
@@ -33,6 +35,8 @@ private:
 
     Seek::Ref<Seek::Font> m_Font;
     Seek::Ref<Seek::Font> m_Font2;
+
+    Menu* m_Menu = nullptr;
 
     float m_Scale = 1.0f;
 

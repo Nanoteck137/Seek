@@ -49,6 +49,10 @@ namespace Seek
     void UIButton::OnInit()
     {
         m_Block = new UIBlock();
+        m_Block->SetBorderActive(m_Props.Border);
+        m_Block->SetBorderThickness(m_Props.BorderThickness);
+        m_Block->SetBorderColor(m_Props.BorderColor);
+
         UIConstraints* constraints = new UIConstraints();
         constraints->SetX(new UIRelativeConstraint(0.0f));
         constraints->SetY(new UIRelativeConstraint(0.0f));
@@ -67,9 +71,13 @@ namespace Seek
         constraints->SetHeight(new UITextHeightConstraint());
         Add(m_Text, constraints);
 
-        m_HoverTransition = CreateRef<Transition>();
-        m_HoverTransition->Add(TransitionType::XPOS,
-                               new SlideTransition(0.05f, 0.10f));
+        m_HoverBlockTransition = CreateRef<Transition>();
+        m_HoverBlockTransition->Add(TransitionType::XPOS,
+                                    new SlideTransition(0.05f, 0.10f));
+
+        m_HoverTextTransition = CreateRef<Transition>();
+        m_HoverTextTransition->Add(TransitionType::XPOS,
+                                   new SlideTransition(0.02f, 0.15f));
     }
 
     void UIButton::OnUpdate(float deltaTime) {}
@@ -83,19 +91,25 @@ namespace Seek
         {
             if (m_MouseOver == false)
             {
-                m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, false,
-                                                      0.0f);
+                m_Block->GetAnimator()->ApplyModifier(m_HoverBlockTransition,
+                                                      false, 0.0f);
+                m_Text->GetAnimator()->ApplyModifier(m_HoverTextTransition,
+                                                     false, 0.0f);
                 m_Block->SetColor(m_Props.HoverColor);
             }
 
             m_MouseOver = true;
+
+            return true;
         }
         else
         {
             if (m_MouseOver == true)
             {
-                m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, true,
-                                                      0.0f);
+                m_Block->GetAnimator()->ApplyModifier(m_HoverBlockTransition,
+                                                      true, 0.0f);
+                m_Text->GetAnimator()->ApplyModifier(m_HoverTextTransition,
+                                                     true, 0.0f);
                 m_Block->SetColor(m_Props.Color);
             }
             m_MouseOver = false;
