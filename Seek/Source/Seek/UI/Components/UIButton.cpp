@@ -6,6 +6,10 @@
 #include "Seek/UI/Constraints/UICenterConstraint.h"
 #include "Seek/UI/UIConstraints.h"
 
+#include "Seek/UI/Transition/SlideTransition.h"
+
+#include "Seek/UI/UIManager.h"
+
 namespace Seek
 {
     UIButton::UIButton(const String& text, const Ref<Font>& font)
@@ -16,17 +20,32 @@ namespace Seek
 
     UIButton::~UIButton() {}
 
+    bool UIButton::InsideButton(float32 x, float32 y)
+    {
+        if (x >= m_Position.x && x <= m_Position.x + m_Size.x)
+        {
+            if (y >= m_Position.y && y <= m_Position.y + m_Size.y)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void UIButton::OnEvent(Event& event)
     {
         EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<MouseMovedEvent>(
+            SK_BIND_EVENT_FN(UIButton::OnMouseMoved));
         dispatcher.Dispatch<MouseButtonPressedEvent>(
-            SK_BIND_EVENT_FN(UIButton::OnMousePressedEvent));
+            SK_BIND_EVENT_FN(UIButton::OnMouseButtonPressed));
+        dispatcher.Dispatch<MouseButtonReleasedEvent>(
+            SK_BIND_EVENT_FN(UIButton::OnMouseButtonReleased));
     }
 
     void UIButton::OnInit()
     {
-        glm::vec2 textSize = m_Text->GetFont()->GetTextSize(m_Text->GetText());
-
         UIConstraints* constraints = new UIConstraints();
         constraints->SetX(new UIRelativeConstraint(0.0f));
         constraints->SetY(new UIRelativeConstraint(0.0f));
@@ -40,24 +59,62 @@ namespace Seek
         constraints->SetWidth(new UIRelativeConstraint(1.0f));
         constraints->SetHeight(new UITextHeightConstraint());
         Add(m_Text, constraints);
+
+        m_HoverTransition = CreateRef<Transition>();
+        m_HoverTransition->Add(TransitionType::XPOS,
+                               new SlideTransition(0.05f, 0.25f));
     }
 
-    void UIButton::OnUpdate(float deltaTime) {}
-
-    bool UIButton::OnMousePressedEvent(MouseButtonPressedEvent& event)
+    void UIButton::OnUpdate(float deltaTime)
     {
-        /*if (event.GetX() >= m_Position.x &&
-            event.GetX() <= m_Position.x + m_Size.x)
+        if (m_MouseOver)
         {
-            if (event.GetY() >= m_Position.y &&
-                event.GetY() <= m_Position.y + m_Size.y)
+            // m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, false,
+            //                                      0.0f);
+        }
+        else
+        {
+            // m_Block->GetAnimator()->ApplyModifier(m_HoverTransition, true,
+            //                                      0.0f);
+        }
+    }
+
+    bool UIButton::OnMouseMoved(MouseMovedEvent& event)
+    {
+        float32 mouseX = event.GetX() / UIManager::GetDisplayWidth();
+        float32 mouseY = event.GetY() / UIManager::GetDisplayHeight();
+
+        if (InsideButton(mouseX, mouseY))
+        {
+            m_MouseOver = true;
+        }
+        else
+        {
+            m_MouseOver = false;
+        }
+
+        return false;
+    }
+
+    bool UIButton::OnMouseButtonPressed(MouseButtonPressedEvent& event)
+    {
+        float32 mouseX = event.GetX() / UIManager::GetDisplayWidth();
+        float32 mouseY = event.GetY() / UIManager::GetDisplayHeight();
+
+        if (mouseX >= m_Position.x && mouseX <= m_Position.x + m_Size.x)
+        {
+            if (mouseY >= m_Position.y && mouseY <= m_Position.y + m_Size.y)
             {
                 printf("Inside button\n");
-                m_Color = sf::Color::Red;
                 return true;
             }
-        }*/
+        }
 
+        return false;
+    }
+
+    bool UIButton::OnMouseButtonReleased(MouseButtonReleasedEvent& event)
+    {
         return false;
     }
 }

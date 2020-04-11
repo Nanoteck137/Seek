@@ -64,6 +64,8 @@ namespace Seek
         dispatcher.Dispatch<WindowResizeEvent>(
             SK_BIND_EVENT_FN(Application::OnWindowResize));
 
+        UIManager::GetContainer()->OnEvent(e);
+
         for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
         {
             (*--it)->OnEvent(e);

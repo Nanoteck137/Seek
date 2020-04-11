@@ -15,4 +15,5 @@ namespace Seek
     {
         Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(), m_Color);
     }
+
 }
