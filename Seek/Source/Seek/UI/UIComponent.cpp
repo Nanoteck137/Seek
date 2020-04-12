@@ -37,8 +37,53 @@ namespace Seek
         InitChild(child);
     }
 
+    void UIComponent::AddInStyle(UIComponent* child, UIConstraints* constraints)
+    {
+        child->SetHidden();
+        Add(child, constraints);
+        child->Display(true);
+    }
+
+    void UIComponent::SetHidden()
+    {
+        m_Displayed = false;
+        Show(false);
+    }
+
+    void UIComponent::Display(bool display)
+    {
+        if (display == m_Displayed)
+            return;
+
+        m_Displayed = display;
+
+        if (display)
+            Show(true);
+
+        DoDisplayAnimation(display, 0.0f, true);
+    }
+
+    void UIComponent::DoDisplayAnimation(bool display, float32 parentDelay,
+                                         bool head)
+    {
+        if (!IsShown() || (!m_Displayed && !head))
+            return;
+
+        float32 delay = display ? m_DisplayDelay : m_HideDelay;
+        if (m_DisplayTransition)
+        {
+            m_Animator->ApplyModifier(m_DisplayTransition, display, delay);
+        }
+
+        for (auto& it : m_Children)
+            it->DoDisplayAnimation(display, delay, false);
+    }
+
     void UIComponent::Update(float deltaTime)
     {
+        if (!m_Visable)
+            return;
+
         m_Animator->Update(deltaTime);
 
         OnUpdate(deltaTime);

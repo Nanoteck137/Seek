@@ -23,6 +23,11 @@ namespace Seek
         virtual ~UIComponent();
 
         void Add(UIComponent* child, UIConstraints* constraints);
+        void AddInStyle(UIComponent* child, UIConstraints* constraints);
+
+        void SetHidden();
+        void Display(bool display);
+        void DoDisplayAnimation(bool display, float parentDelay, bool head);
 
         void Update(float deltaTime);
 
@@ -58,19 +63,45 @@ namespace Seek
         virtual void OnDimentionsChange() {}
 
     public:
+        inline void Show(bool show) { m_Visable = show; }
+        inline bool IsShown() { return m_Visable; }
+
+        inline bool IsDisplayed() const { return m_Displayed; }
+
         inline const std::vector<UIComponent*>& GetChildren() const
         {
             return m_Children;
         }
 
         inline Animator* GetAnimator() { return m_Animator; }
+        inline void SetDisplayTransition(const Ref<Transition>& transition)
+        {
+            m_DisplayTransition = transition;
+            m_DisplayDelay = 0.0f;
+            m_HideDelay = 0.0f;
+        }
+
+        inline void SetDisplayTransition(const Ref<Transition>& transition,
+                                         float32 displayDelay,
+                                         float32 hideDelay)
+        {
+            m_DisplayTransition = transition;
+            m_DisplayDelay = displayDelay;
+            m_HideDelay = hideDelay;
+        }
 
     protected:
+        bool m_Visable = true;
+        bool m_Displayed = true;
+
         std::vector<UIComponent*> m_Children;
         UIComponent* m_Parent = nullptr;
         UIConstraints* m_Constraints = nullptr;
 
         Animator* m_Animator = nullptr;
+        Ref<Transition> m_DisplayTransition = nullptr;
+        float32 m_DisplayDelay = 0.0f;
+        float32 m_HideDelay = 0.0f;
 
         glm::vec2 m_Position;
         glm::vec2 m_Size;

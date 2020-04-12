@@ -45,6 +45,7 @@ void TestLayer::OnAttach()
     container->Add(button, constraints);*/
 
     m_Menu = new Menu();
+    m_Menu->SetHidden();
     Seek::UIConstraints* constraints = new Seek::UIConstraints();
     constraints->SetX(new Seek::UIRelativeConstraint(0.0f));
     constraints->SetY(new Seek::UIRelativeConstraint(0.0f));
@@ -167,11 +168,22 @@ void TestLayer::OnEvent(Seek::Event& event)
     Seek::EventDispatcher dispatcher(event);
     dispatcher.Dispatch<Seek::WindowResizeEvent>(
         SK_BIND_EVENT_FN(TestLayer::OnWindowResize));
+    dispatcher.Dispatch<Seek::KeyReleasedEvent>(
+        SK_BIND_EVENT_FN(TestLayer::OnKeyReleased));
 }
 
-bool TestLayer::OnWindowResize(Seek::WindowResizeEvent& e)
+bool TestLayer::OnWindowResize(Seek::WindowResizeEvent& event)
 {
-    m_Camera =
-        Seek::OrthographicCamera(0.0f, e.GetWidth(), 0.0f, e.GetHeight());
+    m_Camera = Seek::OrthographicCamera(0.0f, event.GetWidth(), 0.0f,
+                                        event.GetHeight());
+    return false;
+}
+
+bool TestLayer::OnKeyReleased(Seek::KeyReleasedEvent& event)
+{
+    if (event.GetKeyCode() == SK_KEY_SPACE)
+    {
+        m_Menu->Display(!m_Menu->IsDisplayed());
+    }
     return false;
 }

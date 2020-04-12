@@ -9,7 +9,8 @@ public:
     ~Menu();
 
 private:
-    void AddButton(const String& label, int num);
+    void AddButton(const String& label, int num,
+                   Seek::UIButton::ActionHandler action);
 
 protected:
     virtual void OnInit() override;
@@ -17,4 +18,5 @@ protected:
     virtual void OnDimentionsChange() override;
 
 private:
+    Seek::Ref<Seek::Transition> m_Transition;
 };

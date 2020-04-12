@@ -20,7 +20,8 @@ public:
     virtual void OnEvent(Seek::Event& event) override;
 
 private:
-    bool OnWindowResize(Seek::WindowResizeEvent& e);
+    bool OnWindowResize(Seek::WindowResizeEvent& event);
+    bool OnKeyReleased(Seek::KeyReleasedEvent& event);
 
 private:
     Seek::OrthographicCamera m_Camera;

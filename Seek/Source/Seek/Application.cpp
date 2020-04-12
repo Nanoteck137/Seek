@@ -129,4 +129,6 @@ namespace Seek
 
         glfwTerminate();
     }
+
+    void Application::Close() { m_Running = false; }
 }

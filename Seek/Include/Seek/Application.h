@@ -19,13 +19,14 @@ namespace Seek
         virtual ~Application();
 
         void Run();
+        void Close();
 
         void OnEvent(Event& e);
 
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* overlay);
 
-        static inline Application& Get() { return *s_Instance; }
+        inline static Application& Get() { return *s_Instance; }
 
         inline Window& GetWindow() { return *m_Window; }
 
