@@ -5,6 +5,8 @@
   - Add a UI Layer
   - Application Singleton
   - Common place to initialize Engine subsystems
+  - Rethink the Audio system
+  - Instrumentor Singleton
 
 * App
   - Input

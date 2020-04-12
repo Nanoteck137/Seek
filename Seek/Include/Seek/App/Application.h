@@ -20,8 +20,6 @@ namespace Seek
     public:
         virtual ~Application();
 
-    public:
-        // NOTE: Normal Methods
         void Run();
         void Close();
 
@@ -32,16 +30,11 @@ namespace Seek
 
         inline Window& GetWindow() { return *m_Window; }
 
-        // NOTE: Static Methods
-        inline static Application& Get() { return *s_Instance; }
-
     private:
-        // NOTE: Normal Methods
         bool OnWindowClosed(WindowCloseEvent& e);
         bool OnWindowResize(WindowResizeEvent& e);
 
     private:
-        // NOTE: Normal Variables
         bool m_Running = false;
         float32 m_LastFrameTime = 0.0f;
 
@@ -50,7 +43,10 @@ namespace Seek
 
         LayerStack m_LayerStack;
 
-        // NOTE: Static Variables
+    public:
+        inline static Application& Get() { return *s_Instance; }
+
+    private:
         static Application* s_Instance;
     };
 }

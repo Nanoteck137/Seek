@@ -16,35 +16,38 @@ namespace Seek
 {
     class Foo : public Bar
     {
-    // Constructor
+    // Structs, enum, usings
     public:
-    protected:
-    private:
-        Foo();
+        enum class Test 
+        {
+            NONE, 
+            TEST, 
+            TEST2
+        };
+    // Constructors and Destructors
+    public:
+        Foo(Test test);
         ~Foo();
 
-    public:
-        // NOTE: Virtual Methods
-        // NOTE: Normal Methods
-        // NOTE: Static Methods
-    protected:
-        // NOTE: Virtual Methods
-        // NOTE: Normal Methods
-        // NOTE: Static Methods
-    private:
-        // NOTE: Virtual Methods
-        // NOTE: Normal Methods
-        // NOTE: Static Methods
+    // Methods
+        void Hello();
 
-    public:
-        // NOTE: Normal Variables
-        // NOTE: Static Variables
-    protected:
-        // NOTE: Normal Variables
-        // NOTE: Static Variables
     private:
-        // NOTE: Normal Variables
-        // NOTE: Static Variables
+        void World();
+
+    // Variables
+    private:
+        int32 m_Variable = 0;
+
+    // Static Methods
+    public:
+        static void StaticHello();
+    private:
+        static void StaticWorld();
+
+    // Static Variables
+    private:
+        static float s_StaticVar;
     };
 }
 
@@ -55,14 +58,20 @@ namespace Seek
 namespace Seek 
 {
     // NOTE: Static Variables Initializtion
+    float Foo::s_StaticVar;
 
     // NOTE: Constructor
+    Foo(Test test) { }
+    ~Foo() { }
 
-    // NOTE: Virtual Methods
+    // NOTE: Methods
 
-    // NOTE: Normal Methods
+    void Foo::Hello() { }
+    void Foo::World() { }
 
     // NOTE: Static Methods
+    void Foo::StaticHello() { }
+    void Foo::StaticWorld() { }
 }
 ```
 
@@ -73,3 +82,4 @@ namespace Seek
 - Todo Add
 
 ### API Interface
+- Todo Add

@@ -5,64 +5,51 @@
 
 #include <fstream>
 
-// TODO(patrik): Remove, use custom timer later
-#include <chrono>
+#include "InstrumentationTimer.h"
 
 namespace Seek
 {
-    struct ProfileResult
-    {
-        String Name;
-        int64 Start;
-        int64 End;
-        uint32 ThreadID;
-    };
-
-    struct InstrumentationSession
-    {
-        std::string Name;
-    };
-
     class Instrumentor
     {
+    public:
+        struct ProfileResult
+        {
+            String Name;
+            int64 Start;
+            int64 End;
+            uint32 ThreadID;
+        };
+
+        struct Session
+        {
+            String Name;
+        };
+
     public:
         Instrumentor();
         ~Instrumentor();
 
+    public:
         void BeginSession(const String& name,
                           const String& filePath = "result.json");
         void EndSession();
         void WriteProfile(const ProfileResult& profile);
-
-    public:
-        static Instrumentor& Get() { return *s_Instance; }
 
     private:
         void WriteHeader();
         void WriteFooter();
 
     private:
-        InstrumentationSession* m_CurrentSession = nullptr;
+        Session* m_CurrentSession = nullptr;
         // TODO(patrik): Change this
         std::ofstream m_OutputStream;
-        int m_ProfileCount = 0;
+        int32 m_ProfileCount = 0;
+
+    public:
+        static Instrumentor& Get() { return *s_Instance; }
 
     private:
         static Instrumentor* s_Instance;
-    };
-
-    class InstrumentationTimer
-    {
-    public:
-        InstrumentationTimer(const char* name);
-        ~InstrumentationTimer();
-
-        void Stop();
-
-    private:
-        const char* m_Name = nullptr;
-        std::chrono::time_point<std::chrono::high_resolution_clock> m_StartTime;
-        bool m_Stopped = false;
     };
 
 #define SK_PROFILE_BEGIN_SESSION(name, filepath)                               \

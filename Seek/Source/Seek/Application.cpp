@@ -19,10 +19,8 @@
 
 namespace Seek
 {
-    // Static Variables initializtion
     Application* Application::s_Instance = nullptr;
 
-    // NOTE: Constructor
     Application::Application()
     {
         SK_PROFILE_FUNCTION();
@@ -57,9 +55,6 @@ namespace Seek
         UIManager::Shutdown();
     }
 
-    // NOTE: Virtual Methods
-
-    // NOTE: Normal Methods
     void Application::Run()
     {
         SK_PROFILE_FUNCTION();
@@ -137,6 +132,4 @@ namespace Seek
 
         return false;
     }
-
-    // NOTE: Static Methods
 }
