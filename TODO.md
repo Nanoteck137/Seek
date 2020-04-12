@@ -19,19 +19,6 @@
 * Physics
   - PhysicsBox2D
   - PhysicsWorld2D
-* Renderer
-  - Buffer
-  - Font
-  - FontManager
-  - GraphicsContext
-  - OrthograpicCamera
-  - RenderCommand
-  - Renderer
-  - Renderer2D
-  - RendererAPI
-  - Shader
-  - Texture
-  - VertexArray
 * System
   - FileSystem
 * UI
