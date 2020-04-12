@@ -13,18 +13,26 @@ namespace Seek
 
     void UIBlock::OnUpdate(float deltaTime)
     {
+        SK_CORE_INFO("Alpha: {}", m_Color.a);
+        float32 alpha = m_TotalAlpha;
+
         glm::vec2 position = GetPositionInPixels();
         glm::vec2 size = GetSizeInPixels();
 
         if (m_Border)
         {
-            Renderer2D::DrawQuad(position, size, m_BorderColor);
+            glm::vec4 borderColor = m_BorderColor;
+            borderColor.a = m_Color.a;
+            borderColor.a *= alpha;
+            Renderer2D::DrawQuad(position, size, borderColor);
 
             size -= m_BorderThickness;
             position += m_BorderThickness / 2;
         }
 
-        Renderer2D::DrawQuad(position, size, m_Color);
+        glm::vec4 color = m_Color;
+        color.a *= alpha;
+        Renderer2D::DrawQuad(position, size, color);
     }
 
 }

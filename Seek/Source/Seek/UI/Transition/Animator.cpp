@@ -44,7 +44,7 @@ namespace Seek
 
         if (m_AlphaChange)
         {
-            // m_Component->UpdateTotalAlpha();
+            m_Component->UpdateTotalAlpha();
         }
     }
 

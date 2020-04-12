@@ -46,6 +46,9 @@ namespace Seek
         glm::vec2 GetPositionInPixels();
         glm::vec2 GetSizeInPixels();
 
+        void UpdateTotalAlpha();
+        void CalcTotalAlpha();
+
         void NotifyDimensionChange(bool sizeChange);
 
     public:
@@ -105,5 +108,8 @@ namespace Seek
 
         glm::vec2 m_Position;
         glm::vec2 m_Size;
+
+        float32 m_TotalAlpha = 1.0f;
+        float32 m_Alpha = 1.0f;
     };
 }

@@ -14,6 +14,7 @@ void Menu::AddButton(const String& label, int num,
     props.Font = font;
     props.Border = true;
     props.BorderThickness = 10.0f;
+    props.Color = glm::vec4(1.0f, 1.0f, 1.0f, 0.8f);
 
     Seek::UIButton* button = new Seek::UIButton(props);
     button->SetAction(action);
@@ -33,7 +34,9 @@ void Menu::OnInit()
 {
     m_Transition = Seek::CreateRef<Seek::Transition>();
     m_Transition->Add(Seek::TransitionType::XPOS,
-                      new Seek::SlideTransition(-2.0f, 0.4f, 0.5f));
+                      new Seek::SlideTransition(-1.5f, 0.4f));
+    m_Transition->Add(Seek::TransitionType::ALPHA,
+                      new Seek::SlideTransition(0.0f, 0.4f));
 
     int num = 0;
     AddButton("Play", num++, [=]() { Display(false); });
@@ -42,4 +45,5 @@ void Menu::OnInit()
 }
 
 void Menu::OnUpdate(float deltaTime) {}
+
 void Menu::OnDimentionsChange() {}

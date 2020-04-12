@@ -179,6 +179,20 @@ namespace Seek
         m_Size.y = absHeight;
     }
 
+    void UIComponent::UpdateTotalAlpha()
+    {
+        CalcTotalAlpha();
+
+        for (auto& it : m_Children)
+            it->UpdateTotalAlpha();
+    }
+
+    void UIComponent::CalcTotalAlpha()
+    {
+        float animationAlpha = m_Animator->GetAlpha();
+        m_TotalAlpha = m_Parent->m_TotalAlpha * m_Alpha * animationAlpha;
+    }
+
     void UIComponent::CalculateScreenSpacePosition(bool calcSize)
     {
         m_Position.x =

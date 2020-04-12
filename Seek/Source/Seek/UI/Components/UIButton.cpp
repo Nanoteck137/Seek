@@ -49,6 +49,7 @@ namespace Seek
     void UIButton::OnInit()
     {
         m_Block = new UIBlock();
+        m_Block->SetColor(m_Props.Color);
         m_Block->SetBorderActive(m_Props.Border);
         m_Block->SetBorderThickness(m_Props.BorderThickness);
         m_Block->SetBorderColor(m_Props.BorderColor);

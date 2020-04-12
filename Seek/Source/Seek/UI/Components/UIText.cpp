@@ -33,9 +33,13 @@ namespace Seek
         // Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
         //                     glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
 
-        float x = m_TextX * UIManager::GetDisplayWidth();
-        float y = m_Position.y * UIManager::GetDisplayHeight();
-        Renderer2D::DrawText(glm::vec2(x, y), m_Text, m_Font, m_Color, 1.0f);
+        float32 alpha = m_TotalAlpha;
+        float32 x = m_TextX * UIManager::GetDisplayWidth();
+        float32 y = m_Position.y * UIManager::GetDisplayHeight();
+        glm::vec4 color = m_Color;
+        color.a *= alpha;
+
+        Renderer2D::DrawText(glm::vec2(x, y), m_Text, m_Font, color, 1.0f);
     }
 
     void UIText::OnDimentionsChange() { UpdateObjects(); }
