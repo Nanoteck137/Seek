@@ -17,7 +17,7 @@ namespace Seek
 
         glm::vec2 Offset;
 
-        float XAdvance;
+        float32 XAdvance;
     };
 
     class Font

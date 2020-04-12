@@ -12,7 +12,7 @@ namespace Seek
         inline float32 GetX() const { return m_MouseX; }
         inline float32 GetY() const { return m_MouseY; }
 
-        std::string ToString() const override
+        String ToString() const override
         {
             std::stringstream ss;
             ss << "MouseMovedEvent: " << m_MouseX << ", " << m_MouseY;
@@ -37,7 +37,7 @@ namespace Seek
         inline float32 GetXOffset() const { return m_XOffset; }
         inline float32 GetYOffset() const { return m_YOffset; }
 
-        std::string ToString() const override
+        String ToString() const override
         {
             std::stringstream ss;
             ss << "MouseScrolledEvent: " << GetXOffset() << ", "
@@ -79,7 +79,7 @@ namespace Seek
         {
         }
 
-        std::string ToString() const override
+        String ToString() const override
         {
             std::stringstream ss;
             ss << "MouseButtonPressedEvent: " << m_MouseX << ", " << m_MouseY
@@ -98,7 +98,7 @@ namespace Seek
         {
         }
 
-        std::string ToString() const override
+        String ToString() const override
         {
             std::stringstream ss;
             ss << "MouseButtonReleasedEvent: " << m_MouseX << ", " << m_MouseY

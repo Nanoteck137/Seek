@@ -44,11 +44,11 @@ namespace Seek
 
     struct BufferElement
     {
-        String Name;
-        ShaderDataType Type;
-        uint32 Offset;
-        uint32 Size;
-        bool Normalized;
+        String Name = "";
+        ShaderDataType Type = ShaderDataType::None;
+        uint32 Offset = 0;
+        uint32 Size = 0;
+        bool Normalized = false;
 
         BufferElement() {}
 

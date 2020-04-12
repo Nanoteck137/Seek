@@ -14,14 +14,15 @@
 
 namespace Seek
 {
-    struct RenderStats
-    {
-        uint32 NumQuads;
-        uint32 NumDrawCalls;
-    };
-
     class Renderer2D
     {
+    public:
+        struct RenderStats
+        {
+            uint32 NumQuads;
+            uint32 NumDrawCalls;
+        };
+
     public:
         static void Init();
         static void Shutdown();

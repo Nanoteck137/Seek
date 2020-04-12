@@ -7,6 +7,8 @@
   - Common place to initialize Engine subsystems
   - Rethink the Audio system
   - Instrumentor Singleton
+  - Find a solution to the Texture Class enums and structs
+  - Seperate the FileSystem api
 
 * App
   - Input
@@ -14,15 +16,6 @@
 * Audio
   - AudioEngine
   - Sound
-* Debug
-  - Instrumentor
-* Events
-  - ApplicationEvent
-  - Event
-  - KeyEvents
-  - MouseEvents
-* ImGui
-  - ImGuiLayer
 * Physics
   - PhysicsBox2D
   - PhysicsWorld2D

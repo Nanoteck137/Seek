@@ -35,7 +35,7 @@ namespace Seek
 
         uint32 IndexCounter = 0;
 
-        RenderStats Stats;
+        Renderer2D::RenderStats Stats;
     };
 
     static Renderer2DStorage* s_Data;
@@ -159,7 +159,7 @@ namespace Seek
 
     float Renderer2D::SubmitTexture(const Ref<Texture2D>& texture)
     {
-        float result = 0.0f;
+        float32 result = 0.0f;
         bool found = false;
         for (uint32 i = 0; i < s_Data->Textures.size(); i++)
         {
@@ -332,5 +332,8 @@ namespace Seek
         }
     }
 
-    const RenderStats& Renderer2D::GetRenderStats() { return s_Data->Stats; }
+    const Renderer2D::RenderStats& Renderer2D::GetRenderStats()
+    {
+        return s_Data->Stats;
+    }
 }

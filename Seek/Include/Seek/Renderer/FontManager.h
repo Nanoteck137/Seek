@@ -11,6 +11,9 @@ namespace Seek
 {
     class FontManager
     {
+    private:
+        FontManager() {}
+
     public:
         static void Init();
         static void Shutdown();

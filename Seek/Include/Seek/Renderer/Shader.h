@@ -30,6 +30,7 @@ namespace Seek
 
         virtual const String& GetName() const = 0;
 
+    public:
         static Ref<Shader> Create(const String& filePath);
         static Ref<Shader> Create(const String& name,
                                   const String& vertexSource,

@@ -12,6 +12,12 @@ namespace Seek
 {
     class Renderer
     {
+    private:
+        struct SceneData
+        {
+            glm::mat4 ViewProjectionMatrix = glm::mat4(1.0f);
+        };
+
     public:
         static void Init();
         static void Shutdown();
@@ -28,11 +34,6 @@ namespace Seek
         }
 
     private:
-        struct SceneData
-        {
-            glm::mat4 ViewProjectionMatrix;
-        };
-
         static SceneData* s_SceneData;
     };
 }
