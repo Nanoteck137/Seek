@@ -1,7 +1,7 @@
 #include "SeekPCH.h"
 #include "Platform/Windows/WindowsInput.h"
 
-#include "Seek/Application.h"
+#include "Seek/App/Application.h"
 
 #include <GLFW/glfw3.h>
 

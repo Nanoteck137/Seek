@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Seek/Input.h"
+#include "Seek/App/Input.h"
 
 namespace Seek
 {

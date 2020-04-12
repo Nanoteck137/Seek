@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Seek/Window.h"
+#include "Seek/App/Window.h"
 
 #include "Seek/Renderer/GraphicsContext.h"
 
