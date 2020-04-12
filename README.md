@@ -1,170 +1,45 @@
 # Seek
 
-## TODO
+Seek is a small Game Engine created for fun
 
-### Refactoring
-* App
-  - Application
-  - Input
-  - KeyCodes
-  - Layer
-  - LayerStack
-  - MouseButtonCodes
-  - Timestep
-  - Window
-* Audio
-  - AudioEngine
-  - Sound
-* Debug
-  - Instrumentor
-* Events
-  - ApplicationEvent
-  - Event
-  - KeyEvents
-  - MouseEvents
-* ImGui
-  - ImGuiLayer
-* Physics
-  - PhysicsBox2D
-  - PhysicsWorld2D
-* Renderer
-  - Buffer
-  - Font
-  - FontManager
-  - GraphicsContext
-  - OrthograpicCamera
-  - RenderCommand
-  - Renderer
-  - Renderer2D
-  - RendererAPI
-  - Shader
-  - Texture
-  - VertexArray
-* System
-  - FileSystem
-* UI
-  * Components
-    - UIBlock
-    - UIButton
-    - UIContainer
-    - UIText
-  * Constraints
-    - UICenterConstraint
-    - UIPixelConstraint
-    - UIRatioConstraint
-    - UIRelativeConstraint
-    - UITextHeightConstraint
-  * Transition
-    - Animator
-    - Modifier
-    - SlideDriver
-    - SlideTransition
-    - Transition
-    - TransitionType
-    - ValueDriver
-    - ValueTransition
-  * Other
-    - UIComponent
-    - UIConstraint
-    - UIConstriants
-    - UIManager
-* Other
-  - Core
-  - Log
-  - Types
+README Template: https://gist.github.com/PurpleBooth/109311bb0361f32d87a2 
 
-### Engine
-* Audio (XAudio2, OpenAL?)
-* FileSystem
-  - Virtual FileSystem (VFS)
-  - File Infomation
-  - Directory Infomation
-    - File Change Callback???
-* Color Class (Change all glm::vec4)
+## Getting Started
 
-### Renderering Engine
-* UI 
-  - Cleanup
-  - More Components
-    - Slider
-    - TextBox
-  - Fix Memory issues
-  - More transitions
-  - Fix text scaling
-* 2D
-* 3D
-* General
-  - Framebuffers/RenderTargets
+TODO
 
-### Physics Engine
-* Box2D
-  - More Shapes
-  - Collision Callback
-  - Collisions Masks
-  - Triggers/Sensors
+### Prerequisites
 
-### Notes
+TODO
 
-Engine Classes
-```c++
-// .h File
-#pragma once
-
-#include "Seek/Core.h"
-#include "Seek/Log.h"
-
-#include "Bar.h"
-
-namespace Seek 
-{
-    class Foo : public Bar
-    {
-    // Constructor
-    public:
-    protected:
-    private:
-        Foo();
-        ~Foo();
-
-    public:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
-    protected:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
-    private:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
-
-    public:
-        // Normal Variables
-        // Static Variables
-    protected:
-        // Normal Variables
-        // Static Variables
-    private:
-      // Normal Variables
-      // Static Variables
-    };
-}
-
-// .cpp File
-#include "SeekPCH.h"
-#include "Seek/Foo.h"
-
-namespace Seek 
-{
-    // Static Variables initializtion
-
-    // Constructor
-
-    // Virtual Methods
-
-    // Normal Methods
-
-    // Static Methods
-}
 ```
+EXAMPLES
+```
+
+### Installing
+
+TODO
+
+## Built With
+
+TODO
+
+## Contributing
+
+TODO
+
+## Authors
+
+* **Patrik Millvik Rosenström** - *Developer* - [Nanoteck137](https://github.com/Nanoteck137)
+
+See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+
+## Acknowledgments
+
+* [TheCherno](https://github.com/thecherno/)
+* [ThinMatrix](https://www.youtube.com/channel/UCUkRj4qoT1bsWpE_C8lZYoQ)
+
