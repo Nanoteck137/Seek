@@ -7,7 +7,7 @@
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
-#include "Seek/Application.h"
+#include "Seek/App/Application.h"
 
 // TODO(patrik): Remove
 #include <GLFW/glfw3.h>

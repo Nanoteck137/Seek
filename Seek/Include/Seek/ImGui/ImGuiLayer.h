@@ -1,6 +1,9 @@
 #pragma once
 
-#include "Seek/Layer.h"
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
+#include "Seek/App/Layer.h"
 
 #include "Seek/Events/ApplicationEvent.h"
 #include "Seek/Events/KeyEvents.h"

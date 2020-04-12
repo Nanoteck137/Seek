@@ -3,8 +3,8 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-#include "Seek/KeyCodes.h"
-#include "Seek/MouseButtonCodes.h"
+#include "Seek/App/KeyCodes.h"
+#include "Seek/App/MouseButtonCodes.h"
 
 namespace Seek
 {

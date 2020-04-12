@@ -4,17 +4,18 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-// --------------- SYSTEM ---------------
+// --------------- DEBUG ---------------
 #include "Seek/Debug/Instrumentor.h"
 
-#include "Seek/Application.h"
-#include "Seek/Input.h"
-
-#include "Seek/Timestep.h"
-
-// TODO(patrik): Move layers?
-#include "Seek/Layer.h"
-#include "Seek/LayerStack.h"
+// --------------- DEBUG ---------------
+#include "Seek/App/Application.h"
+#include "Seek/App/Input.h"
+#include "Seek/App/KeyCodes.h"
+#include "Seek/App/Layer.h"
+#include "Seek/App/LayerStack.h"
+#include "Seek/App/MouseButtonCodes.h"
+#include "Seek/App/Timestep.h"
+#include "Seek/App/Window.h"
 
 // --------------- EVENTS ---------------
 #include "Seek/Events/Event.h"

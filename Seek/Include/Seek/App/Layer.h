@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
 #include "Seek/Events/Event.h"
-#include "Seek/Timestep.h"
+#include "Seek/App/Timestep.h"
 
 namespace Seek
 {

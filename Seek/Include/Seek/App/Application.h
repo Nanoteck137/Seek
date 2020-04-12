@@ -3,10 +3,10 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-#include "Seek/Window.h"
+#include "Seek/App/Window.h"
+#include "Seek/App/LayerStack.h"
 
 #include "Seek/Events/ApplicationEvent.h"
-#include "Seek/LayerStack.h"
 
 #include "Seek/ImGui/ImGuiLayer.h"
 

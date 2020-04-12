@@ -1,7 +1,7 @@
 #include "SeekPCH.h"
-#include "Seek/Application.h"
+#include "Seek/App/Application.h"
 
-#include "Seek/Timestep.h"
+#include "Seek/App/Timestep.h"
 
 #include "Seek/Renderer/Renderer.h"
 #include "Seek/Renderer/Renderer2D.h"
