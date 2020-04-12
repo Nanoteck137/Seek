@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Seek/UI/UIConstraints.h"
 
+#include "Seek/UI/UIConstraint.h"
+
 namespace Seek
 {
     UIConstraints::UIConstraints() {}

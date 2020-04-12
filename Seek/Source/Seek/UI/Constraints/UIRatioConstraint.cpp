@@ -1,6 +1,7 @@
 #include "SeekPCH.h"
 #include "Seek/UI/Constraints/UIRatioConstraint.h"
 
+#include "Seek/UI/UIComponent.h"
 #include "Seek/UI/UIConstraints.h"
 
 namespace Seek

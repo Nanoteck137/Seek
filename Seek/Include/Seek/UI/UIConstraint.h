@@ -3,10 +3,14 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-#include "UIComponent.h"
+#include <glm/glm.hpp>
+
+#include "Seek/UI/UIComponent.h"
 
 namespace Seek
 {
+    class UIConstraints;
+
     class UIConstraint
     {
     public:

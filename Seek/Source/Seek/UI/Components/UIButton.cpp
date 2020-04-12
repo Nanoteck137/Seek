@@ -92,10 +92,10 @@ namespace Seek
         {
             if (m_MouseOver == false)
             {
-                m_Block->GetAnimator()->ApplyModifier(m_HoverBlockTransition,
-                                                      false, 0.0f);
-                m_Text->GetAnimator()->ApplyModifier(m_HoverTextTransition,
+                m_Block->GetAnimator().ApplyModifier(m_HoverBlockTransition,
                                                      false, 0.0f);
+                m_Text->GetAnimator().ApplyModifier(m_HoverTextTransition,
+                                                    false, 0.0f);
                 m_Block->SetColor(m_Props.HoverColor);
             }
 
@@ -107,10 +107,10 @@ namespace Seek
         {
             if (m_MouseOver == true)
             {
-                m_Block->GetAnimator()->ApplyModifier(m_HoverBlockTransition,
-                                                      true, 0.0f);
-                m_Text->GetAnimator()->ApplyModifier(m_HoverTextTransition,
+                m_Block->GetAnimator().ApplyModifier(m_HoverBlockTransition,
                                                      true, 0.0f);
+                m_Text->GetAnimator().ApplyModifier(m_HoverTextTransition, true,
+                                                    0.0f);
                 m_Block->SetColor(m_Props.Color);
             }
             m_MouseOver = false;

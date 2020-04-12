@@ -35,39 +35,14 @@ namespace Seek
         void SetHidden();
         void Display(bool display);
 
+        void SetDisplayTransition(const Ref<Transition>& transition);
+
+        void SetDisplayTransition(const Ref<Transition>& transition,
+                                  float32 displayDelay, float32 hideDelay);
+
         void Update(Timestep ts);
 
         void NotifyDimensionChange(bool sizeChange);
-
-        inline void Show(bool show) { m_Visable = show; }
-        inline bool IsShown() { return m_Visable; }
-
-        inline bool IsDisplayed() const { return m_Displayed; }
-
-        inline const std::vector<UIComponent*>& GetChildren() const
-        {
-            return m_Children;
-        }
-
-        inline Animator* GetAnimator() { return m_Animator; }
-        inline void SetDisplayTransition(const Ref<Transition>& transition)
-        {
-            m_DisplayTransition = transition;
-            m_DisplayDelay = 0.0f;
-            m_HideDelay = 0.0f;
-        }
-
-        inline void SetDisplayTransition(const Ref<Transition>& transition,
-                                         float32 displayDelay,
-                                         float32 hideDelay)
-        {
-            m_DisplayTransition = transition;
-            m_DisplayDelay = displayDelay;
-            m_HideDelay = hideDelay;
-        }
-
-        inline const glm::vec2& GetPosition() const { return m_Position; }
-        inline const glm::vec2& GetSize() const { return m_Size; }
 
         glm::vec2 GetPositionInPixels();
         glm::vec2 GetSizeInPixels();
@@ -78,6 +53,22 @@ namespace Seek
         float32 GetAbsAspectRatio();
         float32 GetRelativeWidthCoords(float32 relativeWidth);
         float32 GetRelativeHeightCoords(float32 relativeHeight);
+
+        inline void SetVisable(bool visable) { m_Visable = visable; }
+        inline bool IsVisable() const { return m_Visable; }
+
+        inline bool IsDisplayed() const { return m_Displayed; }
+
+        inline Animator& GetAnimator() { return *m_Animator; }
+        inline UIConstraints* GetConstraints() const { return m_Constraints; }
+
+        inline const glm::vec2& GetPosition() const { return m_Position; }
+        inline const glm::vec2& GetSize() const { return m_Size; }
+
+        inline const std::vector<UIComponent*>& GetChildren() const
+        {
+            return m_Children;
+        }
 
     protected:
         virtual void OnInit() {}

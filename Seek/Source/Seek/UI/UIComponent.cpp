@@ -28,6 +28,18 @@ namespace Seek
         }
     }
 
+    void UIComponent::OnEvent(Event& event)
+    {
+        for (auto it = m_Children.end(); it != m_Children.begin();)
+        {
+            UIComponent* child = *--it;
+            child->OnEvent(event);
+
+            if (event.Handled)
+                break;
+        }
+    }
+
     void UIComponent::Add(UIComponent* child, UIConstraints* constraints)
     {
         child->m_Parent = this;
@@ -47,7 +59,7 @@ namespace Seek
     void UIComponent::SetHidden()
     {
         m_Displayed = false;
-        Show(false);
+        SetVisable(false);
     }
 
     void UIComponent::Display(bool display)
@@ -58,25 +70,25 @@ namespace Seek
         m_Displayed = display;
 
         if (display)
-            Show(true);
+            SetVisable(true);
 
         DoDisplayAnimation(display, 0.0f, true);
     }
 
-    void UIComponent::DoDisplayAnimation(bool display, float32 parentDelay,
-                                         bool head)
+    void UIComponent::SetDisplayTransition(const Ref<Transition>& transition)
     {
-        if (!IsShown() || (!m_Displayed && !head))
-            return;
+        m_DisplayTransition = transition;
+        m_DisplayDelay = 0.0f;
+        m_HideDelay = 0.0f;
+    }
 
-        float32 delay = display ? m_DisplayDelay : m_HideDelay;
-        if (m_DisplayTransition)
-        {
-            m_Animator->ApplyModifier(m_DisplayTransition, display, delay);
-        }
-
-        for (auto& it : m_Children)
-            it->DoDisplayAnimation(display, delay, false);
+    void UIComponent::SetDisplayTransition(const Ref<Transition>& transition,
+                                           float32 displayDelay,
+                                           float32 hideDelay)
+    {
+        m_DisplayTransition = transition;
+        m_DisplayDelay = displayDelay;
+        m_HideDelay = hideDelay;
     }
 
     void UIComponent::Update(Timestep ts)
@@ -93,29 +105,15 @@ namespace Seek
         }
     }
 
-    float32 UIComponent::GetAbsAspectRatio()
+    void UIComponent::NotifyDimensionChange(bool sizeChange)
     {
-        glm::vec2 size = GetSizeInPixels();
-        return size.x / size.y;
-    }
+        CalculateScreenSpacePosition(sizeChange);
+        OnDimentionsChange();
 
-    float32 UIComponent::GetRelativeWidthCoords(float32 relativeWidth)
-    {
-        return relativeWidth / GetAbsAspectRatio();
-    }
-
-    float32 UIComponent::GetRelativeHeightCoords(float32 relativeHeight)
-    {
-        return relativeHeight * GetAbsAspectRatio();
-    }
-
-    glm::vec2 UIComponent::GetAnimationSize() { return m_Animator->GetSize(); }
-    glm::vec2 UIComponent::GetAnimationPosition()
-    {
-        glm::vec2 position = m_Animator->GetPosition();
-        position.x *= m_Constraints->GetWidth()->GetRelativeValue();
-        position.y *= m_Constraints->GetHeight()->GetRelativeValue();
-        return position;
+        for (UIComponent* child : m_Children)
+        {
+            child->NotifyDimensionChange(sizeChange);
+        }
     }
 
     glm::vec2 UIComponent::GetPositionInPixels()
@@ -130,27 +128,30 @@ namespace Seek
                          m_Size.y * UIManager::GetDisplayHeight());
     }
 
-    void UIComponent::OnEvent(Event& event)
-    {
-        for (auto it = m_Children.end(); it != m_Children.begin();)
-        {
-            UIComponent* child = *--it;
-            child->OnEvent(event);
+    glm::vec2 UIComponent::GetAnimationSize() { return m_Animator->GetSize(); }
 
-            if (event.Handled)
-                break;
-        }
+    glm::vec2 UIComponent::GetAnimationPosition()
+    {
+        glm::vec2 position = m_Animator->GetPosition();
+        position.x *= m_Constraints->GetWidth()->GetRelativeValue();
+        position.y *= m_Constraints->GetHeight()->GetRelativeValue();
+        return position;
     }
 
-    void UIComponent::NotifyDimensionChange(bool sizeChange)
+    float32 UIComponent::GetAbsAspectRatio()
     {
-        CalculateScreenSpacePosition(sizeChange);
-        OnDimentionsChange();
+        glm::vec2 size = GetSizeInPixels();
+        return size.x / size.y;
+    }
 
-        for (UIComponent* child : m_Children)
-        {
-            child->NotifyDimensionChange(sizeChange);
-        }
+    float32 UIComponent::GetRelativeWidthCoords(float32 relativeWidth)
+    {
+        return relativeWidth / GetAbsAspectRatio();
+    }
+
+    float32 UIComponent::GetRelativeHeightCoords(float32 relativeHeight)
+    {
+        return relativeHeight * GetAbsAspectRatio();
     }
 
     void UIComponent::ForceInit(const glm::vec2& position,
@@ -205,5 +206,21 @@ namespace Seek
         m_Children.push_back(child);
         child->CalculateScreenSpacePosition(true);
         child->OnInit();
+    }
+
+    void UIComponent::DoDisplayAnimation(bool display, float32 parentDelay,
+                                         bool head)
+    {
+        if (!IsVisable() || (!m_Displayed && !head))
+            return;
+
+        float32 delay = display ? m_DisplayDelay : m_HideDelay;
+        if (m_DisplayTransition)
+        {
+            m_Animator->ApplyModifier(m_DisplayTransition, display, delay);
+        }
+
+        for (auto& it : m_Children)
+            it->DoDisplayAnimation(display, delay, false);
     }
 }

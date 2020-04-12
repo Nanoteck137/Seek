@@ -1,6 +1,8 @@
 #include "SeekPCH.h"
 #include "Seek/UI/Constraints/UIPixelConstraint.h"
 
+#include "Seek/UI/UIComponent.h"
+
 namespace Seek
 {
     UIPixelConstraint::UIPixelConstraint(int32 value) : m_Value(value) {}
