@@ -15,16 +15,16 @@ namespace Seek
 {
     static bool s_GLFWInitialized = false;
 
-    Window* Window::Create(const WindowProps& props)
+    Window* Window::Create(const Properties& props)
     {
         return new WindowsWindow(props);
     }
 
-    WindowsWindow::WindowsWindow(const WindowProps& props) { Init(props); }
+    WindowsWindow::WindowsWindow(const Properties& props) { Init(props); }
 
     WindowsWindow::~WindowsWindow() { Shutdown(); }
 
-    void WindowsWindow::Init(const WindowProps& props)
+    void WindowsWindow::Init(const Properties& props)
     {
         SK_PROFILE_FUNCTION();
 

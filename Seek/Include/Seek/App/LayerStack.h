@@ -13,6 +13,8 @@ namespace Seek
         LayerStack();
         ~LayerStack();
 
+    public:
+        // NOTE: Normal Methods
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* overlay);
 
@@ -23,6 +25,7 @@ namespace Seek
         std::vector<Layer*>::iterator end() { return m_Layers.end(); }
 
     private:
+        // NOTE: Normal Variables
         std::vector<Layer*> m_Layers;
         unsigned int m_LayerInsertIndex = 0;
     };

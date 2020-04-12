@@ -3,6 +3,9 @@
 
 namespace Seek
 {
+    // NOTE: Static Variables Initializtion
+
+    // NOTE: Constructor
     LayerStack::LayerStack() {}
 
     LayerStack::~LayerStack()
@@ -14,6 +17,9 @@ namespace Seek
         }
     }
 
+    // NOTE: Virtual Methods
+
+    // NOTE: Normal Methods
     void LayerStack::PushLayer(Layer* layer)
     {
         m_Layers.emplace(m_Layers.begin() + m_LayerInsertIndex, layer);
@@ -47,4 +53,7 @@ namespace Seek
             m_Layers.erase(it);
         }
     }
+
+    // NOTE: Static Methods
+
 }

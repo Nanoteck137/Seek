@@ -7,24 +7,28 @@
 
 namespace Seek
 {
-    struct WindowProps
-    {
-        String Title;
-        unsigned int Width;
-        unsigned int Height;
-
-        WindowProps(const std::string& title = "Seek Engine",
-                    unsigned int width = 1280, unsigned int height = 720)
-            : Title(title), Width(width), Height(height)
-        {
-        }
-    };
-
     class Window
     {
     public:
+        struct Properties
+        {
+            String Title;
+            unsigned int Width;
+            unsigned int Height;
+
+            Properties(const std::string& title = "Seek Engine",
+                       unsigned int width = 1280, unsigned int height = 720)
+                : Title(title), Width(width), Height(height)
+            {
+            }
+        };
+
         using EventCallbackFn = std::function<void(Event&)>;
 
+    protected:
+        Window() {}
+
+    public:
         virtual ~Window() {}
 
         virtual void OnUpdate() = 0;
@@ -38,6 +42,6 @@ namespace Seek
 
         virtual void* GetNativeWindow() const = 0;
 
-        static Window* Create(const WindowProps& props = WindowProps());
+        static Window* Create(const Properties& props = Properties());
     };
 }

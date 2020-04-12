@@ -1,14 +1,13 @@
 # TODO
 
 ## Refactoring
+* Notes
+  - Add a UI Layer
+  - Application Singleton
+  - Common place to initialize Engine subsystems
+
 * App
-  - Application
   - Input
-  - KeyCodes
-  - Layer
-  - LayerStack
-  - MouseButtonCodes
-  - Timestep
   - Window
 * Audio
   - AudioEngine

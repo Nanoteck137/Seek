@@ -11,7 +11,7 @@ namespace Seek
     class WindowsWindow : public Window
     {
     public:
-        WindowsWindow(const WindowProps& props);
+        WindowsWindow(const Properties& props);
         virtual ~WindowsWindow();
 
         void OnUpdate() override;
@@ -30,7 +30,7 @@ namespace Seek
         inline void* GetNativeWindow() const override { return m_Window; }
 
     private:
-        virtual void Init(const WindowProps& props);
+        virtual void Init(const Properties& props);
         virtual void Shutdown();
 
     private:

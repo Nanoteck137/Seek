@@ -1,18 +1,24 @@
 #pragma once
 
+#include "Seek/Core.h"
+#include "Seek/Log.h"
+
 namespace Seek
 {
     class Timestep
     {
     public:
-        Timestep(float time = 0.0f) : m_Time(time) {}
+        Timestep(float32 time = 0.0f) : m_Time(time) {}
 
-        operator float() { return GetSeconds(); }
+    public:
+        // NOTE: Normal Methods
+        operator float32() { return GetSeconds(); }
 
-        inline float GetSeconds() const { return m_Time; }
-        inline float GetMilliseconds() const { return m_Time * 1000.0f; }
+        inline float32 GetSeconds() const { return m_Time; }
+        inline float32 GetMilliseconds() const { return m_Time * 1000.0f; }
 
     private:
-        float m_Time;
+        // NOTE: Normal Variables
+        float32 m_Time;
     };
 }

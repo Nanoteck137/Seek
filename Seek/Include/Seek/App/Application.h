@@ -14,37 +14,43 @@ namespace Seek
 {
     class Application
     {
-    public:
+    protected:
         Application();
+
+    public:
         virtual ~Application();
 
+    public:
+        // NOTE: Normal Methods
         void Run();
         void Close();
-
-        void OnEvent(Event& e);
 
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* overlay);
 
-        inline static Application& Get() { return *s_Instance; }
+        void OnEvent(Event& e);
 
         inline Window& GetWindow() { return *m_Window; }
 
+        // NOTE: Static Methods
+        inline static Application& Get() { return *s_Instance; }
+
     private:
+        // NOTE: Normal Methods
         bool OnWindowClosed(WindowCloseEvent& e);
         bool OnWindowResize(WindowResizeEvent& e);
 
     private:
+        // NOTE: Normal Variables
         bool m_Running = false;
+        float32 m_LastFrameTime = 0.0f;
 
-        Scope<Window> m_Window;
-        ImGuiLayer* m_ImGuiLayer;
+        Scope<Window> m_Window = nullptr;
+        ImGuiLayer* m_ImGuiLayer = nullptr;
 
         LayerStack m_LayerStack;
 
-        float32 m_LastFrameTime = 0.0f;
-
-    private:
+        // NOTE: Static Variables
         static Application* s_Instance;
     };
 }

@@ -11,18 +11,22 @@ namespace Seek
     class Layer
     {
     public:
-        Layer(const std::string& name = "Layer");
+        Layer(const String& name = "Layer");
         virtual ~Layer();
 
+    public:
+        // NOTE: Virtual Methods
         virtual void OnAttach() {}
         virtual void OnDetach() {}
         virtual void OnUpdate(Timestep ts) {}
         virtual void OnImGuiRender(Timestep ts) {}
         virtual void OnEvent(Event& event) {}
 
-        inline const std::string& GetName() const { return m_DebugName; }
+        // NOTE: Normal Methods
+        inline const String& GetName() const { return m_DebugName; }
 
     private:
-        std::string m_DebugName;
+        // NOTE: Normal Variables
+        String m_DebugName;
     };
 }

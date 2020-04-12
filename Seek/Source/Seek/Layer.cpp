@@ -3,7 +3,16 @@
 
 namespace Seek
 {
-    Layer::Layer(const std::string& name) : m_DebugName(name) {}
+    // NOTE: Static Variables Initializtion
+
+    // NOTE: Constructor
+    Layer::Layer(const String& name) : m_DebugName(name) {}
 
     Layer::~Layer() {}
+
+    // NOTE: Virtual Methods
+
+    // NOTE: Normal Methods
+
+    // NOTE: Static Methods
 }

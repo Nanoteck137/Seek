@@ -24,27 +24,27 @@ namespace Seek
         ~Foo();
 
     public:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
+        // NOTE: Virtual Methods
+        // NOTE: Normal Methods
+        // NOTE: Static Methods
     protected:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
+        // NOTE: Virtual Methods
+        // NOTE: Normal Methods
+        // NOTE: Static Methods
     private:
-        // Virtual Methods
-        // Normal Methods
-        // Static Methods
+        // NOTE: Virtual Methods
+        // NOTE: Normal Methods
+        // NOTE: Static Methods
 
     public:
-        // Normal Variables
-        // Static Variables
+        // NOTE: Normal Variables
+        // NOTE: Static Variables
     protected:
-        // Normal Variables
-        // Static Variables
+        // NOTE: Normal Variables
+        // NOTE: Static Variables
     private:
-      // Normal Variables
-      // Static Variables
+        // NOTE: Normal Variables
+        // NOTE: Static Variables
     };
 }
 
@@ -54,15 +54,15 @@ namespace Seek
 
 namespace Seek 
 {
-    // Static Variables initializtion
+    // NOTE: Static Variables Initializtion
 
-    // Constructor
+    // NOTE: Constructor
 
-    // Virtual Methods
+    // NOTE: Virtual Methods
 
-    // Normal Methods
+    // NOTE: Normal Methods
 
-    // Static Methods
+    // NOTE: Static Methods
 }
 ```
 
@@ -71,3 +71,5 @@ namespace Seek
 
 ### Singleton Class
 - Todo Add
+
+### API Interface
