@@ -93,48 +93,29 @@ namespace Seek
         }
     }
 
-    float32 UIComponent::GetPixelWidth()
-    {
-        return m_Size.x * UIManager::GetDisplayWidth();
-    }
-
-    float32 UIComponent::GetPixelHeight()
-    {
-        return m_Size.y * UIManager::GetDisplayHeight();
-    }
-
     float32 UIComponent::GetAbsAspectRatio()
     {
-        return GetPixelWidth() / GetPixelHeight();
+        glm::vec2 size = GetSizeInPixels();
+        return size.x / size.y;
     }
 
-    float32 UIComponent::GetRelativeHeightCoords(float32 relativeWidth)
+    float32 UIComponent::GetRelativeWidthCoords(float32 relativeWidth)
     {
-        return relativeWidth * GetAbsAspectRatio();
+        return relativeWidth / GetAbsAspectRatio();
     }
 
-    float32 UIComponent::GetRelativeWidthCoords(float32 relativeHeight)
+    float32 UIComponent::GetRelativeHeightCoords(float32 relativeHeight)
     {
-        return relativeHeight / GetAbsAspectRatio();
+        return relativeHeight * GetAbsAspectRatio();
     }
 
-    float32 UIComponent::GetAnimationWidth() { return m_Animator->GetWidth(); }
-
-    float32 UIComponent::GetAnimationHeight()
+    glm::vec2 UIComponent::GetAnimationSize() { return m_Animator->GetSize(); }
+    glm::vec2 UIComponent::GetAnimationPosition()
     {
-        return m_Animator->GetHeight();
-    }
-
-    float32 UIComponent::GetAnimationX()
-    {
-        return m_Animator->GetX() *
-               m_Constraints->GetWidth()->GetRelativeValue();
-    }
-
-    float32 UIComponent::GetAnimationY()
-    {
-        return m_Animator->GetY() *
-               m_Constraints->GetHeight()->GetRelativeValue();
+        glm::vec2 position = m_Animator->GetPosition();
+        position.x *= m_Constraints->GetWidth()->GetRelativeValue();
+        position.y *= m_Constraints->GetHeight()->GetRelativeValue();
+        return position;
     }
 
     glm::vec2 UIComponent::GetPositionInPixels()
@@ -172,14 +153,11 @@ namespace Seek
         }
     }
 
-    void UIComponent::ForceInit(float32 absX, float32 absY, float32 absWidth,
-                                float32 absHeight)
+    void UIComponent::ForceInit(const glm::vec2& position,
+                                const glm::vec2& size)
     {
-        m_Position.x = absX;
-        m_Position.y = absY;
-
-        m_Size.x = absWidth;
-        m_Size.y = absHeight;
+        m_Position = position;
+        m_Size = size;
     }
 
     void UIComponent::UpdateTotalAlpha()
@@ -198,21 +176,27 @@ namespace Seek
 
     void UIComponent::CalculateScreenSpacePosition(bool calcSize)
     {
+        glm::vec2 parentPosition = m_Parent->GetPosition();
+        glm::vec2 parentSize = m_Parent->GetSize();
+
+        glm::vec2 animationPosition = GetAnimationPosition();
+        glm::vec2 animationSize = GetAnimationSize();
+
         m_Position.x =
-            m_Parent->m_Position.x +
-            (m_Constraints->GetX()->GetRelativeValue() + GetAnimationX()) *
-                m_Parent->m_Size.x;
+            parentPosition.x +
+            (m_Constraints->GetX()->GetRelativeValue() + animationPosition.x) *
+                parentSize.x;
         m_Position.y =
-            m_Parent->m_Position.y +
-            (m_Constraints->GetY()->GetRelativeValue() + GetAnimationY()) *
-                m_Parent->m_Size.y;
+            parentPosition.y +
+            (m_Constraints->GetY()->GetRelativeValue() + animationPosition.y) *
+                parentSize.y;
 
         if (calcSize)
         {
             m_Size.x = m_Constraints->GetWidth()->GetRelativeValue() *
-                       m_Parent->m_Size.x * GetAnimationWidth();
+                       parentSize.x * animationSize.x;
             m_Size.y = m_Constraints->GetHeight()->GetRelativeValue() *
-                       m_Parent->m_Size.y * GetAnimationHeight();
+                       parentSize.y * animationSize.y;
         }
     }
 

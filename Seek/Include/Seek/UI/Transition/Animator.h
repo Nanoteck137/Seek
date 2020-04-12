@@ -3,7 +3,8 @@
 #include "Seek/Core.h"
 #include "Seek/Log.h"
 
-#include <unordered_map>
+#include <glm/glm.hpp>
+
 #include "Modifier.h"
 #include "Transition.h"
 
@@ -40,6 +41,16 @@ namespace Seek
         inline float GetWidth() const { return m_Width; }
         inline float GetHeight() const { return m_Height; }
         inline float GetAlpha() const { return m_Alpha; }
+
+        inline glm::vec2 GetPosition() const
+        {
+            return glm::vec2(m_XValue, m_YValue);
+        }
+
+        inline glm::vec2 GetSize() const
+        {
+            return glm::vec2(m_Width, m_Height);
+        }
 
     private:
         UIComponent* m_Component = nullptr;

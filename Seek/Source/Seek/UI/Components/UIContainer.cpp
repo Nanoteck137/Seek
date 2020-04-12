@@ -3,7 +3,10 @@
 
 namespace Seek
 {
-    UIContainer::UIContainer() { ForceInit(0, 0, 1, 1); }
+    UIContainer::UIContainer()
+    {
+        ForceInit(glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
+    }
 
     UIContainer::~UIContainer() {}
 }

@@ -21,7 +21,8 @@ namespace Seek
 
     float UIConstraint::GetParentPixelSize()
     {
-        return m_XAxis ? m_Parent->GetPixelWidth() : m_Parent->GetPixelHeight();
+        glm::vec2 size = m_Parent->GetSizeInPixels();
+        return m_XAxis ? size.x : size.y;
     }
 
     void UIConstraint::SetAxis(bool xAxis, bool posValue)

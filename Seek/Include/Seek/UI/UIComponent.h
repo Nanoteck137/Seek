@@ -18,57 +18,27 @@ namespace Seek
 
     class UIComponent
     {
+    public:
+        friend class Animator;
+
     protected:
         UIComponent();
 
     public:
         virtual ~UIComponent();
 
+        virtual void OnEvent(Event& event);
+
         void Add(UIComponent* child, UIConstraints* constraints);
         void AddInStyle(UIComponent* child, UIConstraints* constraints);
 
         void SetHidden();
         void Display(bool display);
-        void DoDisplayAnimation(bool display, float32 parentDelay, bool head);
 
         void Update(Timestep ts);
 
-        float32 GetPixelWidth();
-        float32 GetPixelHeight();
-
-        float32 GetAbsAspectRatio();
-        float32 GetRelativeHeightCoords(float32 relativeWidth);
-        float32 GetRelativeWidthCoords(float32 relativeHeight);
-
-        float32 GetAnimationWidth();
-        float32 GetAnimationHeight();
-        float32 GetAnimationX();
-        float32 GetAnimationY();
-
-        glm::vec2 GetPositionInPixels();
-        glm::vec2 GetSizeInPixels();
-
-        void UpdateTotalAlpha();
-        void CalcTotalAlpha();
-
         void NotifyDimensionChange(bool sizeChange);
 
-    public:
-        virtual void OnEvent(Event& event);
-
-    protected:
-        void ForceInit(float32 absX, float32 absY, float32 absWidth,
-                       float32 absHeight);
-
-        void CalculateScreenSpacePosition(bool calcSize);
-        void InitChild(UIComponent* child);
-
-    protected:
-        virtual void OnInit() {}
-        virtual void OnUpdate(Timestep ts) {}
-        virtual void OnDimentionsChange() {}
-
-    public:
         inline void Show(bool show) { m_Visable = show; }
         inline bool IsShown() { return m_Visable; }
 
@@ -95,6 +65,34 @@ namespace Seek
             m_DisplayDelay = displayDelay;
             m_HideDelay = hideDelay;
         }
+
+        inline const glm::vec2& GetPosition() const { return m_Position; }
+        inline const glm::vec2& GetSize() const { return m_Size; }
+
+        glm::vec2 GetPositionInPixels();
+        glm::vec2 GetSizeInPixels();
+
+        glm::vec2 GetAnimationSize();
+        glm::vec2 GetAnimationPosition();
+
+        float32 GetAbsAspectRatio();
+        float32 GetRelativeWidthCoords(float32 relativeWidth);
+        float32 GetRelativeHeightCoords(float32 relativeHeight);
+
+    protected:
+        virtual void OnInit() {}
+        virtual void OnUpdate(Timestep ts) {}
+        virtual void OnDimentionsChange() {}
+
+        void ForceInit(const glm::vec2& position, const glm::vec2& size);
+
+        void UpdateTotalAlpha();
+        void CalcTotalAlpha();
+        void CalculateScreenSpacePosition(bool calcSize);
+
+    private:
+        void InitChild(UIComponent* child);
+        void DoDisplayAnimation(bool display, float32 parentDelay, bool head);
 
     protected:
         bool m_Visable = true;

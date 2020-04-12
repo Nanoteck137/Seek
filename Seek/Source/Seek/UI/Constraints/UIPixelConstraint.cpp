@@ -13,8 +13,8 @@ namespace Seek
     {
         UIComponent* parent = GetParent();
 
-        float parentSizePixels =
-            IsXAxis() ? parent->GetPixelWidth() : parent->GetPixelHeight();
+        glm::vec2 size = parent->GetSizeInPixels();
+        float parentSizePixels = IsXAxis() ? size.x : size.y;
 
         float value = m_Value / parentSizePixels;
 
