@@ -5,7 +5,7 @@
 
 namespace Seek
 {
-    UIRatioConstraint::UIRatioConstraint(float aspectRatio)
+    UIRatioConstraint::UIRatioConstraint(float32 aspectRatio)
         : m_AspectRatio(aspectRatio)
     {
     }
@@ -35,12 +35,12 @@ namespace Seek
         return relativeValue * m_AspectRatio;
     }
 
-    void UIRatioConstraint::SetPixelValue(int value)
+    void UIRatioConstraint::SetPixelValue(int32 value)
     {
         SK_CORE_ASSERT(false, "Can't set pixel value");
     }
 
-    void UIRatioConstraint::SetRelativeValue(float value)
+    void UIRatioConstraint::SetRelativeValue(float32 value)
     {
         SK_CORE_ASSERT(false, "Can't set relative value");
     }

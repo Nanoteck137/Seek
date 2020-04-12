@@ -48,9 +48,7 @@
     - UIConstriants
     - UIManager
 * Other
-  - Core
   - Log
-  - Types
 
 ## Engine
 * Audio (XAudio2, OpenAL?)

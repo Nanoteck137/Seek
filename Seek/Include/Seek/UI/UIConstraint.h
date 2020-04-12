@@ -18,13 +18,11 @@ namespace Seek
         void NotifyAdded(UIConstraints* constraints, UIComponent* current,
                          UIComponent* parent);
 
-    public:
         virtual void CompleteSetup(UIConstraints* constraints) = 0;
         virtual float GetRelativeValue() = 0;
-        virtual void SetPixelValue(int value) = 0;
-        virtual void SetRelativeValue(float value) = 0;
+        virtual void SetPixelValue(int32 value) = 0;
+        virtual void SetRelativeValue(float32 value) = 0;
 
-    public:
         void SetAxis(bool xAxis, bool posValue);
 
         inline bool IsPosValue() const { return m_PosValue; }

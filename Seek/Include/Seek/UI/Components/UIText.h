@@ -19,25 +19,16 @@ namespace Seek
     class UIText : public UIComponent
     {
     public:
-        UIText(const std::string& text, const Ref<Font>& font, float fontSize,
+        UIText(const String& text, const Ref<Font>& font, float32 fontSize,
                TextAlignment alignment);
         ~UIText();
 
-    protected:
-        virtual void OnInit() override;
-        virtual void OnUpdate(float deltaTime) override;
-        virtual void OnDimentionsChange() override;
-
-    private:
-        void UpdateObjects();
-
-    public:
-        void SetText(const std::string& text)
+        void SetText(const String& text)
         {
             m_Text = text;
             UpdateObjects();
         }
-        inline const std::string& GetText() const { return m_Text; }
+        inline const String& GetText() const { return m_Text; }
 
         void SetAlignment(TextAlignment alignment)
         {
@@ -46,14 +37,23 @@ namespace Seek
         }
         inline TextAlignment GetAlignment() const { return m_Alignment; }
 
-        void SetFontSize(float size) { m_FontSize = size; }
-        inline float GetFontSize() const { return m_FontSize; }
+        void SetFontSize(float32 size) { m_FontSize = size; }
+        inline float32 GetFontSize() const { return m_FontSize; }
 
         inline const Ref<Font>& GetFont() const { return m_Font; }
 
         inline void SetColor(const glm::vec4& color) { m_Color = color; }
         inline const glm::vec4& GetColor() const { return m_Color; }
 
+    protected:
+        virtual void OnInit() override;
+        virtual void OnUpdate(Timestep ts) override;
+        virtual void OnDimentionsChange() override;
+
+    private:
+        void UpdateObjects();
+
+    public:
     private:
         std::string m_Text;
         TextAlignment m_Alignment = TextAlignment::LEFT;
@@ -61,7 +61,7 @@ namespace Seek
         float32 m_FontSize = 0.0f;
         Ref<Font> m_Font = nullptr;
 
-        float m_TextX = 0.0f;
+        float32 m_TextX = 0.0f;
 
         glm::vec4 m_Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     };

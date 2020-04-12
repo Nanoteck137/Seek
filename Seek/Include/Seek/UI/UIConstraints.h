@@ -15,15 +15,16 @@ namespace Seek
 
         void NotifyAdded(UIComponent* current, UIComponent* parent);
 
-    public:
         void SetX(UIConstraint* constraint);
-        void SetY(UIConstraint* constraint);
-        void SetWidth(UIConstraint* constraint);
-        void SetHeight(UIConstraint* constraint);
-
         inline UIConstraint* GetX() const { return m_XConstraint; }
+
+        void SetY(UIConstraint* constraint);
         inline UIConstraint* GetY() const { return m_YConstraint; }
+
+        void SetWidth(UIConstraint* constraint);
         inline UIConstraint* GetWidth() const { return m_WidthConstraint; }
+
+        void SetHeight(UIConstraint* constraint);
         inline UIConstraint* GetHeight() const { return m_HeightConstraint; }
 
     private:

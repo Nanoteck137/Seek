@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Seek/App/Timestep.h"
+
 #include "Seek/UI/Transition/Animator.h"
 
 #include "Seek/Events/Event.h"
@@ -27,21 +29,21 @@ namespace Seek
 
         void SetHidden();
         void Display(bool display);
-        void DoDisplayAnimation(bool display, float parentDelay, bool head);
+        void DoDisplayAnimation(bool display, float32 parentDelay, bool head);
 
-        void Update(float deltaTime);
+        void Update(Timestep ts);
 
-        float GetPixelWidth();
-        float GetPixelHeight();
+        float32 GetPixelWidth();
+        float32 GetPixelHeight();
 
-        float GetAbsAspectRatio();
-        float GetRelativeHeightCoords(float relativeWidth);
-        float GetRelativeWidthCoords(float relativeHeight);
+        float32 GetAbsAspectRatio();
+        float32 GetRelativeHeightCoords(float32 relativeWidth);
+        float32 GetRelativeWidthCoords(float32 relativeHeight);
 
-        float GetAnimationWidth();
-        float GetAnimationHeight();
-        float GetAnimationX();
-        float GetAnimationY();
+        float32 GetAnimationWidth();
+        float32 GetAnimationHeight();
+        float32 GetAnimationX();
+        float32 GetAnimationY();
 
         glm::vec2 GetPositionInPixels();
         glm::vec2 GetSizeInPixels();
@@ -55,14 +57,15 @@ namespace Seek
         virtual void OnEvent(Event& event);
 
     protected:
-        void ForceInit(float absX, float absY, float absWidth, float absHeight);
+        void ForceInit(float32 absX, float32 absY, float32 absWidth,
+                       float32 absHeight);
 
         void CalculateScreenSpacePosition(bool calcSize);
         void InitChild(UIComponent* child);
 
     protected:
         virtual void OnInit() {}
-        virtual void OnUpdate(float deltaTime) {}
+        virtual void OnUpdate(Timestep ts) {}
         virtual void OnDimentionsChange() {}
 
     public:

@@ -10,16 +10,16 @@ namespace Seek
     class UIPixelConstraint : public UIConstraint
     {
     public:
-        UIPixelConstraint(int value);
+        UIPixelConstraint(int32 value);
         ~UIPixelConstraint();
 
     public:
         virtual void CompleteSetup(UIConstraints* constraints) override;
         virtual float GetRelativeValue() override;
-        virtual void SetPixelValue(int value) override;
-        virtual void SetRelativeValue(float value) override;
+        virtual void SetPixelValue(int32 value) override;
+        virtual void SetRelativeValue(float32 value) override;
 
     private:
-        int m_Value = 0;
+        int32 m_Value = 0;
     };
 }

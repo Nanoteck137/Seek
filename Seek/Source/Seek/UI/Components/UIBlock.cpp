@@ -11,9 +11,8 @@ namespace Seek
 
     UIBlock::~UIBlock() {}
 
-    void UIBlock::OnUpdate(float deltaTime)
+    void UIBlock::OnUpdate(Timestep ts)
     {
-        SK_CORE_INFO("Alpha: {}", m_Color.a);
         float32 alpha = m_TotalAlpha;
 
         glm::vec2 position = GetPositionInPixels();

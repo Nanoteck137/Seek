@@ -9,8 +9,8 @@
 
 namespace Seek
 {
-    UIText::UIText(const std::string& text, const Ref<Font>& font,
-                   float fontSize, TextAlignment alignment)
+    UIText::UIText(const String& text, const Ref<Font>& font, float32 fontSize,
+                   TextAlignment alignment)
         : m_Text(text), m_Font(font), m_FontSize(fontSize),
           m_Alignment(alignment)
     {
@@ -21,13 +21,13 @@ namespace Seek
 
     void UIText::OnInit()
     {
-        float height = m_Font->GetTextHeight(m_Text);
+        float32 height = m_Font->GetTextHeight(m_Text);
         m_Constraints->GetHeight()->SetPixelValue(height);
         CalculateScreenSpacePosition(true);
         UpdateObjects();
     }
 
-    void UIText::OnUpdate(float deltaTime)
+    void UIText::OnUpdate(Timestep ts)
     {
         // NOTE(patrik): Debug bounds
         // Renderer2D::DrawQuad(GetPositionInPixels(), GetSizeInPixels(),
@@ -46,7 +46,7 @@ namespace Seek
 
     void UIText::UpdateObjects()
     {
-        float textWidth = m_Font->GetTextWidth(m_Text);
+        float32 textWidth = m_Font->GetTextWidth(m_Text);
 
         switch (m_Alignment)
         {

@@ -14,13 +14,13 @@ namespace Seek
         return m_HeightPixels / GetParentPixelSize();
     }
 
-    void UITextHeightConstraint::SetPixelValue(int value)
+    void UITextHeightConstraint::SetPixelValue(int32 value)
     {
         m_HeightPixels = value;
     }
 
-    void UITextHeightConstraint::SetRelativeValue(float value)
+    void UITextHeightConstraint::SetRelativeValue(float32 value)
     {
-        m_HeightPixels = (int)(GetParentPixelSize() * value);
+        m_HeightPixels = (int32)(GetParentPixelSize() * value);
     }
 }

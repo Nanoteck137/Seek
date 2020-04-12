@@ -3,7 +3,9 @@
 
 namespace Seek
 {
-    UIRelativeConstraint::UIRelativeConstraint(float value) : m_Value(value) {}
+    UIRelativeConstraint::UIRelativeConstraint(float32 value) : m_Value(value)
+    {
+    }
 
     UIRelativeConstraint::~UIRelativeConstraint() {}
 
@@ -11,7 +13,7 @@ namespace Seek
 
     float UIRelativeConstraint::GetRelativeValue() { return m_Value; }
 
-    void UIRelativeConstraint::SetPixelValue(int value) {}
+    void UIRelativeConstraint::SetPixelValue(int32 value) {}
 
-    void UIRelativeConstraint::SetRelativeValue(float value) {}
+    void UIRelativeConstraint::SetRelativeValue(float32 value) {}
 }

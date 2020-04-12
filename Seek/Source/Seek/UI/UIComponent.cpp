@@ -79,56 +79,59 @@ namespace Seek
             it->DoDisplayAnimation(display, delay, false);
     }
 
-    void UIComponent::Update(float deltaTime)
+    void UIComponent::Update(Timestep ts)
     {
         if (!m_Visable)
             return;
 
-        m_Animator->Update(deltaTime);
+        m_Animator->Update(ts);
 
-        OnUpdate(deltaTime);
+        OnUpdate(ts);
         for (int i = 0; i < m_Children.size(); i++)
         {
-            m_Children[i]->Update(deltaTime);
+            m_Children[i]->Update(ts);
         }
     }
 
-    float UIComponent::GetPixelWidth()
+    float32 UIComponent::GetPixelWidth()
     {
         return m_Size.x * UIManager::GetDisplayWidth();
     }
 
-    float UIComponent::GetPixelHeight()
+    float32 UIComponent::GetPixelHeight()
     {
         return m_Size.y * UIManager::GetDisplayHeight();
     }
 
-    float UIComponent::GetAbsAspectRatio()
+    float32 UIComponent::GetAbsAspectRatio()
     {
         return GetPixelWidth() / GetPixelHeight();
     }
 
-    float UIComponent::GetRelativeHeightCoords(float relativeWidth)
+    float32 UIComponent::GetRelativeHeightCoords(float32 relativeWidth)
     {
         return relativeWidth * GetAbsAspectRatio();
     }
 
-    float UIComponent::GetRelativeWidthCoords(float relativeHeight)
+    float32 UIComponent::GetRelativeWidthCoords(float32 relativeHeight)
     {
         return relativeHeight / GetAbsAspectRatio();
     }
 
-    float UIComponent::GetAnimationWidth() { return m_Animator->GetWidth(); }
+    float32 UIComponent::GetAnimationWidth() { return m_Animator->GetWidth(); }
 
-    float UIComponent::GetAnimationHeight() { return m_Animator->GetHeight(); }
+    float32 UIComponent::GetAnimationHeight()
+    {
+        return m_Animator->GetHeight();
+    }
 
-    float UIComponent::GetAnimationX()
+    float32 UIComponent::GetAnimationX()
     {
         return m_Animator->GetX() *
                m_Constraints->GetWidth()->GetRelativeValue();
     }
 
-    float UIComponent::GetAnimationY()
+    float32 UIComponent::GetAnimationY()
     {
         return m_Animator->GetY() *
                m_Constraints->GetHeight()->GetRelativeValue();
@@ -169,8 +172,8 @@ namespace Seek
         }
     }
 
-    void UIComponent::ForceInit(float absX, float absY, float absWidth,
-                                float absHeight)
+    void UIComponent::ForceInit(float32 absX, float32 absY, float32 absWidth,
+                                float32 absHeight)
     {
         m_Position.x = absX;
         m_Position.y = absY;

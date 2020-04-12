@@ -3,7 +3,7 @@
 
 namespace Seek
 {
-    UIPixelConstraint::UIPixelConstraint(int value) : m_Value(value) {}
+    UIPixelConstraint::UIPixelConstraint(int32 value) : m_Value(value) {}
 
     UIPixelConstraint::~UIPixelConstraint() {}
 
@@ -21,7 +21,7 @@ namespace Seek
         return value;
     }
 
-    void UIPixelConstraint::SetPixelValue(int value) {}
+    void UIPixelConstraint::SetPixelValue(int32 value) {}
 
-    void UIPixelConstraint::SetRelativeValue(float value) {}
+    void UIPixelConstraint::SetRelativeValue(float32 value) {}
 }

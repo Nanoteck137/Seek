@@ -42,29 +42,24 @@ namespace Seek
         UIButton(const Properties& props);
         ~UIButton();
 
-    private:
-        bool InsideButton(float32 x, float32 y);
-        void OnAction();
-
-    public:
         virtual void OnEvent(Event& event) override;
 
-    private:
-        bool OnMouseMoved(MouseMovedEvent& event);
-        bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
-        bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
-
-        static void NoAction() {}
-
-    protected:
-        virtual void OnInit() override;
-        virtual void OnUpdate(float deltaTime) override;
-
-    public:
         inline void SetAction(ActionHandler action)
         {
             m_ActionHandler = action;
         }
+
+    protected:
+        virtual void OnInit() override;
+        virtual void OnUpdate(Timestep ts) override;
+
+    private:
+        bool InsideButton(float32 x, float32 y);
+        void OnAction();
+
+        bool OnMouseMoved(MouseMovedEvent& event);
+        bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
+        bool OnMouseButtonReleased(MouseButtonReleasedEvent& event);
 
     private:
         UIBlock* m_Block = nullptr;
@@ -79,5 +74,8 @@ namespace Seek
         bool m_MouseOver = false;
 
         ActionHandler m_ActionHandler = &UIButton::NoAction;
+
+    private:
+        static void NoAction() {}
     };
 }

@@ -10,17 +10,17 @@ namespace Seek
     class UIRatioConstraint : public UIConstraint
     {
     public:
-        UIRatioConstraint(float aspectRatio);
+        UIRatioConstraint(float32 aspectRatio);
         ~UIRatioConstraint();
 
     public:
         virtual void CompleteSetup(UIConstraints* constraints) override;
         virtual float GetRelativeValue() override;
-        virtual void SetPixelValue(int value) override;
-        virtual void SetRelativeValue(float value) override;
+        virtual void SetPixelValue(int32 value) override;
+        virtual void SetRelativeValue(float32 value) override;
 
     private:
-        float m_AspectRatio = 0.0f;
+        float32 m_AspectRatio = 0.0f;
         UIConstraint* m_OtherConstraint = nullptr;
     };
 }

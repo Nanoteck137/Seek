@@ -13,10 +13,6 @@ namespace Seek
         UIBlock();
         ~UIBlock();
 
-    protected:
-        virtual void OnUpdate(float deltaTime) override;
-
-    public:
         inline void SetRoundedRadius(float radius) { m_RoundedRadius = radius; }
         inline float GetRoundedRadius() const { return m_RoundedRadius; }
 
@@ -37,6 +33,9 @@ namespace Seek
             m_BorderColor = color;
         }
         inline const glm::vec4& GetBorderColor() const { return m_BorderColor; }
+
+    protected:
+        virtual void OnUpdate(Timestep ts) override;
 
     private:
         float m_RoundedRadius = 0.0f;

@@ -16,25 +16,6 @@ namespace Seek
 
     UIButton::~UIButton() {}
 
-    bool UIButton::InsideButton(float32 x, float32 y)
-    {
-        if (x >= m_Position.x && x <= m_Position.x + m_Size.x)
-        {
-            if (y >= m_Position.y && y <= m_Position.y + m_Size.y)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    void UIButton::OnAction()
-    {
-        if (m_ActionHandler)
-            m_ActionHandler();
-    }
-
     void UIButton::OnEvent(Event& event)
     {
         EventDispatcher dispatcher(event);
@@ -81,7 +62,26 @@ namespace Seek
                                    new SlideTransition(0.02f, 0.15f));
     }
 
-    void UIButton::OnUpdate(float deltaTime) {}
+    void UIButton::OnUpdate(Timestep ts) {}
+
+    bool UIButton::InsideButton(float32 x, float32 y)
+    {
+        if (x >= m_Position.x && x <= m_Position.x + m_Size.x)
+        {
+            if (y >= m_Position.y && y <= m_Position.y + m_Size.y)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void UIButton::OnAction()
+    {
+        if (m_ActionHandler)
+            m_ActionHandler();
+    }
 
     bool UIButton::OnMouseMoved(MouseMovedEvent& event)
     {

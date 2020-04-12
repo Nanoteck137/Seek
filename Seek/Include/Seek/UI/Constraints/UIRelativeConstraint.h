@@ -10,16 +10,16 @@ namespace Seek
     class UIRelativeConstraint : public UIConstraint
     {
     public:
-        UIRelativeConstraint(float value);
+        UIRelativeConstraint(float32 value);
         ~UIRelativeConstraint();
 
     public:
         virtual void CompleteSetup(UIConstraints* constraints) override;
         virtual float GetRelativeValue() override;
-        virtual void SetPixelValue(int value) override;
-        virtual void SetRelativeValue(float value) override;
+        virtual void SetPixelValue(int32 value) override;
+        virtual void SetRelativeValue(float32 value) override;
 
     private:
-        float m_Value;
+        float32 m_Value;
     };
 }

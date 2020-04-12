@@ -21,7 +21,7 @@ namespace Seek
         return (1 - size) / 2.0f;
     }
 
-    void UICenterConstraint::SetPixelValue(int value) {}
+    void UICenterConstraint::SetPixelValue(int32 value) {}
 
-    void UICenterConstraint::SetRelativeValue(float value) {}
+    void UICenterConstraint::SetRelativeValue(float32 value) {}
 }
