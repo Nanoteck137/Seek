@@ -9,6 +9,7 @@ class GameLayer : public Seek::Layer
 {
 public:
     GameLayer();
+    ~GameLayer();
 
     void OnAttach() override;
     void OnDetach() override;
@@ -20,6 +21,7 @@ public:
 
 private:
     Seek::OrthographicCamera m_Camera;
-    WorldController* m_WorldController;
-    MouseController* m_MouseController;
+
+    WorldController* m_WorldController = nullptr;
+    MouseController* m_MouseController = nullptr;
 };

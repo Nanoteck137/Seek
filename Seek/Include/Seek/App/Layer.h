@@ -14,7 +14,6 @@ namespace Seek
         Layer(const String& name = "Layer");
         virtual ~Layer();
 
-    public:
         virtual void OnAttach() {}
         virtual void OnDetach() {}
         virtual void OnUpdate(Timestep ts) {}

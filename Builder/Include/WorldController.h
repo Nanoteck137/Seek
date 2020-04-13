@@ -8,6 +8,7 @@ class WorldController
 {
 public:
     WorldController();
+    ~WorldController();
 
     void Update(Seek::Timestep ts);
 
