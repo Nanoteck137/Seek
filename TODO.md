@@ -9,6 +9,8 @@
   - Instrumentor Singleton
   - Find a solution to the Texture Class enums and structs
   - Seperate the FileSystem api
+  - Fix SK_CORE_ASSERT macro (Fix the arugments to the log)
+  - Add a way to give a user errors (NOT ASSERT) for example TextureManager::LoadTexture
 
 * App
   - Input

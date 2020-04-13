@@ -14,6 +14,7 @@
 #include "Seek/Renderer/Renderer.h"
 #include "Seek/Renderer/Renderer2D.h"
 #include "Seek/Renderer/FontManager.h"
+#include "Seek/Renderer/TextureManager.h"
 
 #include "Seek/UI/UIManager.h"
 
@@ -39,6 +40,7 @@ namespace Seek
         Renderer::Init();
         AudioEngine::Init();
         FontManager::Init();
+        TextureManager::Init();
         UIManager::Init();
 
         UIManager::UpdateDisplaySize(m_Window->GetWidth(),
@@ -52,6 +54,7 @@ namespace Seek
         AudioEngine::Shutdown();
         Renderer::Shutdown();
         FontManager::Shutdown();
+        TextureManager::Shutdown();
         UIManager::Shutdown();
     }
 

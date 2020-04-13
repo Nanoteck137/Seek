@@ -36,6 +36,8 @@
 #include "Seek/Renderer/Font.h"
 #include "Seek/Renderer/FontManager.h"
 
+#include "Seek/Renderer/TextureManager.h"
+
 // ------------------ UI-------------------
 #include "Seek/UI/Components/UIBlock.h"
 #include "Seek/UI/Components/UIButton.h"

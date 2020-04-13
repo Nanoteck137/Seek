@@ -4,6 +4,9 @@ GameLayer::GameLayer()
 {
     m_WorldController = new WorldController();
     m_MouseController = new MouseController(m_Camera, *m_WorldController);
+
+    Seek::TextureManager::LoadTexture("TestTexture",
+                                      "Assets/Textures/Test.png");
 }
 
 GameLayer::~GameLayer()
@@ -77,8 +80,8 @@ void GameLayer::OnUpdate(Seek::Timestep ts)
     m_WorldController->Update(ts);
     m_MouseController->Update(ts);
 
-    // Seek::Renderer2D::DrawQuad(glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f),
-    //                           glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+    Seek::Renderer2D::DrawQuad(glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f),
+                               Seek::TextureManager::GetTexture("TestTexture"));
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
