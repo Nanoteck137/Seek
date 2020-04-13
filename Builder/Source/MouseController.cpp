@@ -1,16 +1,18 @@
 #include "MouseController.h"
 
-MouseController::MouseController(WorldController& worldController)
-    : m_WorldController(worldController)
+MouseController::MouseController(Seek::OrthographicCamera& camera,
+                                 WorldController& worldController)
+    : m_Camera(camera), m_WorldController(worldController)
 {
 }
 
 void MouseController::Update(Seek::Timestep ts)
 {
     glm::vec2 mousePos = Seek::Input::GetMousePosition();
+    glm::vec2 worldPos = m_Camera.ConvertScreenToWorldPoint(mousePos);
 
-    int32 tileX = floor((mousePos.x / 32.0f));
-    int32 tileY = floor((mousePos.y / 32.0f));
+    int32 tileX = floor(worldPos.x);
+    int32 tileY = floor(worldPos.y);
 
     World& world = m_WorldController.GetWorld();
 
@@ -18,8 +20,8 @@ void MouseController::Update(Seek::Timestep ts)
     {
         if (tileY >= 0 && tileY < world.GetHeight())
         {
-            Seek::Renderer2D::DrawQuad(glm::vec2(tileX * 32.0f, tileY * 32.0f),
-                                       glm::vec2(32.0f, 32.0f),
+            Seek::Renderer2D::DrawQuad(glm::vec2(tileX, tileY),
+                                       glm::vec2(1.0f, 1.0f),
                                        glm::vec4(1.0f, 0.0f, 1.0f, 0.5f));
         }
     }

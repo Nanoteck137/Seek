@@ -1,6 +1,6 @@
 #include "TestLayer.h"
 
-TestLayer::TestLayer() : Layer("Test"), m_Camera(0.0f, 1280.0f, 0.0f, 720.0f) {}
+TestLayer::TestLayer() : Layer("Test") {}
 
 void TestLayer::OnAttach()
 {
@@ -68,7 +68,7 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     const float cameraMoveSpeed = 5.0f;
 
-    glm::vec3 cameraPos = m_Camera.GetPosition();
+    glm::vec2 cameraPos = m_Camera.GetPosition();
     float cameraRot = m_Camera.GetRotation();
 
     if (Seek::Input::IsKeyPressed(SK_KEY_A))
@@ -174,8 +174,8 @@ void TestLayer::OnEvent(Seek::Event& event)
 
 bool TestLayer::OnWindowResize(Seek::WindowResizeEvent& event)
 {
-    m_Camera = Seek::OrthographicCamera(0.0f, event.GetWidth(), 0.0f,
-                                        event.GetHeight());
+    m_Camera.Update();
+
     return false;
 }
 

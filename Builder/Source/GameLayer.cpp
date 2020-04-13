@@ -1,9 +1,11 @@
 #include "GameLayer.h"
 
-GameLayer::GameLayer() : m_Camera(0.0f, 1280.0f, 0.0f, 720.0f)
+GameLayer::GameLayer()
 {
     m_WorldController = new WorldController();
-    m_MouseController = new MouseController(*m_WorldController);
+    m_MouseController = new MouseController(m_Camera, *m_WorldController);
+
+    // m_Camera.SetPosition(glm::vec3(3.2f, 5.0f, 0.0f));
 }
 
 void GameLayer::OnAttach() {}
@@ -12,9 +14,9 @@ void GameLayer::OnDetach() {}
 
 void GameLayer::OnUpdate(Seek::Timestep ts)
 {
-    const float cameraMoveSpeed = 32.0f;
+    const float cameraMoveSpeed = 4.0f;
 
-    glm::vec3 cameraPos = m_Camera.GetPosition();
+    glm::vec2 cameraPos = m_Camera.GetPosition();
     float cameraRot = m_Camera.GetRotation();
 
     if (Seek::Input::IsKeyPressed(SK_KEY_A))
@@ -50,6 +52,9 @@ void GameLayer::OnUpdate(Seek::Timestep ts)
     m_WorldController->Update(ts);
     m_MouseController->Update(ts);
 
+    // Seek::Renderer2D::DrawQuad(glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f),
+    //                           glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
 
@@ -57,11 +62,18 @@ void GameLayer::OnUpdate(Seek::Timestep ts)
     uint32 width = window.GetWidth();
     uint32 height = window.GetHeight();
 
+    float32 aspect = (float32)width / (float32)height;
     cameraPos = m_Camera.GetPosition();
     glm::vec2 mouse = Seek::Input::GetMousePosition();
-    glm::vec4 world =
-        glm::vec4(mouse.x, mouse.y, 1.0f, 1.0f) * m_Camera.GetViewMatrix();
+
+    float32 camHeight = 2.0f * m_Camera.GetOrthograpicSize();
+    float32 camWidth = camHeight * aspect;
+    glm::vec2 world = glm::vec2(mouse.x * (camWidth / (float32)width),
+                                mouse.y * (camHeight / (float32)height));
     // world += glm::vec2(cameraPos.x, cameraPos.y);
+
+    // world.x /= world.w;
+    // world.y /= world.w;
 
     // SK_APP_INFO("{}, {}", world.x, world.y);
 }

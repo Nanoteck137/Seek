@@ -11,6 +11,8 @@ World::World(int32 width, int32 height) : m_Width(width), m_Height(height)
             m_Tiles[x + y * m_Width] = new Tile(x, y, Tile::Type::EMPTY);
         }
     }
+
+    GetTileAt(0, 0).SetType(Tile::Type::FLOOR);
 }
 
 Tile& World::GetTileAt(int32 x, int32 y) { return *m_Tiles[x + y * m_Width]; }

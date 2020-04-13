@@ -7,10 +7,12 @@
 class MouseController
 {
 public:
-    MouseController(WorldController& worldController);
+    MouseController(Seek::OrthographicCamera& camera,
+                    WorldController& worldController);
 
     void Update(Seek::Timestep ts);
 
 private:
+    Seek::OrthographicCamera& m_Camera;
     WorldController& m_WorldController;
 };
