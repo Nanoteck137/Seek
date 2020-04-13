@@ -126,3 +126,47 @@ project "Sandbox"
         defines { "SK_DIST" }
         runtime "Release"
         optimize "On"
+
+project "Builder"
+    location "Builder"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files { 
+        "%{prj.name}/Include/**.h", 
+        "%{prj.name}/Source/**.cpp"
+    }
+
+    includedirs {
+        "%{prj.name}/Include/",
+        "Seek/Include/",
+
+        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.imgui}",
+        "%{IncludeDir.Box2D}",
+    }
+
+    links {
+        "Seek",
+    }
+
+    filter "configurations:Debug"
+        defines { "SK_DEBUG" }
+        runtime "Debug"
+        symbols "On"
+
+    filter "configurations:Release"
+        defines { "SK_RELEASE" }
+        runtime "Release"
+        optimize "On"
+
+    filter "configurations:Dist"
+        defines { "SK_DIST" }
+        runtime "Release"
+        optimize "On"

@@ -27,27 +27,17 @@ namespace Seek
         return state == GLFW_PRESS;
     }
 
-    float WindowsInput::GetMouseXImpl()
+    glm::vec2 WindowsInput::GetMousePositionImpl()
     {
-        GLFWwindow* window = static_cast<GLFWwindow*>(
-            Application::Get().GetWindow().GetNativeWindow());
+        Window& window = Application::Get().GetWindow();
+        GLFWwindow* handle = static_cast<GLFWwindow*>(window.GetNativeWindow());
 
-        double xpos;
-        double ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
+        float64 xPos;
+        float64 yPos;
+        glfwGetCursorPos(handle, &xPos, &yPos);
 
-        return (float)xpos;
-    }
+        yPos = window.GetHeight() - yPos;
 
-    float WindowsInput::GetMouseYImpl()
-    {
-        GLFWwindow* window = static_cast<GLFWwindow*>(
-            Application::Get().GetWindow().GetNativeWindow());
-
-        double xpos;
-        double ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-
-        return (float)ypos;
+        return glm::vec2((float32)xPos, (float32)yPos);
     }
 }
