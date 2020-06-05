@@ -268,6 +268,54 @@ namespace Seek
         s_Data->IndexCounter += 6;
     }
 
+    void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
+                              const Ref<SubTexture2D>& texture)
+    {
+        DrawQuad({position.x, position.y, 0.0f}, size, texture);
+    }
+
+    void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
+                              const Ref<SubTexture2D>& texture)
+    {
+        float textureID = SubmitTexture(texture->GetTexture());
+        glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+        auto coords = texture->GetCoords();
+
+        // TODO/FIXME(patrik): The position is wrong for all the vertices
+        // It should be (0, 0) (0, 1) (1, 1) (1, 0)
+        // But it is (0, 0) (1, 0) (1, 1) (0, 1)
+
+        s_Data->VertexBufferDataWritePtr->Position = position;
+        s_Data->VertexBufferDataWritePtr->TexCoord = coords[0];
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, 0.0f, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = coords[1];
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(size.x, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = coords[2];
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->VertexBufferDataWritePtr->Position =
+            position + glm::vec3(0.0f, size.y, 0.0f);
+        s_Data->VertexBufferDataWritePtr->TexCoord = coords[3];
+        s_Data->VertexBufferDataWritePtr->Color = color;
+        s_Data->VertexBufferDataWritePtr->TextureID = textureID;
+        s_Data->VertexBufferDataWritePtr++;
+
+        s_Data->IndexCounter += 6;
+    }
+
     void Renderer2D::DrawText(const glm::vec2& position, const String& text,
                               const Ref<Font>& font, const glm::vec4& color,
                               float scale)

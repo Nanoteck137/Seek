@@ -5,6 +5,7 @@
 
 #include "Seek/Renderer/OrthographicCamera.h"
 #include "Seek/Renderer/Texture.h"
+#include "Seek/Renderer/SubTexture2D.h"
 
 #include "Seek/Renderer/Font.h"
 
@@ -42,6 +43,11 @@ namespace Seek
                              const Ref<Texture2D>& texture);
         static void DrawQuad(const glm::vec3& position, const glm::vec2& size,
                              const Ref<Texture2D>& texture);
+
+        static void DrawQuad(const glm::vec2& position, const glm::vec2& size,
+                             const Ref<SubTexture2D>& texture);
+        static void DrawQuad(const glm::vec3& position, const glm::vec2& size,
+                             const Ref<SubTexture2D>& texture);
 
         static void DrawText(const glm::vec2& position, const String& text,
                              const Ref<Font>& font, const glm::vec4& color,
