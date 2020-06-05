@@ -12,7 +12,7 @@ IncludeDir["spdlog"] = "Vendor/spdlog/include/"
 IncludeDir["glm"] = "Vendor/glm/"
 
 group "Dependencies"
-    include "Seek/Vendor"
+    include "Vendor"
 
 group ""
 

@@ -1,7 +1,7 @@
 #include "SeekPCH.h"
 #include "Seek/Log.h"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 namespace Seek
 {
