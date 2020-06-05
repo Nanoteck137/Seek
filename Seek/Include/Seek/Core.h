@@ -29,11 +29,12 @@
             __debugbreak();                                                    \
         }                                                                      \
     }
+
 #define SK_APP_ASSERT(x, ...)                                                  \
     {                                                                          \
         if (!(x))                                                              \
         {                                                                      \
-            SK_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);               \
+            SK_APP_ERROR("Assertion Failed: {0}", __VA_ARGS__);                \
             __debugbreak();                                                    \
         }                                                                      \
     }
