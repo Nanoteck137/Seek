@@ -29,19 +29,30 @@ namespace Seek
         uint32 width = window.GetWidth();
         uint32 height = window.GetHeight();
 
+        glm::vec2 cameraSize = GetCameraSize();
+
+        glm::vec2 worldPos =
+            glm::vec2(screenCoords.x * (cameraSize.x / (float32)width),
+                      screenCoords.y * (cameraSize.y / (float32)height));
+
+        worldPos -= glm::vec2(cameraSize.x / 2.0f, cameraSize.y / 2.0f);
+        worldPos += m_Position;
+
+        return worldPos;
+    }
+
+    glm::vec2 OrthographicCamera::GetCameraSize()
+    {
+        Seek::Window& window = Seek::Application::Get().GetWindow();
+        uint32 width = window.GetWidth();
+        uint32 height = window.GetHeight();
+
         float32 aspect = (float32)width / (float32)height;
 
         float32 camHeight = 2.0f * m_OrthograpicSize;
         float32 camWidth = camHeight * aspect;
 
-        glm::vec2 worldPos =
-            glm::vec2(screenCoords.x * (camWidth / (float32)width),
-                      screenCoords.y * (camHeight / (float32)height));
-
-        worldPos -= glm::vec2(camWidth / 2.0f, camHeight / 2.0f);
-        worldPos += m_Position;
-
-        return worldPos;
+        return {camWidth, camHeight};
     }
 
     void OrthographicCamera::RecalculateProjectionMatrix()

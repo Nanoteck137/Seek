@@ -18,6 +18,8 @@ namespace Seek
 
         glm::vec2 ConvertScreenToWorldPoint(const glm::vec2& screenCoords);
 
+        glm::vec2 GetCameraSize();
+
         inline const glm::mat4& GetProjectionMatrix() const
         {
             return m_ProjectionMatrix;
