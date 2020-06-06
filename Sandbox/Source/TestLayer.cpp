@@ -1,5 +1,14 @@
 #include "TestLayer.h"
 
+struct PositionComponent
+{
+    glm::vec2 position;
+};
+
+struct SpriteRendererComponent
+{
+};
+
 TestLayer::TestLayer() : Layer("Test") {}
 
 void TestLayer::OnAttach()
@@ -58,6 +67,40 @@ void TestLayer::OnAttach()
     // m_Sound->Play();
     // Sound* sound = Seek::AudioEngine::CreateSound();
     // effect->Play();
+
+    // EntityManager entityManager;
+    // Entity* entity = entityManager->CreateEntity();
+
+    entt::entity entity = m_Registry.create();
+    m_Registry.emplace<PositionComponent>(entity, glm::vec2(0.0f, 0.0f));
+    m_Registry.emplace<SpriteRendererComponent>(entity);
+
+    auto version = m_Registry.version(entity);
+    SK_CORE_INFO("Version: {}", version);
+
+    m_Registry.destroy(entity);
+
+    entt::entity entity2 = m_Registry.create();
+    m_Registry.emplace<PositionComponent>(entity2, glm::vec2(0.0f, 0.0f));
+    m_Registry.emplace<SpriteRendererComponent>(entity2);
+
+    version = m_Registry.version(entity2);
+    SK_CORE_INFO("Version: {}", version);
+
+    version = m_Registry.version(entity);
+    SK_CORE_INFO("Version: {}", version);
+}
+
+void TestLayer::Test()
+{
+    auto view = m_Registry.view<PositionComponent, SpriteRendererComponent>();
+    for (auto entity : view)
+    {
+        auto& component = view.get<PositionComponent>(entity);
+
+        Seek::Renderer2D::DrawQuad(component.position, {4.0f, 4.0f},
+                                   {1.0f, 0.0f, 1.0f, 1.0f});
+    }
 }
 
 void TestLayer::OnDetach() {}
@@ -136,6 +179,8 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     Seek::Renderer2D::DrawText(glm::vec2(32.0f, 70.0f), text, m_Font2,
     m_Scale);*/
+
+    Test();
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();

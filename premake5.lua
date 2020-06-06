@@ -31,6 +31,8 @@ project "Sandbox"
 
         "Seek/%{IncludeDir.spdlog}",
         "Seek/%{IncludeDir.glm}",
+        "Seek/%{IncludeDir.entt}",
+
         "Seek/%{IncludeDir.imgui}",
         "Seek/%{IncludeDir.Box2D}",
     }

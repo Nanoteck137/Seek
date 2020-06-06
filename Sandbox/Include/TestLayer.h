@@ -4,6 +4,8 @@
 #include <imgui.h>
 #include <box2d/box2d.h>
 
+#include <entt/entt.hpp>
+
 #include "Menu.h"
 
 class TestLayer : public Seek::Layer
@@ -18,6 +20,8 @@ public:
     void OnImGuiRender(Seek::Timestep ts) override;
 
     virtual void OnEvent(Seek::Event& event) override;
+
+    void Test();
 
 private:
     bool OnWindowResize(Seek::WindowResizeEvent& event);
@@ -36,6 +40,8 @@ private:
 
     Seek::Ref<Seek::Font> m_Font;
     Seek::Ref<Seek::Font> m_Font2;
+
+    entt::registry m_Registry;
 
     Menu* m_Menu = nullptr;
 

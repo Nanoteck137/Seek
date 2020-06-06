@@ -13,3 +13,6 @@
 [submodule "Seek/Vendor/Box2D"]
 	path = Seek/Vendor/Box2D
 	url = https://github.com/erincatto/box2d
+[submodule "Seek/Vendor/entt"]
+	path = Seek/Vendor/entt
+	url = https://github.com/skypjack/entt.git

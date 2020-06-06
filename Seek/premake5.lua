@@ -13,6 +13,7 @@ IncludeDir["Box2D"] = "Vendor/Box2D/include"
 -- Header Only Includes
 IncludeDir["spdlog"] = "Vendor/spdlog/include/"
 IncludeDir["glm"] = "Vendor/glm/"
+IncludeDir["entt"] = "Vendor/entt/src/"
 
 group "Dependencies"
     include "Vendor"
@@ -41,6 +42,7 @@ project "Seek"
 
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.glm}",
+        "%{IncludeDir.entt}",
 
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.GLAD}",
