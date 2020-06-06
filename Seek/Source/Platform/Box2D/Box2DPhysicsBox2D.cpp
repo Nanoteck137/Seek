@@ -47,6 +47,8 @@ namespace Seek
         fixtureDef.friction = 0.3f;
 
         m_Fixture = m_Body->CreateFixture(&fixtureDef);
+
+        m_Body->SetLinearDamping(100.0f);
     }
 
     Box2DPhysicsBox2D::~Box2DPhysicsBox2D() {}
@@ -55,7 +57,11 @@ namespace Seek
     {
         SK_PROFILE_FUNCTION();
 
-        m_Body->ApplyForceToCenter(b2Vec2(force.x, force.y), true);
+        // m_Body->ApplyForceToCenter(b2Vec2(force.x, force.y), true);
+        /*m_Body->SetTransform(
+            b2Vec2(force.x + (m_Size.x / 2), force.y + (m_Size.y / 2)),
+            m_Body->GetAngle());*/
+        m_Body->ApplyLinearImpulseToCenter(b2Vec2(force.x, force.y), true);
     }
 
     const glm::vec2& Box2DPhysicsBox2D::GetPosition()
