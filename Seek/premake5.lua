@@ -1,5 +1,8 @@
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+target_dir = "%{wks.location}/bin/" .. outputdir .. "/%{prj.name}"
+obj_dir = "%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}"
+
 IncludeDir = {}
 IncludeDir["GLFW"] = "Vendor/GLFW/include"
 IncludeDir["GLAD"] = "Vendor/GLAD/include"
@@ -12,7 +15,7 @@ IncludeDir["spdlog"] = "Vendor/spdlog/include/"
 IncludeDir["glm"] = "Vendor/glm/"
 
 group "Dependencies"
-    include "Seek/Vendor"
+    include "Vendor"
 
 group ""
 
@@ -25,8 +28,8 @@ project "Seek"
     pchheader "SeekPCH.h"
     pchsource "Source/Seek/SeekPCH.cpp"
     
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files { 
         "Include/**.h", 

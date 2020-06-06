@@ -3,8 +3,8 @@ project "GLFW"
     kind "StaticLib"
     language "C"
 
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files {
         "%{prj.name}/include/GLFW/glfw3.h",
@@ -79,8 +79,8 @@ project "GLAD"
     kind "StaticLib"
     language "C"
 
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files {
         "%{prj.name}/src/glad.c",
@@ -119,8 +119,8 @@ project "imgui"
     kind "StaticLib"
     language "C++"
     
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files {
         "%{prj.name}/imconfig.h",
@@ -157,8 +157,8 @@ project "stb"
     kind "StaticLib"
     language "C++"
     
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files {
         -- stb_image
@@ -192,8 +192,8 @@ project "Box2D"
     kind "StaticLib"
     language "C++"
     
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir (target_dir)
+    objdir (obj_dir)
 
     files {
         -- Include Files
