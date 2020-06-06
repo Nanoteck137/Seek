@@ -25,7 +25,10 @@
     {                                                                          \
         if (!(x))                                                              \
         {                                                                      \
-            SK_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);               \
+            SK_CORE_ERROR("------------ Assertion Failed ------------");       \
+            SK_CORE_ERROR("    Location: {0}:{1}", __FILE__, __LINE__);        \
+            SK_CORE_ERROR("    Message: " __VA_ARGS__);                        \
+            SK_CORE_ERROR("------------------------------------------");       \
             __debugbreak();                                                    \
         }                                                                      \
     }
@@ -34,7 +37,10 @@
     {                                                                          \
         if (!(x))                                                              \
         {                                                                      \
-            SK_APP_ERROR("Assertion Failed: {0}", __VA_ARGS__);                \
+            SK_APP_ERROR("------------ Assertion Failed ------------");        \
+            SK_APP_ERROR("    Location: {0}:{1}", __FILE__, __LINE__);         \
+            SK_APP_ERROR("    Message: " __VA_ARGS__);                         \
+            SK_APP_ERROR("------------------------------------------");        \
             __debugbreak();                                                    \
         }                                                                      \
     }
