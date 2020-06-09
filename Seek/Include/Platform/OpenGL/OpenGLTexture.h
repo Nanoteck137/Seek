@@ -14,6 +14,8 @@ namespace Seek
         virtual uint32 GetWidth() const override { return m_Width; }
         virtual uint32 GetHeight() const override { return m_Height; }
 
+        inline uint32 GetRendererID() const { return m_RendererID; }
+
         virtual void SetData(void* data, uint32 size) override;
 
         virtual void Bind(uint32 slot) const override;

@@ -13,6 +13,15 @@ TestLayer::TestLayer() : Layer("Test") {}
 
 void TestLayer::OnAttach()
 {
+    auto& window = Seek::Application::Get().GetWindow();
+
+    Seek::FramebufferOptions options = {};
+    options.Width = window.GetWidth();
+    options.Height = window.GetHeight();
+
+    m_Framebuffer = Seek::Framebuffer::Create(options);
+    m_FramebufferTexture = m_Framebuffer->GetColorAttachmentTexture();
+
     m_Texture = Seek::Texture2D::Create("Assets/Textures/Test.png");
 
     m_World = Seek::PhysicsWorld2D::Create();
@@ -146,6 +155,8 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     Seek::Renderer2D::ResetRenderStats();
 
+    m_Framebuffer->Bind();
+
     Seek::RenderCommand::SetClearColor({0.2f, 0.2f, 0.2f, 1.0f});
     Seek::RenderCommand::Clear();
 
@@ -184,7 +195,21 @@ void TestLayer::OnUpdate(Seek::Timestep ts)
 
     Seek::Renderer2D::EndScene();
     Seek::Renderer2D::Flush();
+
+    m_Framebuffer->Unbind();
+
+    Seek::RenderCommand::SetClearColor({0.2f, 0.0f, 0.2f, 1.0f});
+    Seek::RenderCommand::Clear();
+
+    Seek::Renderer2D::BeginScene(m_Camera);
+
+    Seek::Renderer2D::DrawQuad({-5.0f, -0.0f}, {10, 5}, m_FramebufferTexture);
+
+    Seek::Renderer2D::EndScene();
+    Seek::Renderer2D::Flush();
 }
+
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 void TestLayer::OnImGuiRender(Seek::Timestep ts)
 {
@@ -205,6 +230,12 @@ void TestLayer::OnImGuiRender(Seek::Timestep ts)
 
     ImGui::Text("FPS: %u", fps);
     ImGui::Text("Framtime: %.2fms", frameTime);
+
+    auto pd =
+        std::dynamic_pointer_cast<Seek::OpenGLTexture2D>(m_FramebufferTexture);
+    ImGui::Image((ImTextureID)pd->GetRendererID(),
+                 ImVec2(1280 / 2.0f, 720 / 2.0f));
+
     ImGui::End();
 }
 

@@ -29,6 +29,9 @@ private:
 
 private:
     Seek::OrthographicCamera m_Camera;
+
+    Seek::Ref<Seek::Framebuffer> m_Framebuffer;
+    Seek::Ref<Seek::Texture2D> m_FramebufferTexture;
     Seek::Ref<Seek::Texture2D> m_Texture;
 
     Seek::Ref<Seek::Sound> m_Sound;

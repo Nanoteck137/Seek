@@ -32,6 +32,7 @@
 #include "Seek/Renderer/Texture.h"
 #include "Seek/Renderer/SubTexture2D.h"
 #include "Seek/Renderer/Shader.h"
+#include "Seek/Renderer/Framebuffer.h"
 #include "Seek/Renderer/OrthographicCamera.h"
 
 #include "Seek/Renderer/Font.h"

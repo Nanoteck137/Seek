@@ -159,6 +159,8 @@ namespace Seek
 
     float Renderer2D::SubmitTexture(const Ref<Texture2D>& texture)
     {
+        SK_CORE_ASSERT(texture, "Texture can't be null");
+
         float32 result = 0.0f;
         bool found = false;
         for (uint32 i = 0; i < s_Data->Textures.size(); i++)
