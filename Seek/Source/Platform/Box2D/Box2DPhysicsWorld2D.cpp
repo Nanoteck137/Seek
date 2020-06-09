@@ -9,7 +9,7 @@ namespace Seek
     {
         SK_PROFILE_FUNCTION();
 
-        b2Vec2 gravity(0.0f, -2.0f);
+        b2Vec2 gravity(0.0f, 0.0f);
         m_Box2DWorld = CreateRef<b2World>(gravity);
     }
 
